@@ -1,0 +1,5442 @@
+--- Page 1 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+1
+Multi-Modal LLMs in Agriculture: A
+Comprehensive Review
+Ranjan Sapkota1∗, Rizwan Qureshi2, Syed Zohaib Hassan3, John Shutske4, Maged Shoman3, Muhammad Sajjad5,
+Fayaz Ali Dharejo6, Achyut Paudel1,7, Jiajia Li8, Zhichao Meng9, Ferhat Sadak10, Muhammad Usman Hadi11,
+Manoj Karkee1∗
+Abstract—Given the rapid emergence and applications of
+Large Language Models (LLMs) across various scientific fields,
+insights regarding their applicability in agriculture are still only
+partially explored. This paper conducts an in-depth review of
+LLMs in agriculture, focusing on understanding how LLMs can
+be developed and implemented to optimize agricultural pro-
+cesses, increase efficiency, and reduce costs. Recent studies have
+explored the capabilities of LLMs in agricultural information
+processing and decision-making. Nevertheless, a comprehensive
+understanding of the capabilities, challenges, limitations, and
+future directions of LLMs in agricultural information processing
+and application remains in its early stages. Such exploration is
+essential to provide the community with a broader perspective
+and clearer understanding of LLMs’ applications, serving as a
+baseline for the current state and trends in the subject matter.
+To bridge this gap, this survey reviews the progress of LLMs
+and their utilization in agriculture, with an additional focus
+on 11 key research questions (RQs), where 4 RQs are general
+and 7 RQs are agriculture focused. By addressing these RQs,
+this review outlines the current opportunities and challenges,
+limitations, and future roadmap for LLMs in agriculture. The
+findings indicate that multi-modal LLMs not only simplify
+complex agricultural challenges but also significantly enhance
+decision-making and improve the efficiency of agricultural image
+processing. These advancements position LLMs as an essen-
+tial tool for the future of farming. For continued research
+and understanding, an organized and regularly updated list of
+papers on LLMs is available at https://github.com/JiajiaLi04/
+Multi-Modal-LLMs-in-Agriculture.
+Note to Practitioners: Motivated by the need to optimize
+agricultural practices, this paper investigates the use of Large
+Language Models (LLMs) to enhance efficiency and decision-
+making in farming. We delve into critical research questions
+to reveal the capabilities and challenges of LLMs, and their
+1Center for Precision and Automated Agricultural Systems, Department of
+Biological Systems Engineering, Washington State University, USA.
+2Center for Research in Computer Vision, University of Central Florida,
+USA.
+3Department of Civil, Environmental, and Construction Engineering, Uni-
+versity of Central Florida, USA.
+4Biological Systems Engineering Department, University of Wisconsin-
+Madison, USA.
+5Division of Landscape Architecture, the University of Hong Kong, Hong
+Kong Special Administrative Region.
+6Computer Vision Lab, CAIDAS, IFI, University of W¨urzburg, Germany.
+7Orchard Robotics, Seattle, WA, USA
+8Department of Electrical and Computer Engineering, Michigan State
+University, East Lansing, MI 48824, USA.
+9School
+of
+Mechanical
+Engineering,
+Zhejiang
+Sci-Tech
+University,
+Hangzhou 310018, China.
+10Department of Mechanical Engineering, Bartin University, Bartin 74100,
+T¨urkiye.
+11School of Engineering, Ulster University, Belfast, BT15 1AP, United
+Kingdom.
+Corresponding author: Ranjan Sapkota (email: ranjan.sapkota@wsu.edu)
+potential applications in the agricultural sector. Looking ahead,
+our findings suggest a promising future for the integration
+of LLMs in agriculture, potentially revolutionizing how we
+manage and operate farms. Index Terms—Large Language
+Models (LLMs), Generative Artificial Intelligence, multi-modal
+LLMs, ChatGPT, Language Processing, Deep Learning, Machine
+Learning, Computer Vision, Precision Agriculture, Language
+Models, Transformers, Vision-Language Models, Agricultural
+Data Analysis.
+I. INTRODUCTION
+Language processing refers to computational techniques
+used to analyze, understand, and generate human language
+using various algorithms and techniques including machine
+learning (ML) [1], [2]. It encompasses tasks such as text
+generation [3], sentiment analysis [4], and machine translation,
+the automated conversion of text from one language to an-
+other [5], enabling machines to interact with and comprehend
+hu man language effectively [6], [7].Traditional Language
+Models (LMs) have been foundational in language processing
+as they provided a basis for text generation and understand-
+ing [8]. With the advent of increased computational power,
+advanced ML techniques, and access to large-scale data, the
+emergence of Large Language Models (LLMs) has marked a
+significant transition. These models, equipped with expansive
+and diverse training data, have demonstrated an impressive
+ability to simulate human linguistic capabilities, leading to
+transformative changes across multiple domains, such as na-
+tional security [9], healthcare [10], robotics [11], autonomous
+vehicle technologies [12], road and traffic safety [13], security
+and privacy [14] and so on [15].
+In agriculture, the application of machine learning (ML)
+and deep learning (DL) techniques has revolutionized various
+aspects such as crop monitoring, pest management, and yield
+prediction, establishing these fields as some of the most sig-
+nificant beneficiaries of artificial intelligence (AI) technologies
+[16], [17]. Among these technologies, LLMs such as the Gen-
+erative Pre-trained Transformer (GPT) series have emerged as
+groundbreaking tools [18], [19]. These models leverage deep
+learning to process and analyze vast amounts of agricultural
+data, offering insights previously unattainable through tradi-
+tional techniques such as manual sampling, visual inspection,
+and basic statistical analysis [18]. LLMs can respond to free-
+text queries without training to specific tasks, demonstrating
+remarkable adaptability and versatility. For instance, ChatGPT,
+a prominent example of a generative AI chatbot, showcases
+the potential of LLMs through its sophisticated fine-tuning
+
+
+--- Page 2 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+2
+What are Large Language Models (LLMS) and how they evolved 
+historically?
+What are the current status and capabilities of LLMs?
+What are the current applications of LLMs in agriculture?
+What types of LLM-based models are employed in agriculture, and 
+what are their general approaches?
+Which sources and types of data are used to train LLMs for 
+agricultural applications, and how are they integrated?
+What are evaluation metrics are utilized to assess the performance of 
+LLM tasks in agriculture?
+What prompt engineering techniques are applied to improve the 
+performance of LLMs in agriculture?
+Which optimization strategies are applied in agriculture to improve 
+the efficiency and effectiveness of LLMs?
+What are the challenges and limitations of using LLMs in agriculture?
+What are the benefits of using LLMs instead of traditional ML and DL 
+methods in agriculture?
+How do LLMs compare with ML and DL-based approaches in their 
+applications in agriculture?
+Crop Production, Entity Recognition & Human-Machine Interaction, Disease Detection 
+and Diagnosis, Agriculture Assistance Bots & Tools, Pest Management and Evaluation, 
+Remote Sensing Integration,  Agricultural decision making
+Introduction, Background and Objectives
+Methods of paper selection
+Paper Structure
+LLM emergence, history, key milestones in 
+LLM development and current capabilities
+Challenges 
+&
+Limitations
+Future 
+roadmap of 
+LLMs in 
+Agriculture
+Conclusion
+Discussion on Research Questions
+Applications of LLMs in agriculture
+-
+Proximal Sensing Integration
+-
+Remote Sensing Integration
+Data quality and availability challenge
+Other challenges
+Fig. 1: Research questions (RQs) flowchart highlighting the core agricultural and general RQs addressed in the study,
+illustrating the comprehensive inquiry into the applications of Large Language Models (LLMs) in agriculture
+processes such as adjusting the model’s parameters post initial
+training on a broad dataset, to tailor it for specialized tasks
+or improve its understanding and generation of language in
+specific contexts [19].
+LLMs
+have
+advanced
+significantly
+beyond
+traditional
+data processing applications such as statistical regression,
+spreadsheet-based data manipulation, and rule-based expert
+systems
+[20], bringing deep contextual understanding and
+predictive analytics into the agricultural sector. These models,
+including the widely recognized GPT series from OpenAI, an-
+alyze large datasets to predict outcomes, understand complex
+patterns, and provide actionable insights [21]. In agriculture,
+this capability translates to improved decision-making in areas
+such as crop rotation, soil management, and predictive mainte-
+nance of farming equipment [22]. The ability of LLMs to inter-
+pret and generate human-like text further enables them to assist
+in real-time problem-solving and customer service, enhancing
+the responsiveness of businesses within the agricultural supply
+chain. The profound impact of LLMs lies in their ability to
+transform vast and diverse data into coherent, insightful, and
+immediately actionable information, thus driving efficiency
+and productivity in agricultural practices [23], [24].
+Despite their potential, LLMs in agriculture face several
+shortcomings, including data privacy concerns, high computa-
+tional costs, and the need for extensive domain-specific data
+for accurate predictions. Additionally, the models can some-
+times generate inaccurate or biased outputs due to insufficient
+or unrepresentative training data, that may lead to undesirable
+farming outcomes. Moreover, integrating LLMs into existing
+agricultural systems can be complicated and requires sig-
+nificant adaptation. Further exploring LLMs is essential to
+develop more robust, efficient, and context-aware systems for
+enhancing the farms of the future, reducing resource waste
+while increasing yield and quality, thus increasing overall en-
+vironmental, economic and social sustainability in agricultural
+practices [25], [26]. By overcoming these limitations, we can
+fully realize the potential of LLMs, paving the path for new
+approaches to some of agriculture’s most pressing challenges.
+The objective of this study is to survey the state-of-the-art
+use of LLMs in agriculture, with a major focus on answering
+the research questions (RQs) as shown in Figure 1. Through
+answering these questions, this comprehensive review aims to
+bridge the current knowledge gap by systematically exploring
+the applications, benefits, challenges, and future directions of
+LLMs in the agricultural sector.
+A. Method of Paper Selection
+A systematic bibliographic analysis was employed to pro-
+vide a comprehensive review of the integration of LLMs in
+agriculture. The research process was structured around two
+primary steps: the collection of relevant works and the detailed
+review and analysis of these works.
+The primary search was conducted using Google Scholar,
+which was then supplemented by secondary searches in five
+additional scientific databases: ScienceDirect (204 papers),
+IEEE Xplore (97 papers), PubMed (114 papers), Web of
+Science (17 papers), and Scopus (28 papers), as illustrated
+in Figure 2. The search utilized the query: [’Large Language
+Models’ OR ’LLM’] in/and [’agriculture’], aiming to exclude
+papers that referenced LLMs without directly applying them
+to the agricultural domain. This initial search yielded a total
+
+
+--- Page 3 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+3
+of 460 papers across the five databases. Papers were then
+screened for relevance, with repeated and irrelevant papers
+being minimized, resulting in 207 references that were used
+to build this comprehensive survey.
+Fig. 2: Search database results for the number of papers
+Exclude papers
+No
+Next Step
+Yes
+Is there a gap
+ in understanding 
+LLMs in Agriculture?
+Are relevant 
+Keywords
+ identified?
+Refine Keyword strategy
+Perform keyword-based database search
+No
+Yes
+Are sufficient 
+Papers retrieved?
+Yes
+Yes
+Screen papers
+Define Research    
+ Objective
+No
+Do paper focus 
+on  LLMs in 
+Agriculture?
+No
+Yes
+Reassess 
+research focus & 
+broaden search 
+criteria 
+Select papers
+Are selected 
+paper 
+relevant?
+Next Step
+No
+Yes
+Detailed Review
+Does paper 
+address key RQs?
+Do findings 
+address all RQs?
+Yes
+Include in review
+Yes
+Analysis of findings
+Summarize insights
+ &
+ prepare report
+Reassess/Revise Relevance
+No
+- Google Scholar
+- ScienceDirect
+- IEEE Xplore
+- PubMed
+- Web of Science
+- Scopus
+21 papers for 
+core Agricultural 
+RQs
+84 papers 
+Agriculture 
+Relevant
+Fig. 3: Flowchart illustrating the systematic process for
+bibliographic analysis and research question evaluation in
+this review study
+The methodological framework involved defining the re-
+search objective, focusing on identifying whether a gap existed
+in understanding LLMs in agriculture. A step-by-step approach
+was employed, starting with the refinement of keywords, as the
+broad query ”Large Language Models in agriculture” returned
+an extensive number of results across databases (e.g., 2315
+in ScienceDirect and 1910 in PubMed). Refining the search
+to ”LLM in agriculture” significantly reduced the number
+of relevant papers, yielding just 204 in ScienceDirect and
+114 in PubMed. Out of the 207 selected papers, 105 were
+identified as strongly related to agricultural applications, with
+84 papers directly relevant to agricultural use. From these, 21
+papers were found to be strongly aligned with the seven core
+agricultural RQs, and only these peer-reviewed journal articles
+were included in the final analysis, as shown in Figures 1and
+3. The comprehensive review then focused on addressing these
+RQs, presenting the findings in a structured manner.
+B. Paper Structure and Content Overview
+The paper first explores the intricacies of Large Language
+Models, divided into two subsections: Emergence to State-of-
+the-art Capabilities of Large Language Models and Vision
+Language Models (VLMs). Building on this foundational
+knowledge, the section Application of LLMs in Agriculture
+further explores the use of these technologies, with subsections
+Proximal Sensing Integration of LLMs in Agriculture and
+LLMs Integration with Agricultural Remote Sensing. Within
+Proximal Sensing Integration of LLMs in Agriculture,
+subsubsections detail applications such as LLMs for crop
+monitoring and management, LLM for disease detection and
+diagnosis, LLM for precision irrigation and fertilization, LLMs
+for Agricultural Information and decision support tools, and
+LLMs for Agricultural Extension and Technical Advisors.
+The subsection LLMs Integration with Agricultural Remote
+Sensing (RS) includes subsubsections State-of-the-art LLM
+studies for Remote Sensing and LLMs for Multi-modal Remote
+Sensing and Data Fusion in Agriculture. Following the in-
+depth exploration of remote sensing integration, the paper
+addresses the Commercialization of LLM by Private Com-
+panies in Agriculture, focusing on how private sector ad-
+vancements are shaping the deployment of LLM technologies
+in the agricultural industry. Then the paper transitions to a
+Discussion on Research Questions which sets the stage
+for addressing the systemic challenges faced in the field.
+The section Major Challenges and Limitations is then
+divided into three critical areas: Data Quality Challenge, Data
+Availability Challenge, and Other Challenges, shedding light
+on the obstacles that need overcoming for further integration of
+LLMs in agriculture. The review culminates in the Conclusion
+and Future Roadmap of LLMs in Agriculture, discussing
+the anticipated developments and potential future directions
+for LLM technology in the overall agricultural domain.
+II. LARGE LANGUAGE MODELS
+Language is fundamental to human communication and
+self-expression, and therefore is a crucial method fo human-
+machine interfacing [18]. The growing demand for machines
+to perform complex language tasks has necessitated the de-
+velopment of more advanced language models to understand
+
+
+--- Page 4 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+4
+and generate language. The recent advances in language
+models have been driven primarily by transformers, enhanced
+computational power, and access to large-scale training data
+[27]. These advancements have enabled LLMs to approxi-
+mate human-level performance on various tasks. LLMs have
+emerged as state-of-the-art artificial intelligence systems capa-
+ble of processing text and generating coherent communication,
+thereby generalizing across multiple tasks. The progress in
+LLM has evolved from statistical to neural language modeling
+and from pre-trained language models (PLMs) to the latest
+state-of-the-art LLMs [28]. Traditional language modeling
+techniques such as n-grams [29], Hidden Markov Models
+(HMMs) [30], Maximum Entropy Models (MEMs) [31], Con-
+ditional Random Fields (CRFs) [32], and Latent Dirichlet
+Allocation (LDA) [33] have historically played a pivotal role
+in natural language processing, laying the groundwork for
+more sophisticated approaches like neural language modeling
+and the development of pre-trained language models (PLMs).
+These traditional language models only consider a limited
+number of words or phrases at a time when analyzing text,
+which means they struggle to understand relationships between
+words that are far apart in a sentence or paragraph. This
+limitation makes them less effective at understanding the
+overall context or meaning of longer pieces of text.
+While conventional language modeling trains task-specific
+models in supervised settings, PLMs are trained in a self-
+supervised setting on large corpora of text to learn a generic
+representation that can be shared across various NLP tasks
+[34]. With fine-tuning for downstream tasks, PLMs often
+achieve performance gains superior to those obtained through
+traditional language modeling [35]. As the PLMs grow larger,
+their performance improves, leading to the transition from
+PLMs to LLMs through a significant increase in model pa-
+rameters and training datasets [36].
+The core of LLMs is the Transformer architecture, which
+has revolutionized the field of NLP through its self-attention
+mechanisms and positional encodings, enabling the model
+to capture complex relationships within data [37]. Although
+these models build on foundational elements shared with
+earlier architectures, the introduction of self-attention and
+positional encodings marked a significant leap in handling
+large datasets and scaling computational power. This scaling
+has allowed LLMs to process and generate language with
+remarkable accuracy, particularly in understanding long-range
+dependencies in text [38]. The progression of NLP models
+reflects these advances, with earlier models like Recurrent
+Neural Networks (RNNs) and Convolutional Neural Networks
+(CNNs) laying the groundwork, but struggling with capturing
+long-range dependencies essential for tasks such as translation
+and summarization [38], [39].
+The breakthrough in addressing these limitations came in
+2017 with Vaswani et al.’s introduction of the Transformer
+model [37]. Its innovative self-attention mechanism enables it
+to effectively process every token in the input sequence, cap-
+turing long-range dependencies that earlier models could not.
+This advancement significantly boosted performance across a
+variety of NLP tasks [40], marking a major evolution in the
+field. Figure 4 shows the history and evolution of LLMs.
+2017
+2018
+2019
+2020
+2023
+Bidirectional 
+Encoder 
+Representatio
+ns from 
+Transformers
+Generative 
+Pre-trained 
+Transformer
+GPT-4
+Transformer
+BERT 
+GPT-2 
+GPT-3 
+Introduced self-attention 
+mechanism, enhancing 
+scalability and performance in 
+Natural Language Processing 
+tasks
+Bidirectional context 
+understanding, revolutionizing 
+tasks like question answering
+Larger scale autoregressive model 
+for better text generation
+Few-shot learning capabilities 
+with 175 billion parameters
+Advanced multimodal 
+capabilities, top performance in 
+professional benchmarks
+Recent advancements in Large 
+Language Models such as 
+Ernie, Gemini, Claude, 
+Olympus, SenseNova 5.0, BERT, 
+RoBERTa, T5, ELECTRA, ALBER, 
+Meta LLM, and so on; 
+Demonstrate significant 
+improvements in processing 
+complex tasks with multi 
+modal inputs (text, videos, 
+audios, code)
+2024
+2021
+2022
+Post-GPT4 LLM Surge
+Img: Dr Alan D. Thompson, 
+LifeArchitect.ai (July/2024)
+Llama 3.1
+Fig. 4: Flow diagram showing the History of LLMs,
+starting from transformer to current LLM surge. The post-
+GPT4 surge in LLM has risen to a level where hundreds
+of LLMs have been released.
+A. Emergence to State-of-the-art and Capabilities of Large
+Language Models
+Building on the success of the Transformer, Devlin et al.
+[40] introduced BERT (Bidirectional Encoder Representations
+from Transformers) in 2018, which utilized deep bidirectional
+training by conditioning on both left and right contexts,
+simultaneously. This methodology enabled the model to be
+fine-tuned with just one additional output layer to perform a
+wide range of NLP tasks effectively, setting a new standard in
+the field. The development of language models continued to
+accelerate with the introduction of GPT-2 by Radford et al. in
+2019, which employed a transformer-based architecture with
+1.5 billion parameters, leveraging self-attention mechanisms
+to enhance text generation capabilities [7], [38]. That same
+year, the Megatron-LM was developed by Shoeybi et al. [41],
+featuring 8.3 billion parameters which allowed for even more
+complex pattern recognition and faster training due to its
+innovative parallelization scheme.
+In 2020, the release of GPT-3 by Brown et al. marked
+a further leap in the scale and capabilities of LLMs, with
+175 billion parameters, enabling high-quality text generation
+with minimal fine-tuning [18]. This model not only pushed
+the boundaries of what was possible in NLP but also set
+the stage for the next generation of multimodal models.
+Most recently, in 2023, OpenAI introduced GPT-4, which
+can process both text and image inputs, demonstrating near-
+human or superior performance on various professional and
+academic benchmarks (OpenAI, 2023). Recently, Meta re-
+leased the open-source LLM LLaMa, which, while smaller
+in size, offers a valuable resource for researchers worldwide
+(Meta, 2023). LLMs like OpenAI’s GPT-4 and Google’s PaLM
+are at the forefront of AI, showing remarkable advancements
+in handling complex tasks with vast parameter scales. These
+models now support multimodal inputs, processing text, im-
+ages, and sometimes audio, which broadens their applicability
+
+
+--- Page 5 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+5
+in diverse sectors such as healthcare [42], finance [43], and
+education [44]. Specifically, LLMs are revolutionizing content
+generation, offering decision support, enhancing customer
+interaction through chatbots, and personalizing educational
+content. However, their increasing integration into daily life
+raises significant ethical concerns, including potential biases
+in model training data and the opacity of their decision-
+making processes. Efforts to mitigate these biases and improve
+transparency are ongoing, but challenges remain, particularly
+in regulation and ensuring fairness. Additionally, the environ-
+mental and economic costs of training and deploying these
+resource-intensive models are significant. Despite these chal-
+lenges, the future of LLMs is likely to see deeper integration
+with other AI technologies, promising even more sophisticated
+autonomous systems. This ongoing evolution underscores the
+importance of continued ethical scrutiny and the development
+of regulations to prevent misuse and ensure that the benefits
+of LLM technologies are realized responsibly and equitably.
+In the following section, we review the leading LLM and
+their current capabilities, first highlighting the state-of-the-art
+LLM models developed by leading AI companies: Amazon,
+OpenAI, Meta, Google, Microsoft, Apple, NVIDIA, and Al-
+ibaba in Table I. Subsequently, we provide a discussion on
+each, outlining their key features and contributions.
+• OpenAI:The evolution of GPT models by OpenAI marks
+a new era in the development of language understanding
+and generation. This post-GPT era demonstrates rapid
+advancement of model design and capabilities. The ca-
+pability of LLMs was first demoonstrated with GPT-
+1 in June 2018, which showcased the effectiveness of
+unsupervised pre-training on large datasets to improve
+performance on diverse language tasks. GPT-1, with 0.12
+billion parameters, laid the groundwork for scalable, task-
+agnostic language models [48]. Following this, GPT-2
+was introduced in February 2019, boasting 1.5 billion
+parameters trained on 40GB of Internet text. This model
+showed unprecedented capabilities in generating coher-
+ent and contextually relevant text without task-specific
+training [49]. The advancements continued with GPT-3,
+released in June 2020, featuring a massive 175 billion
+parameters. GPT-3 excelled in few-shot learning, achiev-
+ing state-of-the-art performance on a wide range of NLP
+tasks, and setting a new benchmark for language models
+[18]. Following the success of GPT-3, OpenAI introduced
+GPT-4 in 2023 [50]. GPT-4 represents a significant leap
+forward as a multimodal model, capable of processing
+both text and visual inputs, thereby expanding its utility
+across a broader range of applications. GPT-4 demon-
+strated human-level performance on various professional
+and academic benchmarks, such as the bar exam, where it
+scored in the top 10% of test takers. The model’s ability
+to handle complex and nuanced scenarios in multiple
+languages further solidified its position as a cutting-edge
+AI system. Building on this, OpenAI announced GPT-
+4o, a groundbreaking advancement that integrates text,
+audio, image, and video processing capabilities [51].
+GPT-4o, which stands for “omni”, achieves remarkable
+TABLE I: Recent LLMs from Major AI Leading Companies:
+Amazon, OpenAI, Meta, Google, Microsoft, Apple, NVIDIA,
+and Alibaba
+Lab Name
+Model Name
+Parameters
+(B)
+Tokens
+Trained
+(B)
+Paper Ref-
+erence
+Amazon
+Olympus
+2000
+40000
+-
+Amazon
+HLAT
+7
+Not specified
+[45]
+Amazon
+Multimodal-
+CoT
+Not
+speci-
+fied
+Not specified
+[46]
+Amazon
+AlexaTM 20B
+20
+Not specified
+[47]
+OpenAI
+GPT-1
+0.12
+0.005
+[48]
+OpenAI
+GPT-2
+1.5
+Not specified
+[49]
+OpenAI
+GPT-3
+175
+570
+[18]
+OpenAI
+GPT-4
+Not
+speci-
+fied
+Text and images
+[50]
+OpenAI
+GPT-4o
+Not
+speci-
+fied
+Text, audio, image,
+video
+[51]
+OpenAI
+CriticGPT
+Not
+speci-
+fied
+Not specified
+[52]
+Meta AI
+Chameleon
+34
+9200
+[53]
+Meta AI
+Llama 3 70B
+70
+2000
+[54]
+Meta AI
+Llama 2
+70
+2400
+[55]
+Meta AI
+LIMA
+65
+Not specified
+[56]
+Meta AI
+LLaMA-65B
+175
+300
+[57]
+Meta AI
+BlenderBot 3x
+150
+300
+[58]
+Meta AI
+Atlas
+11
+40
+[59]
+Meta AI
+OPT-175B
+175
+300
+[60]
+Meta AI
+InCoder
+6.7
+Not specified
+[61]
+Apple
+4M-21
+3
+Not specified
+[62]
+Apple
+Apple
+On-
+Device model
+3.04
+1500
+[63]
+Apple
+MM1
+30
+2080
+[64]
+Apple
+ReALM-3B
+3
+134
+[65]
+Apple
+Ferret-UI
+13
+2000
+[66]
+Apple
+MGIE
+7
+2000
+[67]
+Apple
+Ferret
+13
+2000
+[68]
+NVIDIA
+Nemotron-4
+340B
+340
+9000
+[69]
+NVIDIA
+VIMA
+0.2
+Not specified
+[70]
+NVIDIA
+Retro 48B
+48
+1200
+[71]
+NVIDIA
+Raven
+11
+40
+[72]
+NVIDIA
+MT-NLG
+530
+270
+[73]
+Google
+DeepMind
+Gemini 1.5
+Not
+speci-
+fied
+Not specified
+[74]
+Google
+DeepMind
+Med-Gemini-
+L 1.0
+1500
+30000
+[75]
+Google
+DeepMind
+Hawk
+7
+300
+[76]
+Google
+DeepMind
+Griffin
+14
+300
+[76]
+Google
+DeepMind
+Gemma
+7
+6000
+[77]
+Google
+DeepMind
+Gemini
+1.5
+Pro
+1500
+30000
+[74]
+Google
+DeepMind
+PaLi-3
+6
+Not specified
+[78]
+Google
+DeepMind
+RT-X
+55
+Not specified
+[79]
+Google
+DeepMind
+Med-PaLM M
+540
+780
+[80]
+Microsoft
+MAI-1
+500
+10000
+[81]
+Microsoft
+YOCO
+3
+1600
+[82]
+Microsoft
+phi-3-medium
+14
+4800
+[83]
+Microsoft
+phi-3-mini
+3.8
+3300
+[83]
+Microsoft
+WizardLM-2-
+8x22B
+141
+Not specified
+[84]
+Microsoft
+WaveCoder-
+Pro-6.7B
+6.7
+20
+[85]
+Microsoft
+WaveCoder-
+Ultra-6.7B
+6.7
+20
+[85]
+Microsoft
+WaveCoder-
+SC-15B
+15
+20
+[85]
+Microsoft
+OCRA 2
+7, 13
+Not specified
+[86]
+Microsoft
+Florence-2
+Not
+speci-
+fied
+5.4 (visual annota-
+tions)
+[87]
+Alibaba
+Qwen
+72
+3000
+[88]
+Alibaba
+SeaLLM-13b
+13
+2000
+[89]
+
+
+--- Page 6 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+6
+performance improvements in multilingual, audio, and
+visual tasks, making it a versatile tool for real-time,
+multimodal human-computer interaction.
+• Amazon’s LLM: Amazon has significantly contributed
+to the advancement of LLMs through its innovative
+research and development [45], [46]. The AlexaTM 20B
+model, a multilingual sequence-to-sequence (seq2seq)
+model, excels in few-shot learning tasks, outperform-
+ing larger models like GPT-3 in zero-shot settings, and
+showcases superior performance in machine translation
+and summarization tasks [47]. This model demonstrates
+Amazon’s capability to achieve high efficiency and effec-
+tiveness even with a relatively smaller parameter scale.
+The HLAT model, designed for efficient and scalable
+learning, highlights Amazon’s commitment to optimiz-
+ing model training and enhancing performance across
+diverse applications [45]. Additionally, the multimodal-
+CoT (Chain-of-Thoughts) model integrates language and
+vision modalities to improve reasoning accuracy and
+mitigate hallucinations through a two-stage framework
+that separates rationale generation from answer inference
+[46].
+• Microsoft’s LLM: The Orca 2 model, with its innovative
+approach to teaching smaller LMs diverse reasoning
+techniques, achieves performance comparable to much
+larger models [86]. Florence-2 advances vision tasks with
+a unified, prompt-based representation, leveraging a vast
+annotated dataset for superior zero-shot and fine-tuning
+capabilities [87]. The Multimodal-CoT model integrates
+language and vision modalities to enhance reasoning
+accuracy, addressing the limitations of single-modality
+CoT models [46]. In Orca 2, improved training signals
+significantly boost smaller LMs’ reasoning abilities, sur-
+passing models 5-10x larger on complex benchmarks
+[86]. Florence-2’s extensive dataset of 5.4 billion visual
+annotations ensures comprehensive performance in vision
+tasks, reflecting its robust multi-task learning setup [87].
+Multimodal-CoT’s two-stage framework mitigates hallu-
+cination and enhances convergence speed, demonstrating
+the efficacy of multimodal information fusion [46].
+• Meta AI: Meta has developed several cutting-edge
+LLMs that push the boundaries of AI capabilities. The
+Chameleon family of models, as described in [53], repre-
+sents a significant advancement in mixed-modal models.
+Chameleon uses an early-fusion, token-based approach
+to integrate images and text, enabling it to perform a
+variety of tasks such as visual question answering, image
+captioning, text generation, and image generation. The
+models achieve state-of-the-art performance in image
+captioning and outperform other text-only models in text
+generation tasks. Chameleon also demonstrates compet-
+itive performance against much larger models in long-
+form mixed-modal generation evaluations, showcasing
+its versatility and robustness. Meta Llama 3 and 3.1
+[54], [90], is hailed as the most capable openly available
+LLM to date. This model excels in instruction fine-
+tuning through a combination of supervised fine-tuning,
+rejection sampling, proximal policy optimization, and
+direct preference optimization. The study by Meta AI
+presented in [55] introduces a series of long-context
+LLMs capable of handling up to 32,768 tokens. These
+models are built from the continual pre-training of Llama
+2, with a focus on longer training sequences and an
+upsampled dataset of long texts. The models demonstrate
+consistent improvements on regular tasks and significant
+enhancements on long-context tasks compared to Llama
+2. A notable achievement is that the 70B variant surpasses
+GPT-3.5-turbo-16k’s performance on long-context tasks
+using a cost-effective instruction tuning method.
+[58] introduced BlenderBot 3x, an enhanced conversa-
+tional model trained using organic conversation and feed-
+back data from real users. This approach aims to improve
+both the skills and safety of the model. Likewise, [91]
+introduces LLaMA, a series of foundation models from
+7B to 65B parameters, trained exclusively on publicly
+available datasets. LLaMA models, particularly the 13B
+and 65B variants, outperform GPT-3 and compete with
+models like Chinchilla-70B and PaLM-540B. [56] dis-
+cusses LIMA, a 65B parameter LLaMA model fine-tuned
+with only 1,000 curated prompts and responses. LIMA
+achieves remarkable performance in following response
+formats and generalizing to unseen tasks, often preferred
+over GPT-4, Bard, and DaVinci003 in controlled studies,
+highlighting the significance of pre-training in LLMs.
+Additionally, [59] introduces Atlas, a retrieval-augmented
+language
+model
+designed
+for
+few-shot
+learning
+in
+knowledge-intensive tasks. By leveraging a retrieval
+mechanism, Atlas achieves high accuracy with minimal
+training examples, demonstrating over 42% accuracy on
+Natural Questions with just 64 examples, outperforming
+much larger models like the 540B parameters model.
+This approach significantly reduces the need for massive
+parameter counts while maintaining robust performance
+across various benchmarks such as MMLU, KILT, and
+Natural Questions. [60] presents the Open Pre-trained
+Transformers (OPT), which matches the performance
+of GPT-3 with significantly reduced computational re-
+sources, showcasing its efficiency in large-scale model
+operations.The emphasis on lowering environmental im-
+pact while maintaining high performance highlights the
+significance of sustainable AI practices. The full model
+weights and training logs are made available, promoting
+transparency and reproducibility in large-scale model
+training. [61] introduces InCoder, a generative model
+capable of both code synthesis and infilling, trained on a
+diverse corpus of code with bidirectional context, InCoder
+excels in zero-shot code infilling tasks, including type
+inference, comment generation, and variable renaming.
+• Google Deepmind: Google DeepMind has made sig-
+nificant strides in the development of LLMs with their
+recent publications. The Gemini 1.5 family, introduced by
+Reid et al. [74], represents a new generation of compute-
+efficient multimodal models that excel in recalling and
+reasoning over extensive contexts, including text, audio,
+and video. These models demonstrate superior perfor-
+mance in long-document QA and long-video QA tasks,
+
+
+--- Page 7 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+7
+achieving near-perfect retrieval accuracy for contexts
+up to 10 million tokens. In the medical domain, Saab
+et al. [75] introduced Med-Gemini, which outperforms
+GPT-4 on several medical benchmarks, showcasing its
+potential in medical applications such as text summa-
+rization and multimodal dialogue. Another notable de-
+velopment is Griffin, a hybrid model combining gated
+linear recurrences with local attention, as described by
+de et al. [76]. Griffin exhibits efficient training and infer-
+ence capabilities, matching the performance of Llama-
+2 while using significantly fewer tokens. Additionally,
+the Gemma family, detailed by the DeepMind team
+[77], offers lightweight open models with strong per-
+formance across language understanding, reasoning, and
+safety benchmarks. These models, ranging from 2 billion
+to 7 billion parameters, are released with a focus on
+responsible AI development, aiming to advance the field
+of LLMs through open and safe innovations.
+PaLI-3, as detailed in [78], introduces a VLM with only
+5B parameters, achieving superior performance across
+various multimodal benchmarks. It emphasizes the ef-
+fectiveness of contrastively pre-trained Vision Transform-
+ers, particularly for tasks like localization and visually-
+situated text understanding. RT-X, described in [79], em-
+ploys a large, diverse dataset collected from 22 different
+robots to train generalizable robotic policies. This model
+demonstrates positive transfer, significantly improving
+capabilities across multiple robots and tasks. Med-PaLM
+M, highlighted in [80], is a multimodal biomedical AI
+system that integrates clinical language, imaging, and
+genomics.
+• Apple: Apple’s recent advancements in LLMs are marked
+by significant contributions across various domains, as
+demonstrated by five notable papers. The first paper
+[62] presents a robust vision language model (VLM)
+trained on diverse multimodal datasets, achieving state-
+of-the-art performance across a broad range of tasks. It
+emphasizes the potential of a unified model handling
+substantially more modalities without performance loss.
+[63] introduces OpenELM, an open and reproducible
+language model framework that enhances accuracy and
+efficiency through a layer-wise scaling strategy, offering
+comprehensive resources for the research community.
+[64] explores the construction of multimodal LLMs, high-
+lighting the critical role of data diversity and architectural
+components in achieving superior few-shot learning re-
+sults across different benchmarks. [65] innovates in refer-
+ence resolution, demonstrating significant improvements
+by converting the problem into a language modeling
+task, achieving results comparable to GPT-4. Lastly, [66]
+addresses the challenges in UI comprehension, proposing
+Ferret-UI, a model that excels in understanding and
+interacting with mobile user interfaces, outperforming
+existing models like GPT-4V on numerous tasks.
+Another
+LLM
+from
+Apple,
+MGIE
+[67],
+enhances
+instruction-based image editing by using MM-LLMs to
+generate expressive and detailed commands. This ap-
+proach addresses the challenge of brief human instruc-
+tions, allowing for more precise image manipulation.
+The model integrates visual imagination with editing
+capabilities through end-to-end training, demonstrating
+significant improvements in automatic metrics and hu-
+man evaluations across various editing tasks, including
+global photo optimization and local modifications, while
+maintaining efficient inference. Ferret, another innovative
+model from Apple [68], excels in spatial referencing and
+grounding within images.
+• NVIDIA: In their exploration of robot manipulation,
+NVIDIA presents VIMA, a transformer-based agent ca-
+pable of handling multimodal prompts encompassing
+textual and visual tokens. VIMA demonstrates a high
+level of scalability and data efficiency, outperforming
+existing designs in zero-shot generalization settings with
+a significant success rate, and maintaining strong perfor-
+mance with reduced training data [70]. RAVEN explores
+in-context learning using retrieval-augmented language
+models, enhancing few-shot learning efficiency [72].
+NVIDIA’s InstructRetro significantly boosts performance
+by pre-training a 43B GPT model on 1.2 trillion tokens,
+achieving notable improvements in QA and summariza-
+tion tasks [71]. The Nemotron-4 340B model family,
+under the NVIDIA Open Model License, and the collab-
+orative Megatron-Turing NLG 530B model by Microsoft
+and NVIDIA, demonstrate high performance on various
+NLP benchmarks [69], [73].
+• Alibaba: Alibaba’s advancements in large language mod-
+els are highlighted through their development of Qwen
+and SeaLLMs. The Qwen series, encompassing base pre-
+trained language models and chat models fine-tuned with
+human alignment techniques, showcases exceptional per-
+formance across diverse downstream tasks. Qwen-Chat
+models, particularly those trained using Reinforcement
+Learning from Human Feedback (RLHF), demonstrate
+advanced tool-use and planning capabilities, competing
+effectively even with larger models on complex tasks
+such as utilizing a code interpreter. Specialized mod-
+els like Code-Qwen, Code-Qwen-Chat, and Math-Qwen-
+Chat exhibit significantly enhanced performance, surpass-
+ing open-source counterparts and approaching the capa-
+bilities of proprietary models [88]. SeaLLMs addresses
+the linguistic biases inherent in many LLMs by focusing
+on Southeast Asian languages. Built on the Llama-2
+model, SeaLLMs incorporate an extended vocabulary and
+specialized instruction tuning to capture the nuances of
+regional languages. This series respects local cultural
+norms and legal considerations, resulting in superior
+performance across a variety of linguistic tasks. SeaLLM-
+13b models notably outperform ChatGPT-3.5 in non-
+Latin languages like Thai, Khmer, Lao, and Burmese,
+demonstrating their effectiveness while maintaining cost
+efficiency by low computation requirement [89].
+B. Vision-Language Models (VLMs)
+Multi-Modal Vision-Language Models (VLMs) extend the
+capabilities of traditional language models by incorporating
+
+
+--- Page 8 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+8
+multiple types of data, such as text, images, audio, and
+video [92]. These models represent a significant advancement
+in agricultural technology by integrating diverse data types
+to provide comprehensive insights and solutions [93]. By
+combining textual data with visual and sensory inputs, MM-
+LLMs can offer more accurate and context-aware recom-
+mendations, thereby enhancing decision-making processes in
+agriculture [94].
+Vision-Language Models (VLMs) [95] are a subset of multi-
+modal models that specifically focus on the integration of
+visual and textual information to understand and generate
+multi-modal content. By integrating computer vision and nat-
+ural language processing techniques, VLMs can perform tasks
+such as image captioning, visual question answering [96],
+and image-based text generation [97]. One notable model is
+“GLaMM: Pixel Grounding Large Multimodal Model,” which
+introduces a novel approach to vision-language models by
+focusing on pixel-level grounding to enhance interaction and
+understanding between visual and textual modalities [98]. The
+GLaMM model extends the capabilities of LLMs into the vi-
+sion domain by generating natural language responses that are
+closely intertwined with corresponding object segmentation
+masks. This capability is particularly important in handling
+video data, where temporal dynamics add complexity to the
+analysis [99].
+III. APPLICATIONS OF LLMS IN AGRICULTURE
+In agriculture, LLMs have been applied across various
+domains including weed control, pest and disease detection,
+livestock management, and agricultural Remote Sensing (RS).
+The capability of these models to process extensive and di-
+verse datasets renders them exceptionally useful for predictive
+modeling and performance analysis. Agricultural LLMs are
+tailored to address specific challenges such as the limited avail-
+ability and scattered nature of agricultural data. For example,
+ChatGPT has shown significant potential in agricultural text
+classification, effectively overcoming challenges related to data
+scarcity and cross-linguistic transferability [100]. Similarly,
+AgriBERT has been fine-tuned to enhance semantic matching
+between food descriptions and nutrition data, demonstrating
+its utility in improving agricultural NLP applications [101].
+The integration of LLMs with CNNs for diagnostics, as seen
+with GPT-4 and YOLOPC, exemplifies how these models
+can enhance pest detection accuracy while reducing model
+parameters [102].
+Furthermore, LLMs like GPT-4 have demonstrated their
+potential in educational and crop management contexts by
+successfully passing agriculture exams [103]. Techniques such
+as RAG and fine-tuning have been utilized to enhance LLMs’
+efficiency in providing location-specific agricultural insights
+[104]. Additionally, the development of PLLaMa, an open-
+source language model specifically designed for plant science,
+has significantly advanced the understanding of plant-related
+topics [105]. These advancements underscore the extensive
+adaptability and versatility of LLMs in addressing complex
+agricultural challenges. Figure 5 presents a comprehensive
+overview of the pipeline for developing (multimodal) founda-
+tion models (FMs) in agriculture. This process encompasses
+TABLE II: Applications of Large Language Models (LLMs)
+in Agricultural Information Diagnostics and Human-Machine
+Interaction (peer-reviewed)
+Reference
+LLM
+Model
+Used
+Main Findings, Contributions, and Impact
+[102]
+GPT-4,
+YOLOPC
+Achieved 94.5% accuracy in pest detection,
+integrating LLMs with CNNs for advanced
+agricultural diagnostics.
+[106]
+BERT-based
+Seq2Seq
+Enabled efficient synthesis of commands, sig-
+nificantly enhancing human-machine interac-
+tion in agricultural applications.
+[107]
+GPT-2, BERT,
+DistilBERT
+BERT outperformed others in sentiment anal-
+ysis, proving viable for classifying technical
+agricultural text accurately.
+[108]
+AgriBERT
+Demonstrated superior semantic matching re-
+sults, enhancing food-nutrition mapping in
+agricultural contexts.
+[109]
+Extended
+BERT
+with
+LDA
+Achieved 80.43% F-measure in NER, signif-
+icantly improving agricultural entity recogni-
+tion accuracy.
+[110]
+H2020
+DEMETER
+Project
+Enhanced data interoperability with a scal-
+able framework for agricultural data integra-
+tion across systems.
+[100]
+ChatGPT
+(GPT-3.5,
+GPT-4)
+Effective cross-linguistic text classification,
+addressing data scarcity and transferability
+issues in agriculture.
+[17]
+Generative
+Pre-trained
+Transformer
+(GPT)
+Simplified scientific knowledge for farmers,
+offering an idealized LLM design process for
+safe agricultural use.
+[111]
+ChatGPT
+Provided real-time information access, en-
+hancing farm management and simplifying
+regulatory processes in agriculture.
+[112]
+GPT-3.5
+Enabled real-time pest identification, promot-
+ing sustainable farming practices through ad-
+vanced AI integration.
+[113]
+ChatGPT
+Improved surveillance of agricultural injuries,
+advancing public health through AI-driven
+insights.
+[114]
+GPT-3, LSTM
+Enhanced soybean news analysis, leading to
+improved sentiment analysis accuracy in agri-
+cultural contexts.
+[26]
+YOLOv8,
+RAG
+Achieved precision in coffee disease reme-
+diation by combining object detection with
+LLMs for advanced diagnostics.
+[115]
+ChatGLM,
+Llama 2-13B
+Improved knowledge service modes, enhanc-
+ing agricultural technology extension services
+for farmers.
+[22]
+Generative AI,
+LLM
+Provided advisory services for risk assess-
+ment, integrated into the smart agriculture
+platform ZEMELA.
+[116]
+Not specified
+Facilitated adoption of Green Planting Tech-
+nology, influenced by personal and external
+support mechanisms.
+[117]
+Not specified
+Demonstrated
+smart
+agriculture
+enhances
+GPT diversity, with specific benefits for dif-
+ferent farm types.
+stages such as data collection, dataset curation, model training,
+and downstream fine-tuning.
+Table II provides a detailed summary of recent LLMs pub-
+lished in peer-reviewed journals, summarizing the state-of-the-
+art surveys related to LLMs in agriculture, highlighting their
+main findings, contributions, and impacts. Table III presents
+a summary of LLM-related papers available on arXiv. In the
+following sections, we present categorical review of proximal
+and remote sensing integration of LLMs in Agriculture:
+A. Proximal Sensing Integration of LLMs in Agriculture
+Proximal sensing involves the use of ground-based sensors
+and technologies to gather detailed and high-resolution data
+about crops, soil, and environmental conditions [125]. When
+integrated with LLMs, proximal sensing technologies can
+utilize advanced data processing and analysis capabilities to
+
+
+--- Page 9 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+9
+Images
+Data Collection
+Plant Health
+Weed & Crop Management
+Fruit Picking
+Animal Agriculture
+…
+Structure Data
+3D Signals
+Audio
+Text
+Curated Datasets
+Multi-modal Large Language Models
+Input text prompt 1
+Input text prompt 2
+Llama 3.1
+DALL.E  model
+Downstream Applications
+And
+many 
+more 
+LLMs
+Training
+Adaptation
+Fig. 5: Pipeline for developing multi-modal LLMs in agriculture, illustrating (multi-modal) data collection, cleaning,
+training, fine-tuning, and downstream adaptation, modified from [93].
+enhance decision-making processes in agriculture [93], [126].
+This integration enables precise monitoring and management
+of agricultural practices, optimizing resource use and improv-
+ing crop yields. Furthermore, combining real-time sensor data
+and LLM predictive analytics enables dynamic adaptability to
+changing agriculture conditions, thereby improving forecasting
+accuracy. In this section, we review the integration of LLMs
+with proximal sensing technologies in agriculture, categorized
+into the following subsections: LLMs for Crop Monitoring
+and Management, LLMs for Disease Detection and Diagnosis,
+LLMs for Precision Irrigation and Fertilization, and LLMs for
+Agricultural Information and Decision Support Tools.
+1) LLMs for Crop Monitoring and Management: Recent
+advancements in language models such as GPT-4 have shown
+significant potential in transforming crop production by pro-
+viding on-demand agronomic expertise [115], [127], Kuska et
+al. [128] explored the potential of LLMs in revolutionizing
+agricultural practices. The authors highlight four primary use
+cases for LLMs in agriculture: consulting and assistance,
+automated documentation, explanation and education, and
+interpretation of machine learning results and forecasts. They
+emphasize that LLMs can enhance decision support in plant
+disease management, generate user-friendly guides and tuto-
+rials, and convert complex ML outputs into comprehensible
+information.
+Wu et al. [129] explored the integration of reinforce-
+ment learning (RL) with LMs for advanced crop manage-
+ment. The study utilizes the Decision Support System for
+Agrotechnology Transfer (DSSAT) to simulate crop manage-
+ment scenarios, employing a deep Q-network for training
+management policies. The innovative aspect lies in converting
+state variables from the simulator into language that LMs
+can understand, facilitating better decision-making. Empirical
+results from simulations with maize crops in Florida and Spain
+demonstrate that this approach not only improves economic
+profitability by over 49% but also reduces environmental
+impact compared to baseline methods. This study highlights
+the potential of combining RL and LMs to optimize crop
+management practices effectively.
+Veena et al. [109] propose a novel approach for Named
+Entity Recognition (NER) tailored for the agricultural domain.
+Their study addresses the challenges of developing accurate
+NER models in agriculture, such as the lack of annotated
+data, domain-specific vocabulary, and contextual variation.
+The proposed model leverages an extended BERT model with
+Latent Dirichlet Allocation (LDA) topic modeling to perform
+unsupervised NER, focusing on six key entities: disease, soil,
+pathogen, pesticide, crops, and place. To overcome the absence
+of a benchmark dataset, the authors created a corpus of
+30,000 sentences from recognized agricultural sources and
+evaluated their model using a test corpus of 700 sentences.
+The AGRONER model achieved a macro average F-measure
+of 80.43%, demonstrating its effectiveness. The approach
+shows significant improvement over BERT without LDA,
+
+
+--- Page 10 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+10
+TABLE III: Applications of LLMs in Agricultural Information
+Diagnostics and Human-Machine Interaction (arXiv) as of
+07/04/2024
+Reference
+LLM
+Model
+Used
+Main Findings, Contributions, and Impact
+[101]
+AgriBERT,
+GPT, ChatGPT
+Improved semantic matching in food do-
+mains, enhancing agricultural NLP applica-
+tions and precision in food-nutrition map-
+ping.
+[118]
+ChatGPT-style
+LLMs
+Highlights risks and opportunities of LLMs,
+proposing frameworks for responsible use in
+agricultural settings.
+[103]
+GPT-4, Llama
+2, RAG, ER
+GPT-4 passes agriculture exams, significantly
+improving educational methods and crop
+management practices.
+[105]
+PLLaMa
+(LLaMa-2
+based)
+Enhanced understanding in plant science,
+providing an open-source model tailored for
+agricultural research and applications.
+[104]
+GPT-4, Llama
+2-13B
+Demonstrated benefits of RAG and fine-
+tuning,
+offering
+improved
+geographic-
+specific insights for agriculture.
+[119]
+Various LLMs
+Enhanced explainability in Decision-Driven
+Technologies (DDTs), aiding in smart agri-
+cultural decision-making processes.
+[120]
+BERT-based
+models
+Classified Plant Health Bulletins accurately,
+improving plant health management and re-
+sponse strategies.
+[23]
+General LLMs
+Enabled accurate pest identification, effi-
+ciently extracting structured data from agri-
+cultural documents.
+[121]
+MoCo-V2,
+CNN,
+Swin
+Transformer
+Improved dataset for agricultural analysis,
+enhancing aerial image analysis in precision
+farming.
+[122]
+TimeGPT
+Achieved accurate soil moisture forecasting,
+advancing time-series models for smart agri-
+culture applications.
+[123]
+GPT-4o
+Enhanced visual perception in piglet activity,
+improving animal behavior recognition and
+welfare monitoring.
+[124]
+LSTM-RASA
+Developed an effective farm assistant chat-
+bot, providing timely and expert advice for
+farmers.
+highlighting its potential for unsupervised domain-specific
+entity recognition in agriculture.
+Zhang et al. [106] address the user-friendliness issues of
+existing agricultural measurement and control platforms. They
+propose a NLP pipeline to enhance human-machine interac-
+tion. The pipeline uses a dynamic tuple language framework to
+synthesize natural language commands into structured Action-
+Object-Member (AOM) statements. An end-to-end framework
+with a special mask mechanism improves the BERT-based
+Seq2Seq model’s ability to capture global sequence relations.
+Experimental results demonstrate the pipeline’s efficacy, show-
+ing good performance and reasonable response times.
+Likewise, the “My Climate Advisor” system, presented by
+Nguyen et al. [130], employs NLP to aid climate adaptation
+in agriculture by providing relevant, trustworthy information
+to farmers and advisors. This question-answering prototype
+synthesizes information from peer-reviewed scientific litera-
+ture and high-quality, industry-relevant grey literature, such
+as technical reports, white papers, and policy documents, to
+generate comprehensive, referenced answers. Utilizing open-
+source generative models for privacy and intellectual property
+protection, it combines retrieval augmented generation for
+precise, verifiable answers. A novel evaluation framework
+with seven metrics was developed to assess the system’s
+effectiveness, with initial user studies indicating promising
+results in usability and applicability [130].
+2) LLM for Disease Detection and Diagnosis: Lu et al.
+[131] presented a sophisticated approach using multimodal
+transformer models to enhance the detection of agricultural
+diseases and provide accurate responses to related queries.
+By integrating various data modalities, such as images and
+text, the proposed model leverages advanced ML techniques
+to identify plant diseases with high precision.
+Hue et al. [132] introduce a groundbreaking approach to
+plant disease diagnosis leveraging the capabilities of GPT-4’s
+multimodal model. The system integrates image recognition
+with natural language processing to provide accurate diag-
+nostic information for plant diseases. Utilizing an extensive
+knowledge base of 1,420 host plants, 2,462 pathogens, and
+37,467 pesticide instances, the GPT-4-based system offers
+rapid and precise identification of plant diseases. This method
+addresses the shortcomings of traditional visual inspections
+and complex molecular-based diagnostics by combining the
+speed and accessibility of machine learning with the detailed
+accuracy of molecular data, facilitating effective integrated
+pest management.
+Qing et al. [102] explored the application of GPT-based
+models in diagnosing plant diseases through image analy-
+sis. By employing advanced image recognition technologies
+powered by GPT models, the system aims to provide quick
+and reliable diagnostics for various agricultural issues. The
+integration of GPT’s natural language processing capabilities
+allows for the synthesis of diagnostic information and action-
+able recommendations. This approach is designed to enhance
+traditional diagnostic methods such as visual inspection and
+manual sampling, offering a more efficient and accurate so-
+lution for farmers and agricultural professionals to identify
+and manage plant diseases, ultimately improving crop health
+and yield. Kumar et al. [26] introduced an innovative AI-
+driven precision agriculture (PA) system to combat coffee leaf
+diseases, particularly in Karnataka. By integrating YOLOv8
+for disease identification with Retrieval Augmented Genera-
+tion (RAG) for context-aware diagnosis, the system addresses
+inherent challenges associated with LLMs. Their methodol-
+ogy mitigates hallucinations in LLMs, incorporating real-time
+monitoring and dynamic remediation strategies. Dhavale et al.
+[133] integrated Generative Adversarial Networks (GANs) for
+image augmentation and CNNs for accurate disease detection
+in crops. These technologies enhance the diagnostic process,
+allowing for early detection of diseases, thus reducing the
+reliance on pesticides.
+Madaan et al. [134] developed a mobile application leverag-
+ing deep learning models for early detection of crop diseases to
+aid Indian farmers. By examining MobileNetV2 and ResNet50
+on a dataset of 39,131 images across 21 classes, MobileNetV2
+achieved 97%-99% accuracy, proving optimal for mobile use
+due to its compact model size. The system not only detects
+diseases but also uses LLMs to provide tailored recommen-
+dations, thereby enhancing crop protection and farmer prof-
+itability. Zhao et al. [100] propose an innovative approach
+for agricultural text classification using ChatGPT models. The
+study highlights the challenges in agricultural text classifica-
+tion, such as limited training data, poor domain transferability
+across languages, and the high cost of deploying large mod-
+
+
+--- Page 11 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+11
+els. By using ChatGPT’s advanced understanding capabilities
+through various prompting methods, ChatAgri demonstrates
+competitive performance against fine-tuned PLMs. The study
+finds that ChatGPT outperforms PLM fine-tuning methods in
+few-shot scenarios and showcases remarkable cross-linguistic
+transferability.
+Yang et al. [135] investigate the feasibility of using LLMs,
+such as GPT-4, in pest management. The study focuses on
+evaluating the quality of pest management advice generated
+by LLMs, using GPT-4 to score the content on coherence,
+logical consistency, fluency, relevance, comprehensibility, and
+exhaustiveness. An expert system based on crop threshold data
+is integrated as a baseline to assess factual accuracy. Results
+indicate that GPT-3.5 and GPT-4 outperform Google’s FLAN
+models in most evaluation categories. The use of instruction-
+based prompting with domain-specific knowledge achieves
+an accuracy rate of 72%, demonstrating the effectiveness of
+LLMs in providing reliable pest management suggestions.
+3) LLMs for Precision Irrigation and Fertilization: The
+integration of LLMs in precision irrigation and fertilization
+practices marks a significant advancement in agricultural
+technology. LLMs have demonstrated remarkable potential
+in handling complex set of information, generating insights,
+and providing sophisticated reasoning for decision-making
+processes. Recent advancements have developed a sophisti-
+cated crop management system that integrates RL, LLMs,
+and crop simulations using tools like DSSAT [136]. This
+system employs deep RL, specifically a deep Q-network, to
+train policies that interpret various state variables from the
+simulator as observations. A key innovation is translating these
+state variables into descriptive language, enhancing the LLMs’
+ability to comprehend and optimize management practices.
+Experimental results with maize crops in Florida (US) and
+Zaragoza (Spain) demonstrate that the LLMs not only achieve
+top performance across multiple metrics but also significantly
+boost economic profits by over 49% while reducing environ-
+mental impacts compared to traditional methods.
+The deployment of LLMs as RL agents has shown promis-
+ing results in various domains, including robotics and user
+interface interactions [137]–[139]. For instance, replacing tra-
+ditional multi-layer perceptrons (MLPs) with a distilled and
+pre-trained BERT model as the RL agent has significantly
+improved decision-making processes [140]. In this architec-
+ture, the BERT model encodes state variable sentences into
+feature embeddings, which are then transformed through fully
+connected layers to align with the action space of the RL
+agent. This setup ensures that the complex relationships within
+crop management data are effectively captured and translated
+into actionable insights. Another notable example is presented
+in a framework that incorporates a powerful LLM with crop
+simulations via tools such as DSSAT and Gym-DSSAT as
+presented in Figure 6. In their approach, traditional numerical
+state representations from simulation tools are transformed
+into descriptive sentences. This transformation allows the use
+of LLMs, which encode these sentences into embeddings
+that capture a more nuanced understanding of the states. By
+employing the advanced cognitive capabilities of LLMs, such
+as their reasoning and memory functions [141], [142], the RL
+agent within this framework can comprehend complex aspects
+of crop growth and simulation environments more effectively.
+Fig. 6: LLM-based RL framework for fertilization and
+irrigation [136]
+4) LLMs for Agricultural Information and Decision Sup-
+port Tools: Zhao et al. [100] investigate the application of
+ChatGPT for classifying agricultural texts across different
+languages. The study addresses challenges such as limited
+training data and poor domain transferability. By employing
+various prompting methods, ChatAgri not only demonstrates
+competitive performance compared to PLM fine-tuning meth-
+ods but also excels in few-shot scenarios, outperforming
+PLM fine-tuning with limited data.The research highlights
+ChatGPT’s ability to handle cross-linguistic text classification
+effectively, making it a robust solution for organizing and ac-
+cessing the vast amounts of agricultural information available
+online. This study underscores the potential of ChatGPT to
+revolutionize agricultural text processing, paving the way for
+more efficient and accessible knowledge dissemination in the
+field of sustainable, smart agriculture.
+Arora et al. [143] present an intelligent chatbot designed
+to assist farmers by addressing various farming-related issues
+and supporting their decision-making processes. This chatbot
+employs a sequence-to-sequence learning model based on mul-
+tilayered Long Short-Term Memory (LSTM) units, enabling
+it to provide accurate responses to frequently asked questions.
+Additionally, the bot integrates a CNN architecture for crop
+disease detection, trained on the plant village dataset, achiev-
+ing 94% accuracy on test data. The conversational system
+module uses the Kisan Call Center (KCC) dataset, reaching a
+98% accuracy on training data. This dual-functionality system
+not only aids in identifying crop diseases but also offers
+weather forecasts, enhancing farmers’ ability to manage their
+crops effectively. The integration of AI in such practical ap-
+plications highlights the potential for significant advancements
+in agricultural support systems.
+KissanGPT, launched on March 15, 2023, is an AI chatbot
+designed to support India’s agricultural sector by providing
+verbal interaction capabilities for farmers with varying literacy
+levels. It leverages OpenAI’s ChatGPT technology and a
+proprietary knowledge base to offer advice on crop cultiva-
+tion, pest management, and irrigation in multiple languages,
+including Hindi, English, and Gujarati. This study emphasizes
+its role in bridging the knowledge gap between farmers and
+
+
+--- Page 12 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+12
+experts, enhancing agricultural productivity and sustainability
+[144].
+5) LLMs for Agricultural Extension and Technical Advi-
+sors: In the United States, public sector advisors associ-
+ated with Land Grant universities are traditionally known as
+’Extension’ educators. These roles vary globally; in other
+countries, these professionals may be referred to as extension
+agents, specialists, or consultants. For example, in China,
+there are over 600,000 agricultural extensionists providing
+support. Globally, extension services assist over 570 million
+farmers who cultivate 24% of the world’s agricultural land,
+producing 29% of its crop food kilocalories [17]. In the U.S.,
+Extension advisors typically operate locally, often within a
+specific county or geographic region, close to the agricultural
+producers they serve. Frequently, the Land-Grant universities
+that employ these advisors also have faculty research and
+extension specialists connected to or directly funded through
+Extension but who have a more significant role in leading the
+applied research that serves as the knowledge and information
+source for those local advisors [145]. In this section, we
+expand the conversation to include other groups who may
+work in roles similar to Extension advisors. These may be
+other public sector advisors or those who work in the private
+sector. Examples of agricultural technical advisers who will
+likely benefit from using LLMs include agricultural consul-
+tants, agronomists, veterinarians, or others offering highly
+specialized advice and determine agricultural profitability,
+such as farm financial specialists or attorneys. Considering this
+broad spectrum of technical advisers that includes Extension
+advisors and others, we will refer to the collective group as
+a community of Technical Advisors (TAs). We envision the
+following several roles that LLMs could play in the work
+of TA’s. Among them are tools that have the potential to
+significantly enhance decision-making, empowering TA’s to
+make more informed and confident choices.
+• Enhance the TA’s ability to lead, participate in, or analyze
+and interpret the results of applied agricultural research.
+• Assist TA with knowledge translation into usable tools
+for stakeholders, increasing access, and aiding in content
+creation.
+• Improve work efficiency and processes for TAs to en-
+able higher-level focus on relationships and interpersonal
+communication with stakeholders
+This following points will also talk about some of the caveats,
+cautions, risks, and pitfalls that must be considered as TAs
+adopt LLMs as an everyday tool of practice.
+Assist in Research Leadership and Interpretation: Tech-
+nical Advisors (TAs) in agriculture, who integrate multidisci-
+plinary scientific knowledge, can leverage LLMs to enhance
+their advisory roles. These models not only support TAs by
+providing expert guidance with a demonstrated 93% accu-
+racy on agronomist certification exams [103] but also enable
+efficient management of data-driven tasks such as weather
+forecasting, pest monitoring, and crop condition analysis.
+LLMs can process and integrate multimodal data from various
+sources like satellites and UAVs to aid precision farming [146].
+Additionally, they can facilitate on-farm applied research by
+using machine vision for pest identification and creating
+actionable recommendations for TAs to convey to producers
+[112]. By improving efficiency and extending their operational
+capacity, TAs can better analyze trends and risks, ultimately
+reaching a broader audience [128], [129].
+Assist in Knowledge Translation and Content Creation:
+LLMs significantly enhance the speed and accuracy of translat-
+ing complex scientific knowledge into practical, personalized
+advice for agricultural producers [93], [147]. These tools excel
+in synthesizing insights from diverse data sources, enabling
+TAs to provide comprehensive management recommendations
+[104]. Studies in India and Nigeria show positive farmer recep-
+tion towards AI for tasks like weather prediction and disease
+management, with AI responses often surpassing those from
+human TAs in terms of quality and timeliness [146], [148].
+LLMs offer the additional benefit of multilingual translation,
+facilitating immediate and specific advice tailored to individual
+needs, which is essential in resource-limited settings [17],
+[111], [112], [129].
+Improve Work Efficiency and Processes: Often, TAs in
+public and private sectors who work as consultants, Extension
+advisors, or in other roles encounter various administrative
+tasks that take away from their ability to build relationships,
+learn, and communicate valuable technical information. LLMs
+can help automate program scheduling, registration, record
+keeping, drafting technical reports, follow-up emails, and
+other administrative communication [149]. Increases in time
+efficiency and savings will allow the TA to spend more time on
+critical interactions and relationship building, allowing stake-
+holder needs to be addressed more effectively. LLMs and other
+AI applications create new opportunities for entrepreneurs
+who wish to offer high-value and innovative solutions at
+affordable prices, making research and data-driven practices
+more accessible for a broader range of production operations
+irrespective of their size, scale, and production type [146].
+Potential Threats and Pitfalls: As we consider using LLMs
+and other highly accessible AI tools to support and enhance
+the work of TAs, we must also consider possible risks, pitfalls,
+or threats. For example, LLMs are complex and require con-
+siderable computing capabilities. Models must be continuously
+trained and updated with new research findings, models, and
+data, and the computational costs and complexity could limit
+their widespread application, especially on highly specialized
+issues where “general” GPTs are not entirely suitable [93].
+To be fully trusted by both the TA and their stakeholders,
+transparency is critical; LLM must be able to explain its
+reasoning and limit its output to areas where queries can be
+answered with a high degree of certainty, or there will be
+opportunities to misuse these tools or generate recommenda-
+tions that have unintended consequences [17], [149]. To be
+effective, these tools will need the latest and highest quality
+technical information as training data. This leads to questions
+about data privacy, security, intellectual property concerns, and
+prevention of unauthorized access to the raw training data
+[93]. To the extent that LLMs are trained on available data
+from geographic areas or groups that have the resources to
+generate that data (time, expertise, financing, etc.), we must
+recognize and understand that there will always be biases in
+recommendations, potentially affecting producers and other
+
+
+--- Page 13 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+13
+stakeholders if not corrected and accounted for [150]. For
+example, a model that is trained largely on US resources or
+even more geographically specific areas (e.g., Midwestern US)
+will represent those biases and may or may not be applicable
+in other regions of the world. There are also concerns that
+the widespread use of LLMs by TAs could lead to job loss
+and displacement workers. Of particular note is that generative
+AI in agriculture could displace extension service workers or
+other agricultural professionals [149] all together.
+B. LLMs Integration with Agricultural Remote Sensing (RS)
+Recent advancements underscore the pivotal role of remote
+sensing (RS) in agricultural monitoring and management,
+offering extensive applications from biomass estimation to
+land use and land cover (LULC) changes [151]. LLMs con-
+tribute to RS by improving plant canopy monitoring [152],
+supporting agronomic practices [153], and refining PA systems
+[154]. Key challenges such as spatial resolution and data
+integration are addressed in literature, focusing on Sentinel-2’s
+role in PA and decision-making [155]–[157]. Research extends
+to RS applications in specialized settings like greenhouses
+and plastic-mulched farms, and the broader implications for
+sustainable agriculture under Agriculture 5.0 [158]–[160].
+LLMs are increasingly integrated with RS, leveraging their
+data processing capabilities alongside RS’s ability to gather
+detailed spatial and spectral data, thus enhancing the scope
+and accuracy of agricultural assessments [126], [161].
+1) State-of-the-are LLM studies for Remote Sensing: Since
+the inception of LLMs/VLMs, researchers started to find
+applications in almost every field, including RS. For ex-
+ample, Hu et al. [162] developed high-quality datasets and
+developed a VLM tailored for remote sensing applications,
+enhancing image understanding and reasoning capabilities.
+Their research also emphasized the integration of additional
+remote sensing data types and modalities to further improve
+model performance. Osco et al. [161] used publicly available
+datasets of satellite images to test capabilities; such as edge
+detection, line detection, and image segmentation. They also
+investigated the applicability of Visual ChatGPT in processing
+remote sensing images. The research demonstrated potential
+for various image processing tasks and provided an easy
+interface for non-experts. Kuckreja et al. [163] developed
+“GeoChat” that excels in multitask conversational capabilities
+with high-resolution RS images. However, the model still had
+room for improvement in handling small objects and multiple
+object predictions. Zhang and Wang et al. [164] evaluated the
+performance of multiple VLMs in scene understanding, local-
+ization and counting, and change detection tasks using Earth
+Observation data. Guo et al. [165] developed LLM-powered
+system called “Remote Sensing GPT” that can understand user
+requests, plan remote sensing tasks, execute these tasks, and
+generate comprehensive responses to user-queries. This model
+automated the task planning process, reducing the need for
+human intervention and making remote sensing techniques
+accessible to non-experts. However, it was limited by the
+categories supported by existing remote sensing models.
+Zhan et al. [166] developed ”SkyEyeGPT” for various RS
+vision-language tasks, including image captioning, video cap-
+tioning, visual question answering (VQA), and visual ground-
+ing. Although the model showed promising results compared
+to other models like GPT-4V, it struggled in addressing modal-
+ity differences between satellite and aerial imagery to improve
+VQA task performance. Silva et al. [167] developed a VLM,
+named “RS-CapRet”, that can perform image captioning and
+text-image retrieval for remote sensing images. The model uti-
+lized recent advancements in transformer-based architectures
+and vision encoders, handled multi-modal inputs effectively,
+and could generate descriptions and retrieve images based on
+user queries. Pang et al. [168] developed a large-scale dataset
+of high-quality, detailed captions (HqDC-1.4M) for remote
+sensing images, comprising 1.4 million image-caption pairs.
+They proposed ”Helpful and Honest Remote Sensing Vi-
+sion Language Model” (H2RSVLM) based on this dataset.
+The model demonstrated exceptional performance on sev-
+eral public remote sensing datasets and can identify and
+decline to answer unanswerable questions, thereby effectively
+reducing the generation of incorrect responses. Muhtar et
+al. [169] proposed ”LLM-based Language Helps Remote Sens-
+ing (LHRS)”, which provides a comprehensive understanding
+of RS images and performs various tasks such as image
+classification, visual question answering (VQA), and visual
+grounding (i.e., locating specific objects within those images).
+A ”BB (BaBy)-GeoGTP”, a model with GIS-specific knowl-
+edge was introduced by Zhang et al. [170]. BB-GeoGPT was
+designed to answer professional geospatial questions using
+GIS-specific knowledge. This model can be used by GIS
+researchers to gain insights and perform various geospatial
+analyses. It approached the performance of commercially
+available LLMs like GPT-3.5-turbo in certain domains such
+as remote sensing and surveying. However, there is a need for
+more training data and higher-quality instruction tuning data
+for further enhancement. Zhang et al. [171] presented “Earth-
+GPT”, a model aimed at integrating a variety of tasks, such
+as scene classification, image captioning, region-level caption-
+ing, visual question answering (VQA), visual grounding, and
+object detection (both horizontal bounding box (HBB) and
+oriented bounding box (OBB)) on RS images. Additionally,
+researchers introduced a dataset named “MMRS-1M”, that
+included over 1 million image-text pairs derived from 34
+diverse RS datasets. This dataset featured multisensor images,
+including optical, synthetic aperture radar (SAR), and infrared.
+Earth-GPT demonstrated effective zero-shot reasoning and
+generalization to new, unseen tasks and integrated coarse-scale
+and fine-scale visual perception information effectively.
+To improve the quality of the dataset, Xu et al. [172]
+developed a high-quality, diverse, and unified multimodal
+instruction-following dataset called “RS-GPT4V” for remote
+sensing image (RSI) understanding, employing both GPT-4V
+and existing datasets. This wave of LLMs and the sudden
+surge in integrating LLMs and VLMs into remote sensing sig-
+nificantly enhanced data analysis, interpretation accuracy, and
+decision-making by automating complex tasks and identifying
+patterns. This synergy has the potential to drive innovation in
+environmental monitoring, disaster management, agriculture,
+and urban planning.
+
+
+--- Page 14 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+14
+2) LLMs for Multimodal Remote Sensing and Data Fusion
+in Agriculture: Various RS platforms, such as handheld de-
+vices, aircraft, and satellites, are utilized to collect data at
+varying spatial, temporal, and spectral resolutions for envi-
+ronmental monitoring in diverse industries, including oil and
+gas [173], municipal solid waste management [174], [175],
+and PA [176]. Unmanned aerial vehicles (UAVs) complement
+satellites by enhancing data spatial resolution and temporal
+frequency [177]. The optimal resolution of RS data for PA
+depends on several factors, including management objectives,
+crop types and growth stages, field size, and the capability
+of farm machinery to adjust inputs like fertilizers, pesticides,
+and irrigation [157]. Conventional RS platforms (e.g. airborne
+and satellites) have limitations in spatial, spectral, and tem-
+poral resolutions. While airborne systems offer higher-quality
+data, they are costly and impractical for frequent monitoring.
+In contrast, UAVs offer a cost-effective solution, enhancing
+geospatial data collection and advancing RS capabilities [178].
+Since 2014, 70% of agriculture-related articles have ref-
+erenced drones, highlighting the rapid integration of UAV
+technology into agricultural practices [179]. With these ad-
+vancements, UAV-based remote sensing (RS) has become a
+powerful tool for PA applications, including crop monitoring
+[180]–[182], weed control [183]–[185], pathogen detection
+[186]–[188], and soil health monitoring and management
+[189], [190]. These developments are not only transforming
+PA practices but also paving the way for integrating LLMs into
+agriculture by providing vast amounts of high-quality data that
+LLMs can leverage for enhanced analysis, decision-making,
+and predictive modeling. Thus, the synergy between UAVs
+and LLMs is significantly advancing agricultural efficiency
+and innovation.
+C. Commercialization of LLM by Private Companies in Agri-
+culture
+The rapid adoption of LLMs and AI in agriculture is
+transforming the industry, offering solutions to address the
+needs of a growing world population [193]. Various companies
+are developing AI chatbots, copilots, and specialized models to
+assist farmers, agronomists, and other stakeholders with a wide
+range of tasks, from crop management and decision-making
+to equipment maintenance and market analysis [193]–[196].
+Several companies are at the forefront of this technological
+revolution. Kragworks Ag Solutions (Washington, USA) is
+developing Harvest Engine® (Figure 7, which is being tested
+on orchard blocks operated by Northwest Farm Management
+(NWFM) [194]. Farmers Business Network (South Dakota,
+USA) has launched a chatbot called Norm for general agri-
+cultural queries, while AGvisorPRO has introduced LLM for
+equipment dealers [194], [195]. Bayer (Bayer AG, Leverkusen,
+Germany) and ITC have showcased their AI innovations, with
+Bayer’s Azure-based expert generative AI system and ITC’s
+Krishi Mitra app serving millions of farmers in India [193].
+Cropin Technology has been particularly active, launching
+’aks.ara’, the sector’s first purpose-built open-source Micro
+Language Model for climate-smart agriculture, and partnering
+with Google’s Gemini generative AI chatbot to create a
+TABLE IV: Applications of Large Language Models (LLMs)
+to acquire and analyze remotely sensed data.
+Reference
+LLM
+Model
+Used
+Main Findings, Contribution, and Impact
+[162]
+RSGPT
+(fine-
+tuned Instruct-
+BLIP)
+RSGPT significantly enhances remote sensing im-
+age captioning and visual question answering,
+demonstrating state-of-the-art performance and
+dataset creation impact.
+[161]
+Visual
+ChatGPT
+Visual ChatGPT shows potential in image process-
+ing tasks within remote sensing, requiring domain-
+specific adaptation for optimal performance.
+[163]
+GeoChat (fine-
+tuned LLaVA-
+1.5)
+GeoChat achieves strong zero-shot performance
+across multiple tasks, contributing to multitask
+conversational model advancements in remote
+sensing.
+[164]
+GPT-4V
+GPT-4V excels in high-level scene understanding
+but underperforms in object localization, high-
+lighting areas for improvement in Earth observa-
+tion tasks.
+[165]
+Remote
+sens-
+ing ChatGPT
+High accuracy in task automation with ChatGPT,
+though limited by model constraints, offers en-
+hanced accessibility for non-expert users in remote
+sensing.
+[166]
+SkyEyeGPT
+SkyEyeGPT achieves new state-of-the-art accu-
+racy across various remote sensing tasks, estab-
+lishing a robust model for diverse applications.
+[191]
+ChatGPT-4V
+ChatGPT-4V provides detailed global coverage
+and temporal diversity, significantly improving
+satellite imagery understanding and data interpre-
+tation.
+[167]
+RS-CapRet
+RS-CapRet sets a new standard in remote sensing
+image captioning and text-image retrieval, advanc-
+ing vision-language integration in the field.
+[168]
+H2RSVLM
+H2RSVLM enhances spatial perception and re-
+duces hallucinations, contributing to more accurate
+and reliable remote sensing tasks.
+[169]
+LHRS-Bot
+LHRS-Bot delivers state-of-the-art accuracy in re-
+mote sensing image understanding, bolstered by
+VGI and global imagery data.
+[170]
+BB-GeoGPT
+(adapted
+LLaMA-2-7B)
+BB-GeoGPT significantly improves GIS-specific
+task performance, contributing to the development
+of specialized geospatial language models.
+[171]
+EarthGPT
+EarthGPT excels in RS visual interpretation tasks,
+offering robust generalization and unifying various
+remote sensing interpretation methods.
+[172]
+RS-GPT4V
+RS-GPT4V improves image captioning, VQA, and
+visual grounding, supported by a diversified, high-
+quality multimodal dataset for remote sensing.
+[192]
+Various (e.g.,
+LLaVA-1.5,
+GeoChat)
+Comprehensive evaluation through high-quality,
+diverse annotations facilitates the advancement of
+vision-language models in remote sensing.
+tool that generates grid-based maps of agricultural land and
+provides localized insights [196], [197]. These AI-powered
+tools aim to provide quick, conversational access to infor-
+mation on diverse topics such as yield optimization, weather
+impacts, profitability, disease risks, labor needs, crop protec-
+tion, and harvest windows [193], [194], [196]. They leverage
+data from multiple sources, including extension newsletters,
+research papers, farm-specific records, equipment manuals,
+and specialized datasets [193]–[197]. The potential benefits
+of LLMs in agriculture are significant, including increased
+efficiency, improved decision-making, and enhanced sustain-
+ability. However, challenges remain, including concerns about
+occasional incorrect information or ”hallucinated” responses
+by AI systems [194].
+Researchers and developers are expanding these models
+to cover more comprehensive agronomic recommendations,
+incorporating data on crop health, weather forecasts, irrigation,
+and even generating detailed agricultural land maps [193],
+[196], [197]. The growth of AI in agriculture is driving a
+technology market predicted to reach USD13.8 billion by 2031
+
+
+--- Page 15 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+15
+Fig. 7: Harvest Engine® (a packhouse management software
+based on Large Language Model) developed by Kragworks Ag
+Solution (Yakima, WA) [198]. This Large Language Model
+(LLM)-based platform integrates diverse agricultural data to
+provide real-time, conversational insights.
+[193]. While industry experts are optimistic about the potential
+of LLMs in agriculture, they emphasize the importance of a
+balanced approach, seeing the technology as a powerful tool
+to augment human expertise rather than replace it [194], [196].
+The development of specialized, open-source models like
+aks.ara and partnerships with advanced AI systems represent
+significant steps towards improving access to AI in agriculture
+for farming communities all over the Global including those
+in Global South [194], [196], [197].
+IV. DISCUSSION ON RESEARCH QUESTIONS
+RQ1: Which sources and types of data are used to
+train LLMs for agricultural applications, and how are
+they integrated? Large Language Models (LLMs) for agricul-
+tural applications are trained on diverse and domain-specific
+datasets. For instance, genomic data from 48 plant species
+were utilized to train LLMs for genomic predictions [199],
+while agricultural literature and FoodOn ontology were inte-
+grated for food-nutrition matching tasks [108]. Additionally,
+GPT-4 has been integrated with YOLOPC models to enhance
+disease diagnostics by utilizing real-time sensor data and
+market trends [102], [111]. Custom agricultural corpora, such
+as those containing 30,000 sentences, have been employed to
+improve named entity recognition (NER) models [109]. These
+diverse data sources, including genomic datasets, sensor data,
+and agricultural literature, form the foundation for training
+LLMs, ensuring they are contextually aware and tailored to
+specific agricultural needs. RQ2: What evaluation metrics
+are utilized to assess the performance of LLM tasks in
+agriculture? Evaluating the performance of LLMs in agricul-
+tural applications involves various metrics tailored to specific
+tasks. For example, the precision, recall, and F1-score metrics
+were used to assess the performance of transformer-based deep
+learning models for agricultural entity extraction [200]. In
+genomic predictions, the accuracy of predictions was evaluated
+using the Area Under the Receiver Operating Characteristic
+(AUROC) curve, which measures the ability of the model to
+distinguish between classes, and the Area Under the Precision-
+Recall Curve (AUPRC), which assesses the model’s precision
+and recall capabilities [199]. The effectiveness of sentiment
+analysis models employed for evaluating smart farming tech-
+nologies, such as generative pre-trained transformer 2 (GPT-
+2) and domain-specific BERT, was quantified using metrics
+such as the macro-F1-score and accuracy, which assess overall
+classification performance across various sentiment categories
+[107]. Additionally, the effectiveness of NLP systems for
+climate adaptation in agriculture was evaluated using domain-
+specific criteria in a user study, demonstrating moderate agree-
+ment among experts [130]. These metrics ensure that LLMs
+are rigorously tested and validated across diverse agricultural
+applications.
+RQ3: What prompt engineering techniques are applied
+to improve the performance of LLMs in agriculture?
+Prompt engineering plays a crucial role in enhancing the
+performance of LLMs in agricultural applications. Techniques
+such as task-specific prompting and optimized answer align-
+ment have been used to improve semantic understanding and
+reasoning accuracy in agricultural text classification [100].
+Custom prompts were also developed to enhance injury
+surveillance reports, streamlining the data extraction process
+[113]. Additionally, few-shot prompting was employed for
+fine-tuning Multilingual BERT, enabling it to adapt to diverse
+agricultural datasets with minimal training [201]. In another
+approach, task-specific prompts were tailored to capture sen-
+timent patterns in agricultural product news, significantly
+improving the accuracy of sentiment analysis [114]. These
+techniques underscore the importance of prompt engineering
+in maximizing the efficacy of LLMs in various agricultural
+contexts.
+RQ4: Which optimization strategies are applied in
+agriculture to improve the efficiency and effectiveness of
+LLMs? Optimization strategies are essential for enhancing
+the efficiency and effectiveness of LLMs in agriculture. Tech-
+niques such as parameter-efficient fine-tuning using IA3 have
+been applied in plant genomics, enabling broader genomic
+predictions with minimal computational resources [199]. In
+another study, a mask-based self-attention mechanism was uti-
+lized to enhance global context understanding in sequence-to-
+sequence learning for natural language interfaces in agriculture
+[106]. Additionally, real-time monitoring and collaborative
+dataset expansion were implemented to ensure system adapt-
+ability in diverse agricultural settings, particularly in coffee
+leaf disease remediation [26]. The use of transformer-based
+deep learning models with Conditional Random Field (CRF)
+for entity extraction has also shown improved performance
+in agricultural tasks such as identifying crop types, disease
+names, and agricultural chemicals [200]. These strategies
+highlight the ongoing efforts to optimize LLMs for more
+efficient and effective agricultural applications.
+RQ5: What are the challenges and limitations of using
+LLMs in agriculture? The deployment of LLMs in agri-
+culture faces several challenges and limitations. One signif-
+icant challenge is the scarcity of high-quality, domain-specific
+
+
+--- Page 16 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+16
+training datasets, which affects the accuracy and reliability
+of LLMs [106], [201]. Additionally, LLMs often encounter
+difficulties in handling diverse and unstructured agricultural
+data, such as injury surveillance reports or regional-specific
+adaptation advice for climate resilience [130], [202]. Ethical
+concerns, such as bias and intellectual property issues, also
+pose limitations in the use of LLMs for agricultural safety
+and health [203]. Furthermore, the high computational cost
+and environmental impact of training large models, along with
+challenges in real-time deployment on mobile devices, remain
+critical barriers to their widespread adoption in agriculture
+[204]. Addressing these challenges is crucial for the continued
+advancement of LLMs in the agricultural sector.
+RQ6: What are the benefits of using LLMs instead of
+traditional ML and DL methods in agriculture? LLMs
+offer significant advantages over traditional machine learning
+(ML) and deep learning (DL) methods in agriculture. One of
+the key benefits is their ability to handle complex, context-
+dependent tasks, such as semantic matching in food-nutrition
+tasks or real-time decision-making in precision farming [108],
+[111]. LLMs also provide more accurate and context-aware
+solutions for tasks like agricultural entity extraction, where
+traditional models might struggle with domain-specific ter-
+minology [200]. Additionally, LLMs can leverage zero-shot
+learning capabilities, enabling them to perform well on tasks
+with limited labeled data, which is often a challenge in
+agricultural applications [199]. The integration of LLMs with
+other technologies, such as GPT-4 with YOLOPC for di-
+agnostics, further enhances their utility by reducing model
+parameters while improving diagnostic accuracy [102]. Fur-
+thermore, LLMs are adept at processing multimodal inputs,
+integrating data from diverse sources like satellite images,
+sensor data, and textual information, which greatly enhances
+the accuracy of predictions and insights in agriculture. This
+ability to synthesize information from multiple modalities
+allows for more robust and comprehensive decision-support
+systems. By harnessing these capabilities, LLMs can provide
+nuanced understandings of agricultural environments, aiding
+in more precise and informed agricultural practices
+RQ7: How do LLMs compare with ML and DL-
+based approaches in their applications in agriculture?
+LLMs have consistently outperformed traditional ML and DL-
+based approaches across various agricultural applications. For
+instance, the domain-specific pre-trained Agricultural BERT
+model achieved higher macro-F1-score and accuracy in text
+classification tasks compared to other transformer models
+[107]. Similarly, LLMs demonstrated superior performance
+in NER tasks for agricultural data, with models like GPT-4
+and Multilingual BERT leading in accuracy and adaptability
+[201]. In another study, LLMs outperformed traditional mod-
+els in sentiment analysis of soybean-related news, achieving
+high accuracy in predicting sentiment trends [114]. Moreover,
+LLMs have shown greater efficiency in real-time agricul-
+tural information diagnostics, significantly improving accuracy
+with reduced computational resources [102]. These examples
+highlight the effectiveness of LLMs in surpassing traditional
+methods, making them invaluable tools in modern agricultural
+research and applications.
+Refer to Table V for a detailed correlation between research
+questions and peer-reviewed journal publications.
+V. MAJOR CHALLENGES AND LIMITATIONS
+The implementation of LLMs in agriculture offers consider-
+able potential but also faces a range of substantial challenges
+and limitations. These limitations can be categorized, roughly,
+into three primary areas: Data Quality Challenges, Data
+Availability Challenges, and Other Challenges. These sectors
+encompass a variety of obstacles that must be strategically
+overcome to fully harness the potential of LLMs within the
+agricultural context. A critical issue is the scarcity of domain-
+specific, high-quality training data, such as gold standard cor-
+pora, which significantly hampers the accuracy and reliability
+of LLMs in real-world agricultural settings. Often, studies like
+those focusing on agricultural term extraction or multilingual
+text classification rely on silver standard corpora or limited
+datasets, leading to potential biases and substantial gaps in
+model performance [100], [205]. Moreover, LLMs frequently
+struggle to handle the diverse and constantly evolving agri-
+cultural terminologies, including synonyms, novel terms, and
+context-specific jargon [205]. The complexity of agricultural
+data, which spans textual reports to sensor data, requires robust
+NLP models capable of interpreting rich contextual informa-
+tion, a task that remains challenging [111], [113]. Additionally,
+the high computational costs associated with training and fine-
+tuning these models, combined with limited digital literacy
+among end-users, particularly in rural areas, pose significant
+barriers to the widespread adoption of LLM-based solutions in
+agriculture [111]. Recent research has aimed to enhance the ca-
+pabilities of LLMs in agriculture by tackling core challenges.
+Studies have focused on semantic understanding in multi-
+lingual contexts and genomic data prediction [100], [199].
+Additionally, specialized fine-tuning strategies for agricultural
+term extraction have made significant strides in addressing the
+limitations of LLMs across diverse agricultural tasks [205].
+These efforts are systematically detailed in Table ??, which
+maps the specific research questions to their corresponding
+challenges and studies, providing a comprehensive overview
+of current advancements and ongoing research efforts.
+A. Data Quality Challenge
+The efficacy of LLMs in agriculture heavily depends on
+the quality of data they process. Challenges in this category
+include:
+Inconsistent Data Formats: Agricultural data comes from
+diverse sources like weather stations, satellite imagery, IoT
+sensors, and manual logs, each using different formats and
+standards. This heterogeneity in the data formats causes in-
+tegration and processing challenges, making it difficult for
+LLMs to synthesize information effectively [111].
+Incomplete Data: Many agricultural datasets are incom-
+plete, missing crucial information such as crop yields, nutrition
+status or pest prevalence. This lack of comprehensive data
+leads to gaps in the models’ knowledge, resulting in outputs
+that might be imprecise, inaccurate or misleading [113].
+
+
+--- Page 17 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+17
+Efforts to enhance data quality involve standardizing data
+collection protocols, improving data integration through ad-
+vanced fusion techniques, and rigorous validation and cleaning
+to ensure accuracy and consistency. Collaborative efforts from
+across the agricultural and tech communities are essential to
+these endeavors [111], [113].
+Improving data quality for LLMs in agriculture involves
+several critical strategies. First, Standardization Efforts focus
+on creating uniform data collection protocols and formats to
+ensure consistency and ease data integration. This requires the
+joint efforts of researchers, farmers, and technology develop-
+ers. Data Enrichment methods, such as interpolation and fu-
+sion, address data gaps and improve completeness by merging
+information from various sources and including historical or
+global datasets. Validation and cleaning are vital for ensuring
+accuracy, utilizing both automated tools and manual reviews
+to identify and correct errors. Finally, ”Crowdsourcing” and
+”Collaboration” with local communities and experts can pro-
+vide real-time data and refine data collection processes. These
+approaches collectively enhance data quality, allowing LLMs
+to offer more precise and actionable insights for agriculture.
+B. Data Availability Challenge
+LLMs require extensive, well-curated datasets to function
+optimally, yet such data are often scarce in the agricultural
+sector. The main issues include:
+Geographical Variability: Agricultural data is highly vari-
+able, and region- and crop-specific, making it difficult to gather
+comprehensive datasets that are representative of different
+agricultural practices and conditions [206].
+Fragmented Data Sources: Data collection in agriculture is
+often localized and fragmented, lacking the cohesion necessary
+for effective LLM training. This is compounded by the lack of
+standardized data collection methods across different regions
+[21].
+Addressing data availability challenges involves enhancing
+the infrastructure for data collection, such as deploying IoT
+devices and utilizing remote sensing technologies to gather
+consistent and continuous data streams across diverse agricul-
+tural settings [207]. Crowdsourcing and collaboration is vital
+to address this challenge as well.
+C. Other Challenges
+Beyond data-related issues, several other challenges impede
+the adoption and effectiveness of LLMs in agriculture:
+High Computational Costs: The training and deployment
+of LLMs require substantial computational resources, which
+can be a barrier, particularly in developing regions with limited
+access to such technologies [205].
+Adaptation to Evolving Agricultural Practices: Agricul-
+ture is a rapidly evolving field, and LLMs must continuously
+adapt to new terms, practices, and conditions to remain rele-
+vant and effective [199].
+Integration Challenges: Incorporating LLMs into existing
+agricultural systems poses significant technical challenges and
+requires careful consideration of both technological and human
+factors [100]. Educating farmers and other stakeholders includ-
+ing demonstration of the economic impact of adopting these
+technologies is crucial for wider adoption of the technologies
+in subsistence and commercial farming.
+Displacement of Agricultural Workforce: As LLMs be-
+come more capable of performing complex tasks, such as
+crop monitoring, disease diagnosis, and precision farming, the
+demand for human labor in these areas may decrease [106],
+[118], [147]. This technological advancement may lead to
+the displacement of the agricultural workforce, particularly
+in roles traditionally reliant on manual labor and decision-
+making [23], [102], [109]. This displacement raises important
+questions about the socio-economic impact on rural com-
+munities and the need for strategies to retrain and upskill
+the agricultural workforce [109], [110], [118]. Addressing
+these concerns involves balancing the benefits of LLM-driven
+automation with the potential consequences for employment,
+ensuring that technological progress does not exacerbate social
+inequalities.
+Personal Agronomic Data Security and Proliferation of
+Agronomic Misinformation: The use of AI solutions like
+LLMs in agriculture presents notable challenges, particularly
+in securing personal agronomic data and controlling the spread
+of misinformation. LLMs handle extensive datasets that can
+include sensitive information such as crop yields, soil health,
+and farming methods. It is critical to secure these datasets to
+prevent unauthorized access and data misuse [208]. Further-
+more, LLMs have the potential to generate and disseminate
+misleading agricultural advice, adversely affecting farming
+decisions and outcomes [209]. An example of this can be
+seen in the repercussions of Sri Lanka’s transition to organic
+farming, where misguided policy decisions, potentially exacer-
+bated by erroneous AI outputs, severely impacted agricultural
+productivity and food security [210]. Ensuring the accuracy
+and reliability of LLM-based recommendations, coupled with
+robust data security measures, is crucial to mitigate these risks
+and safeguard the integrity of agricultural decision-making
+processes.
+VI. CONCLUSION AND FUTURE ROAD-MAP OF LLMS IN
+AGRICULTURE
+It is expected that the future of LLMs in agriculture
+will be marked by advancements in several critical domains.
+For instance, integration of IoT and sensor data will enable
+precise data collection, foundational for advanced predictive
+analytics aimed at enhancing crop yield forecasts and opera-
+tional efficiency. Automated crop management systems will
+revolutionize traditional farming techniques, while tailored
+agricultural advice and input recommendation will be cus-
+tomized to individual farmer needs reaching to individual
+plant level. AI-driven technologies will improve pest and
+disease detection, offering early interventions to minimize the
+loss while ensuring effective, integrated pest management.
+Furthermore, optimization of the agricultural supply chain will
+streamline operations from farm to market. Lastly, real-time
+decision support systems will facilitate informed decision-
+making, leveraging comprehensive data analysis facilitated by
+LLMs.
+
+
+--- Page 18 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+18
+UAV-based Data 
+Collection
+Data 
+Collection
+Image pre-processing and 
+processing
+Large Language 
+Model(LLM)/ Vision 
+Language Model(VLM) 
+training
+LLM/VLM-based 
+Situation. 
+Awareness 
+Response
+Testing 
+Image
+Data Processing
+           &
+Model Training
+Model Testing
+Model 
+Response
+UAV-based RS Data 
+Collection 
+Satellite-based RS 
+Data Collection 
+Globally 
+Scanned 
+RS Data
+Locally 
+Scanned 
+RS Data
+Synergic
+Agriculture
+LLM Model
+Satellite-UAV Synergy 
+Global-to-Local Refined Agriculture Monitoring
+User
+Prompt
+(b)
+(c)
+(a)
+IOT and 
+Sensor 
+Data 
+Integration 
+Advanced 
+Predictive 
+Crop 
+Analytics 
+Automated 
+Crop 
+Management 
+Systems
+Tailored 
+Agricultural 
+Advice
+AI-driven 
+Pest and 
+Disease 
+Detection
+Agricultural 
+Supply Chain 
+Optimization
+Real-Time 
+Decision 
+Support 
+System
+Fig. 8:
+(a)Future roadmap of multi-modal LLMs in Agriculture (b)LLM/VLM-based situation awareness response
+in an agriculture field on a UAV-based refined image ; (c) work flow of satellite-UAV synergy application for the
+development of multi-scale LLM/VLM-based agricultural monitoring
+As LLMs are integrated with general or proximal sensing,
+and remote sensing in agriculture, they bring unique abilities
+that enhance the analysis and use of vast agricultural data more
+effectively.
+A. General or Proximal Sensing Integration
+LLMs-enabled proximal sensing will transform localized
+agricultural practices by enabling more precise monitoring and
+management directly at the crop or plant level. This integration
+allows for real-time analysis of soil health, moisture levels, and
+crop vitality through sensors deployed in the field. By process-
+ing this data, LLMs can predict optimal planting times, cus-
+tomize fertilizer applications, and manage irrigation systems
+with unprecedented accuracy. For instance, by interpreting data
+from soil sensors, LLMs can advise on the specific nutrients
+required for different crop sections, optimizing growth condi-
+tions and maximizing yield [211]. Additionally, these models
+can enhance pest management strategies by analyzing images
+from proximal sensors to detect early signs of infestation,
+providing farmers with timely intervention methods [212].
+B. Remote Sensing Integration
+Conversely, the integration of LLMs with remote sensing
+technologies, such as UAVs equipped with high-resolution
+sensors, extends the reach of PA to wider scales. These
+advanced aerial platforms can capture detailed imagery of
+vast farming areas, assessing plant health, detecting disease
+outbreaks, and monitoring environmental impacts across dif-
+ferent terrains [213]. When combined with the analytical
+capabilities of LLMs and Vision Language Models (VLMs),
+the data harvested from remote sensing can be deeply analyzed
+to provide comprehensive insights into crop status, growth
+patterns, and potential stress factors. The synergy between
+UAV technology and LLMs will not only streamline crop
+surveillance and management but also empower farmers with
+actionable, real-time data to make informed decisions on a
+larger scale [214].
+The integration of LLMs into agriculture represents a
+paradigm shift in the way agricultural processes are managed
+and optimized. Our comprehensive survey has delved into
+various applications of LLMs, including crop production, pest
+and disease detection, and remote sensing, demonstrating their
+profound impact on enhancing efficiency, sustainability, and
+productivity in the agricultural sector.
+One of the key findings of our survey is the ability of
+LLMs to process and analyze vast amounts of agricultural data.
+For instance, LLMs have shown remarkable effectiveness in
+crop management by predicting optimal planting schedules,
+identifying nutrient deficiencies, and recommending precise
+irrigation strategies. In pest and disease detection, models
+like GPT-4 combined with CNNs have significantly improved
+
+
+--- Page 19 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+19
+diagnostic accuracy while reducing computational complexity.
+Moreover, the adaptability of LLMs to handle diverse data
+types—ranging from textual descriptions to sensor data—has
+facilitated the development of more accurate and context-
+aware decision support systems. These systems not only assist
+farmers in real-time problem-solving but also enhance the re-
+sponsiveness of the agricultural supply chain, leading to better
+management of resources and improved market outcomes.
+Despite these advancements, our survey also identifies sev-
+eral challenges that need to be addressed to fully realize the
+potential of LLMs in agriculture. Data quality and availability
+remain critical issues, as agricultural data is often sparse,
+heterogeneous, and context-specific. Ensuring the reliability
+and accuracy of the data used to train LLMs is paramount.
+Additionally, the interpretability of LLM outputs poses a
+significant challenge, as farmers and other stakeholders need to
+understand and trust the recommendations provided by these
+models.
+Ethical considerations and sustainability are also crucial
+aspects that require attention. The deployment of LLMs in
+agriculture must be guided by principles that ensure fair
+access, protect privacy, and promote environmental sustain-
+ability. Addressing these ethical concerns will be essential to
+gain widespread acceptance and to harness the full benefits of
+these technologies.
+The future roadmap for LLMs in agriculture is expected
+to revolve around developing specialized, robust models adept
+at handling multimodal data and providing real-time insights,
+crucial for integrating LLMs effectively within existing agri-
+cultural frameworks [215]. Increasing transparency and inter-
+pretability is essential to build user trust and facilitate adoption
+in decision-making. Moreover, the establishment of thorough
+regulatory frameworks is imperative. These frameworks, cre-
+ated through collaboration among researchers, industry stake-
+holders, and policymakers, will ensure the ethical use of LLMs
+and address intellectual property concerns [216]. Proactive
+policy development is vital to manage LLMs’ impacts on
+agriculture, aiming to enhance food system resilience and pre-
+vent data exploitation. Ultimately, such strategic foresight will
+enable the agricultural sector to leverage LLMs responsibly,
+ensuring that their integration supports both innovation and
+the equitable distribution of benefits.
+Authors’ Contribution: Ranjan Sapkota led research de-
+sign, analysis, and manuscript drafting. Rizwan Qureshi, Syed
+Zohaib Hassan, John Shutske, Maged Shoman, Muhammad
+Sajjad, Fayaz Ali Dharejo, Achyut Paudel, Jiajia Li, Zhichao
+Meng, Ferhat Sadak, and Muhammad Usman Hadi refined
+methods and reviewed critically. Manoj Karkee facilitated
+funding and manuscript drafting/edit. Supported by NSF and
+USDA under the ’AI Institute for Agriculture’ program, Award
+AWD003473.
+REFERENCES
+[1] P. M. Nadkarni, L. Ohno-Machado, and W. W. Chapman, “Natural lan-
+guage processing: an introduction,” Journal of the American Medical
+Informatics Association, vol. 18, no. 5, pp. 544–551, 2011.
+[2] K. Chowdhary and K. Chowdhary, “Natural language processing,”
+Fundamentals of artificial intelligence, pp. 603–649, 2020.
+[3] T. Iqbal and S. Qureshi, “The survey: Text generation models in deep
+learning,” Journal of King Saud University-Computer and Information
+Sciences, vol. 34, no. 6, pp. 2515–2528, 2022.
+[4] W. Medhat, A. Hassan, and H. Korashy, “Sentiment analysis algorithms
+and applications: A survey,” Ain Shams engineering journal, vol. 5,
+no. 4, pp. 1093–1113, 2014.
+[5] R. Dabre, C. Chu, and A. Kunchukuttan, “A survey of multilingual
+neural machine translation,” ACM Computing Surveys (CSUR), vol. 53,
+no. 5, pp. 1–38, 2020.
+[6] N. Karanikolas, E. Manga, N. Samaridi, E. Tousidou, and M. Vassi-
+lakopoulos, “Large language models versus natural language under-
+standing and generation,” in Proceedings of the 27th Pan-Hellenic
+Conference on Progress in Computing and Informatics, pp. 278–290,
+2023.
+[7] M. U. Hadi, R. Qureshi, A. Shah, M. Irfan, A. Zafar, M. B. Shaikh,
+N. Akhtar, J. Wu, S. Mirjalili, et al., “A survey on large language
+models: Applications, challenges, limitations, and practical usage,”
+Authorea Preprints, 2023.
+[8] R. C. Moore and W. Lewis, “Intelligent selection of language model
+training data,” in Proceedings of the ACL 2010 conference short papers,
+pp. 220–224, 2010.
+[9] D. Saha, S. Tarek, K. Yahyaei, S. K. Saha, J. Zhou, M. Tehranipoor,
+and F. Farahmandi, “Llm for soc security: A paradigm shift,” IEEE
+Access, 2024.
+[10] M. Cascella, J. Montomoli, V. Bellini, and E. Bignami, “Evaluating the
+feasibility of chatgpt in healthcare: an analysis of multiple clinical and
+research scenarios,” Journal of medical systems, vol. 47, no. 1, p. 33,
+2023.
+[11] J. Wang, Z. Wu, Y. Li, H. Jiang, P. Shu, E. Shi, H. Hu, C. Ma, Y. Liu,
+X. Wang, et al., “Large language models for robotics: Opportunities,
+challenges, and perspectives,” arXiv preprint arXiv:2401.04334, 2024.
+[12] M. Murtaza, C.-T. Cheng, M. Fard, and J. Zeleznikow, “Transforming
+driver education: A comparative analysis of llm-augmented training
+and conventional instruction for autonomous vehicle technologies,”
+International Journal of Artificial Intelligence in Education, pp. 1–38,
+2024.
+[13] I. de Zarz`a, J. de Curt`o, G. Roig, and C. T. Calafate, “Llm multimodal
+traffic accident forecasting,” Sensors, vol. 23, no. 22, p. 9225, 2023.
+[14] Y. Yao, J. Duan, K. Xu, Y. Cai, Z. Sun, and Y. Zhang, “A survey on
+large language model (llm) security and privacy: The good, the bad,
+and the ugly,” High-Confidence Computing, p. 100211, 2024.
+[15] M. A. K. Raiaan, M. S. H. Mukta, K. Fatema, N. M. Fahad, S. Sakib,
+M. M. J. Mim, J. Ahmad, M. E. Ali, and S. Azam, “A review on large
+language models: Architectures, applications, taxonomies, open issues
+and challenges,” IEEE Access, 2024.
+[16] A. Kamilaris and F. X. Prenafeta-Bold´u, “Deep learning in agriculture:
+A survey,” Computers and electronics in agriculture, vol. 147, pp. 70–
+90, 2018.
+[17] A. Tzachor, M. Devare, C. Richards, P. Pypers, A. Ghosh, J. Koo,
+S. Johal, and B. King, “Large language models and agricultural
+extension services,” Nature food, vol. 4, no. 11, pp. 941–948, 2023.
+[18] T. Brown, B. Mann, N. Ryder, M. Subbiah, J. D. Kaplan, P. Dhariwal,
+A. Neelakantan, P. Shyam, G. Sastry, A. Askell, et al., “Language mod-
+els are few-shot learners,” Advances in neural information processing
+systems, vol. 33, pp. 1877–1901, 2020.
+[19] A. J. Thirunavukarasu, D. S. J. Ting, K. Elangovan, L. Gutierrez, T. F.
+Tan, and D. S. W. Ting, “Large language models in medicine,” Nature
+medicine, vol. 29, no. 8, pp. 1930–1940, 2023.
+[20] X. Zhou, X. Zhao, and G. Li, “Llm-enhanced data management,” arXiv
+preprint arXiv:2402.02643, 2024.
+[21] R. Szil´agyi and M. T´oth, “Use of llm for smes, opportunities and
+challenges,” Journal of Agricultural Informatics, vol. 14, no. 2, 2023.
+[22] S.
+Stoyanov,
+M.
+Kumurdjieva,
+V.
+Tabakova-Komsalova,
+and
+L. Doukovska, “Using llms in cyber-physical systems for agriculture-
+zemela,” in 2023 International Conference on Big Data, Knowledge
+and Control Systems Engineering (BdKCSE), pp. 1–6, IEEE, 2023.
+[23] R. Peng, K. Liu, P. Yang, Z. Yuan, and S. Li, “Embedding-based
+retrieval with llm for effective agriculture information extracting from
+unstructured data,” arXiv preprint arXiv:2308.03107, 2023.
+[24] H. Zhu, S. Qin, M. Su, C. Lin, A. Li, and J. Gao, “Harnessing large
+vision and language models in agriculture: A review,” arXiv preprint
+arXiv:2407.19679, 2024.
+[25] X. Wang, H. Kim, S. Rahman, K. Mitra, and Z. Miao, “Human-llm
+collaborative annotation through effective verification of llm labels,” in
+Proceedings of the CHI Conference on Human Factors in Computing
+Systems, pp. 1–21, 2024.
+
+
+--- Page 20 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+20
+[26] S. S. Kumar, A. K. M. A. Khan, I. A. Banday, M. Gada, and V. V.
+Shanbhag, “Overcoming llm challenges using rag-driven precision in
+coffee leaf disease remediation,” in 2024 International Conference
+on Emerging Technologies in Computer Science for Interdisciplinary
+Applications (ICETCS), pp. 1–6, IEEE, 2024.
+[27] C. Wang, M. Li, and A. J. Smola, “Language models with transform-
+ers,” arXiv preprint arXiv:1904.09408, 2019.
+[28] B. Min, H. Ross, E. Sulem, A. P. B. Veyseh, T. H. Nguyen, O. Sainz,
+E. Agirre, I. Heintz, and D. Roth, “Recent advances in natural language
+processing via large pre-trained language models: A survey,” ACM
+Computing Surveys, vol. 56, no. 2, pp. 1–40, 2023.
+[29] A. Pauls and D. Klein, “Faster and smaller n-gram language models,”
+in Proceedings of the 49th annual meeting of the Association for
+Computational Linguistics: Human Language Technologies, pp. 258–
+267, 2011.
+[30] J. Zhang, C. Wang, A. Muthu, and V. Varatharaju, “Computer multi-
+media assisted language and literature teaching using heuristic hidden
+markov model and statistical language model,” Computers & Electrical
+Engineering, vol. 98, p. 107715, 2022.
+[31] R. Rosenfeld, “A whole sentence maximum entropy language model,”
+in 1997 IEEE workshop on automatic speech recognition and under-
+standing proceedings, pp. 230–237, IEEE, 1997.
+[32] K. Yao, B. Peng, G. Zweig, D. Yu, X. Li, and F. Gao, “Recurrent
+conditional random field for language understanding,” in 2014 IEEE
+International Conference on Acoustics, Speech and Signal Processing
+(ICASSP), pp. 4077–4081, IEEE, 2014.
+[33] H.-B. Jeon and S.-Y. Lee, “Language model adaptation based on topic
+probability of latent dirichlet allocation,” ETRI Journal, vol. 38, no. 3,
+pp. 487–493, 2016.
+[34] R. Patil and V. Gudivada, “A review of current trends, techniques, and
+challenges in large language models (llms),” Applied Sciences, vol. 14,
+no. 5, p. 2074, 2024.
+[35] N. Ding, Y. Qin, G. Yang, F. Wei, Z. Yang, Y. Su, S. Hu, Y. Chen, C.-M.
+Chan, W. Chen, et al., “Parameter-efficient fine-tuning of large-scale
+pre-trained language models,” Nature Machine Intelligence, vol. 5,
+no. 3, pp. 220–235, 2023.
+[36] Z. Chen, H. Mao, H. Li, W. Jin, H. Wen, X. Wei, S. Wang, D. Yin,
+W. Fan, H. Liu, et al., “Exploring the potential of large language models
+(llms) in learning on graphs,” ACM SIGKDD Explorations Newsletter,
+vol. 25, no. 2, pp. 42–61, 2024.
+[37] A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N.
+Gomez, Ł. Kaiser, and I. Polosukhin, “Attention is all you need,”
+Advances in neural information processing systems, vol. 30, 2017.
+[38] A. Radford, J. Wu, R. Child, D. Luan, D. Amodei, I. Sutskever, et al.,
+“Language models are unsupervised multitask learners,” OpenAI blog,
+vol. 1, no. 8, p. 9, 2019.
+[39] S. Hochreiter and J. Schmidhuber, “Long short-term memory,” Neural
+computation, vol. 9, no. 8, pp. 1735–1780, 1997.
+[40] J. Devlin, M.-W. Chang, K. Lee, and K. Toutanova, “Bert: Pre-training
+of deep bidirectional transformers for language understanding,” arXiv
+preprint arXiv:1810.04805, 2018.
+[41] M. Shoeybi, M. Patwary, R. Puri, P. LeGresley, J. Casper, and B. Catan-
+zaro, “Megatron-lm: Training multi-billion parameter language models
+using model parallelism,” arXiv preprint arXiv:1909.08053, 2019.
+[42] P. Lee, C. Goldberg, and I. Kohane, The AI revolution in medicine:
+GPT-4 and beyond. Pearson, 2023.
+[43] Y. Li, S. Wang, H. Ding, and H. Chen, “Large language models in
+finance: A survey,” in Proceedings of the fourth ACM international
+conference on AI in finance, pp. 374–382, 2023.
+[44] S. Grassini, “Shaping the future of education: exploring the potential
+and consequences of ai and chatgpt in educational settings,” Education
+Sciences, vol. 13, no. 7, p. 692, 2023.
+[45] H. Fan, H. Zhou, G. Huang, P. Raman, X. Fu, G. Gupta, D. Ram,
+Y. Wang, and J. Huan, “Hlat: High-quality large language model pre-
+trained on aws trainium,” arXiv preprint arXiv:2404.10630, 2024.
+[46] Z. Zhang, A. Zhang, M. Li, H. Zhao, G. Karypis, and A. Smola,
+“Multimodal chain-of-thought reasoning in language models,” arXiv
+preprint arXiv:2302.00923, 2023.
+[47] S. Soltan, S. Ananthakrishnan, J. FitzGerald, R. Gupta, W. Hamza,
+H. Khan, C. Peris, S. Rawls, A. Rosenbaum, A. Rumshisky, et al.,
+“Alexatm 20b: Few-shot learning using a large-scale multilingual
+seq2seq model,” arXiv preprint arXiv:2208.01448, 2022.
+[48] OpenAI, “Improving language understanding with unsupervised learn-
+ing.” https://openai.com/index/language-unsupervised/, 2018.
+[Ac-
+cessed 06-07-2024].
+[49] OpenAI, “Better language models and their implications.” https://
+openai.com/index/better-language-models/, 2019.
+[Accessed 06-07-
+2024].
+[50] J. Achiam, S. Adler, S. Agarwal, L. Ahmad, I. Akkaya, F. L. Aleman,
+D. Almeida, J. Altenschmidt, S. Altman, S. Anadkat, et al., “Gpt-4
+technical report,” arXiv preprint arXiv:2303.08774, 2023.
+[51] OPenAI,
+“Hello
+GPT-4o.”
+https://openai.com/index/hello-gpt-4o/,
+2024. [Accessed 03-07-2024].
+[52] N. McAleese, R. M. Pokorny, J. F. C. Uribe, E. Nitishinskaya,
+M. Trebacz, and J. Leike, “Llm critics help catch llm bugs,” arXiv
+preprint arXiv:2407.00215, 2024.
+[53] C. Team, “Chameleon: Mixed-modal early-fusion foundation models,”
+arXiv preprint arXiv:2405.09818, 2024.
+[54] meta, “Introducing meta llama 3: The most capable openly available
+llm to date.” https://ai.meta.com/blog/meta-llama-3/, 2024. [Accessed
+11-07-2024].
+[55] W. Xiong, J. Liu, I. Molybog, H. Zhang, P. Bhargava, R. Hou,
+L. Martin, R. Rungta, K. A. Sankararaman, B. Oguz, et al., “Ef-
+fective long-context scaling of foundation models,” arXiv preprint
+arXiv:2309.16039, 2023.
+[56] C. Zhou, P. Liu, P. Xu, S. Iyer, J. Sun, Y. Mao, X. Ma, A. Efrat, P. Yu,
+L. Yu, et al., “Lima: Less is more for alignment,” Advances in Neural
+Information Processing Systems, vol. 36, 2024.
+[57] S. Iyer, X. V. Lin, R. Pasunuru, T. Mihaylov, D. Simig, P. Yu, K. Shus-
+ter, T. Wang, Q. Liu, P. S. Koura, et al., “Opt-iml: Scaling language
+model instruction meta learning through the lens of generalization,”
+arXiv preprint arXiv:2212.12017, 2022.
+[58] J. Xu, D. Ju, J. Lane, M. Komeili, E. M. Smith, M. Ung, M. Behrooz,
+W. Ngan, R. Moritz, S. Sukhbaatar, et al., “Improving open lan-
+guage models by learning from organic interactions,” arXiv preprint
+arXiv:2306.04707, 2023.
+[59] G. Izacard, P. Lewis, M. Lomeli, L. Hosseini, F. Petroni, T. Schick,
+J. Dwivedi-Yu, A. Joulin, S. Riedel, and E. Grave, “Atlas: Few-
+shot learning with retrieval augmented language models,” Journal of
+Machine Learning Research, vol. 24, no. 251, pp. 1–43, 2023.
+[60] S. Zhang, S. Roller, N. Goyal, M. Artetxe, M. Chen, S. Chen,
+C. Dewan, M. Diab, X. Li, X. V. Lin, et al., “Opt: Open pre-trained
+transformer language models,” arXiv preprint arXiv:2205.01068, 2022.
+[61] D. Fried, A. Aghajanyan, J. Lin, S. Wang, E. Wallace, F. Shi, R. Zhong,
+W.-t. Yih, L. Zettlemoyer, and M. Lewis, “Incoder: A generative model
+for code infilling and synthesis,” arXiv preprint arXiv:2204.05999,
+2022.
+[62] R. Bachmann, O. F. Kar, D. Mizrahi, A. Garjani, M. Gao, D. Griffiths,
+J. Hu, A. Dehghan, and A. Zamir, “4m-21: An any-to-any vision model
+for tens of tasks and modalities,” arXiv preprint arXiv:2406.09406,
+2024.
+[63] S. Mehta, M. H. Sekhavat, Q. Cao, M. Horton, Y. Jin, C. Sun,
+I. Mirzadeh, M. Najibi, D. Belenko, P. Zatloukal, et al., “Openelm:
+An efficient language model family with open-source training and
+inference framework,” arXiv preprint arXiv:2404.14619, 2024.
+[64] B. McKinzie, Z. Gan, J.-P. Fauconnier, S. Dodge, B. Zhang, P. Dufter,
+D. Shah, X. Du, F. Peng, F. Weers, et al., “Mm1: Methods, anal-
+ysis & insights from multimodal llm pre-training,” arXiv preprint
+arXiv:2403.09611, 2024.
+[65] J. R. A. Moniz, S. Krishnan, M. Ozyildirim, P. Saraf, H. C. Ates,
+Y. Zhang, H. Yu, and N. Rajshree, “Realm: Reference resolution as
+language modeling,” arXiv preprint arXiv:2403.20329, 2024.
+[66] K. You, H. Zhang, E. Schoop, F. Weers, A. Swearngin, J. Nichols,
+Y. Yang, and Z. Gan, “Ferret-ui: Grounded mobile ui understanding
+with multimodal llms,” arXiv preprint arXiv:2404.05719, 2024.
+[67] T.-J. Fu, W. Hu, X. Du, W. Y. Wang, Y. Yang, and Z. Gan, “Guiding
+instruction-based image editing via multimodal large language models,”
+arXiv preprint arXiv:2309.17102, 2023.
+[68] H. You, H. Zhang, Z. Gan, X. Du, B. Zhang, Z. Wang, L. Cao, S.-F.
+Chang, and Y. Yang, “Ferret: Refer and ground anything anywhere at
+any granularity,” arXiv preprint arXiv:2310.07704, 2023.
+[69] B. Adler, N. Agarwal, A. Aithal, D. H. Anh, P. Bhattacharya, A. Brun-
+dyn, J. Casper, B. Catanzaro, S. Clay, J. Cohen, et al., “Nemotron-4
+340b technical report,” arXiv preprint arXiv:2406.11704, 2024.
+[70] Y. Jiang, A. Gupta, Z. Zhang, G. Wang, Y. Dou, Y. Chen, L. Fei-
+Fei, A. Anandkumar, Y. Zhu, and L. Fan, “Vima: Robot manipulation
+with multimodal prompts,” in International Conference on Machine
+Learning, pp. 14975–15022, PMLR, 2023.
+[71] B. Wang, W. Ping, L. McAfee, P. Xu, B. Li, M. Shoeybi, and B. Catan-
+zaro, “Instructretro: Instruction tuning post retrieval-augmented pre-
+training,” arXiv preprint arXiv:2310.07713, 2023.
+
+
+--- Page 21 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+21
+[72] J. Huang, W. Ping, P. Xu, M. Shoeybi, K. C.-C. Chang, and B. Catan-
+zaro, “Raven: In-context learning with retrieval augmented encoder-
+decoder language models,” arXiv preprint arXiv:2308.07922, 2023.
+[73] S. Smith, M. Patwary, B. Norick, P. LeGresley, S. Rajbhandari,
+J. Casper, Z. Liu, S. Prabhumoye, G. Zerveas, V. Korthikanti,
+et al., “Using deepspeed and megatron to train megatron-turing
+nlg 530b, a large-scale generative language model,” arXiv preprint
+arXiv:2201.11990, 2022.
+[74] M. Reid, N. Savinov, D. Teplyashin, D. Lepikhin, T. Lillicrap, J.-b.
+Alayrac, R. Soricut, A. Lazaridou, O. Firat, J. Schrittwieser, et al.,
+“Gemini 1.5: Unlocking multimodal understanding across millions of
+tokens of context,” arXiv preprint arXiv:2403.05530, 2024.
+[75] K. Saab, T. Tu, W.-H. Weng, R. Tanno, D. Stutz, E. Wulczyn, F. Zhang,
+T. Strother, C. Park, E. Vedadi, et al., “Capabilities of gemini models
+in medicine,” arXiv preprint arXiv:2404.18416, 2024.
+[76] S. De, S. L. Smith, A. Fernando, A. Botev, G. Cristian-Muraru, A. Gu,
+R. Haroun, L. Berrada, Y. Chen, S. Srinivasan, et al., “Griffin: Mixing
+gated linear recurrences with local attention for efficient language
+models,” arXiv preprint arXiv:2402.19427, 2024.
+[77] G. Team, T. Mesnard, C. Hardin, R. Dadashi, S. Bhupatiraju, S. Pathak,
+L. Sifre, M. Rivi`ere, M. S. Kale, J. Love, et al., “Gemma: Open
+models based on gemini research and technology,” arXiv preprint
+arXiv:2403.08295, 2024.
+[78] X. Chen, X. Wang, L. Beyer, A. Kolesnikov, J. Wu, P. Voigtlaender,
+B. Mustafa, S. Goodman, I. Alabdulmohsin, P. Padlewski, et al., “Pali-
+3 vision language models: Smaller, faster, stronger,” arXiv preprint
+arXiv:2310.09199, 2023.
+[79] A. Padalkar, A. Pooley, A. Jain, A. Bewley, A. Herzog, A. Ir-
+pan, A. Khazatsky, A. Rai, A. Singh, A. Brohan, et al., “Open x-
+embodiment: Robotic learning datasets and rt-x models,” arXiv preprint
+arXiv:2310.08864, 2023.
+[80] T. Tu, S. Azizi, D. Driess, M. Schaekermann, M. Amin, P.-C. Chang,
+A. Carroll, C. Lau, R. Tanno, I. Ktena, et al., “Towards generalist
+biomedical ai,” NEJM AI, vol. 1, no. 3, p. AIoa2300138, 2024.
+[81] Reuter, “Microsoft readies new ai model to compete with google,
+openai, the information reports,” May 2024.
+[82] Y. Sun, L. Dong, Y. Zhu, S. Huang, W. Wang, S. Ma, Q. Zhang,
+J. Wang, and F. Wei, “You only cache once: Decoder-decoder archi-
+tectures for language models,” arXiv preprint arXiv:2405.05254, 2024.
+[83] M. Abdin, S. A. Jacobs, A. A. Awan, J. Aneja, A. Awadallah,
+H. Awadalla, N. Bach, A. Bahree, A. Bakhtiari, H. Behl, et al., “Phi-
+3 technical report: A highly capable language model locally on your
+phone,” arXiv preprint arXiv:2404.14219, 2024.
+[84] H. FACE, “@wizardlm on hugging face: “introducing wizardlm-2!
+release blog”,” Apr 2015.
+[85] Z. Yu, X. Zhang, N. Shang, Y. Huang, C. Xu, Y. Zhao, W. Hu, and
+Q. Yin, “Wavecoder: Widespread and versatile enhanced instruction
+tuning with refined data generation,” arXiv preprint arXiv:2312.14187,
+2023.
+[86] A. Mitra, L. Del Corro, S. Mahajan, A. Codas, C. Simoes, S. Agarwal,
+X. Chen, A. Razdaibiedina, E. Jones, K. Aggarwal, et al., “Orca
+2: Teaching small language models how to reason,” arXiv preprint
+arXiv:2311.11045, 2023.
+[87] B. Xiao, H. Wu, W. Xu, X. Dai, H. Hu, Y. Lu, M. Zeng, C. Liu,
+and L. Yuan, “Florence-2: Advancing a unified representation for a
+variety of vision tasks,” in Proceedings of the IEEE/CVF Conference
+on Computer Vision and Pattern Recognition, pp. 4818–4829, 2024.
+[88] J. Bai, S. Bai, Y. Chu, Z. Cui, K. Dang, X. Deng, Y. Fan, W. Ge,
+Y. Han, F. Huang, et al., “Qwen technical report,” arXiv preprint
+arXiv:2309.16609, 2023.
+[89] X.-P. Nguyen, W. Zhang, X. Li, M. Aljunied, Q. Tan, L. Cheng,
+G. Chen, Y. Deng, S. Yang, C. Liu, et al., “Seallms–large language
+models for southeast asia,” arXiv preprint arXiv:2312.00738, 2023.
+[90] A. Dubey, A. Jauhri, A. Pandey, A. Kadian, A. Al-Dahle, A. Letman,
+A. Mathur, A. Schelten, A. Yang, A. Fan, et al., “The llama 3 herd of
+models,” arXiv preprint arXiv:2407.21783, 2024.
+[91] H. Touvron, T. Lavril, G. Izacard, X. Martinet, M.-A. Lachaux,
+T. Lacroix, B. Rozi`ere, N. Goyal, E. Hambro, F. Azhar, et al., “Llama:
+Open and efficient foundation language models,” arXiv preprint
+arXiv:2302.13971, 2023.
+[92] Y. Yang, T. Zhou, K. Li, D. Tao, L. Li, L. Shen, X. He, J. Jiang, and
+Y. Shi, “Embodied multi-modal agent trained by an llm from a parallel
+textworld,” in Proceedings of the IEEE/CVF Conference on Computer
+Vision and Pattern Recognition, pp. 26275–26285, 2024.
+[93] J. Li, M. Xu, L. Xiang, D. Chen, W. Zhuang, X. Yin, and Z. Li,
+“Foundation models in smart agriculture: Basics, opportunities, and
+challenges,” Computers and Electronics in Agriculture, vol. 222,
+p. 109032, 2024.
+[94] S. Tipirneni, R. Adkathimar, N. Choudhary, G. Hiranandani, R. A. Am-
+jad, V. N. Ioannidis, C. Yuan, and C. K. Reddy, “Context-aware clus-
+tering using large language models,” arXiv preprint arXiv:2405.00988,
+2024.
+[95] J. Zhang, J. Huang, S. Jin, and S. Lu, “Vision-language models for
+vision tasks: A survey,” IEEE Transactions on Pattern Analysis and
+Machine Intelligence, 2024.
+[96] J. Devlin, H. Cheng, H. Fang, S. Gupta, L. Deng, X. He, G. Zweig,
+and M. Mitchell, “Language models for image captioning: The quirks
+and what works,” arXiv preprint arXiv:1505.01809, 2015.
+[97] B. Shi, X. Bai, and C. Yao, “An end-to-end trainable neural network
+for image-based sequence recognition and its application to scene
+text recognition,” IEEE transactions on pattern analysis and machine
+intelligence, vol. 39, no. 11, pp. 2298–2304, 2016.
+[98] H. Rasheed, M. Maaz, S. Shaji, A. Shaker, S. Khan, H. Cholakkal,
+R. M. Anwer, E. Xing, M.-H. Yang, and F. S. Khan, “Glamm: Pixel
+grounding large multimodal model,” in Proceedings of the IEEE/CVF
+Conference on Computer Vision and Pattern Recognition, pp. 13009–
+13018, 2024.
+[99] H. Xu, G. Ghosh, P.-Y. Huang, P. Arora, M. Aminzadeh, C. Feicht-
+enhofer, F. Metze, and L. Zettlemoyer, “Vlm: Task-agnostic video-
+language model pre-training for video understanding,” arXiv preprint
+arXiv:2105.09996, 2021.
+[100] B. Zhao, W. Jin, J. Del Ser, and G. Yang, “Chatagri: Exploring
+potentials of chatgpt on cross-linguistic agricultural text classification,”
+Neurocomputing, vol. 557, p. 126708, 2023.
+[101] S. Rezayi, Z. Liu, Z. Wu, C. Dhakal, B. Ge, H. Dai, G. Mai,
+N. Liu, C. Zhen, T. Liu, et al., “Exploring new frontiers in agricultural
+nlp: Investigating the potential of large language models for food
+applications,” arXiv preprint arXiv:2306.11892, 2023.
+[102] J. Qing, X. Deng, Y. Lan, and Z. Li, “Gpt-aided diagnosis on agricul-
+tural image based on a new light yolopc,” Computers and Electronics
+in Agriculture, vol. 213, p. 108168, 2023.
+[103] B. Silva, L. Nunes, R. Estev˜ao, and R. Chandra, “Gpt-4 as an
+agronomist assistant? answering agriculture exams using large language
+models,” arXiv preprint arXiv:2310.06225, 2023.
+[104] A. Gupta, A. Shirgaonkar, A. d. L. Balaguer, B. Silva, D. Holstein,
+D. Li, J. Marsman, L. O. Nunes, M. Rouzbahman, M. Sharp, et al.,
+“Rag vs fine-tuning: Pipelines, tradeoffs, and a case study on agricul-
+ture,” arXiv preprint arXiv:2401.08406, 2024.
+[105] X. Yang, J. Gao, W. Xue, and E. Alexandersson, “Pllama: An
+open-source large language model for plant science,” arXiv preprint
+arXiv:2401.01600, 2024.
+[106] Y. Zhang, S. Yao, P. Wang, H. Wu, Z. Xu, Y. Wang, and Y. Zhang,
+“Building natural language interfaces using natural language under-
+standing and generation: A case study on human–machine interaction
+in agriculture,” Applied Sciences, vol. 12, no. 22, p. 11830, 2022.
+[107] S. Yadav and A. Kaushik, “Comparative study of pre-trained language
+models for text classification in smart agriculture domain,” in Advances
+in Data-driven Computing and Intelligent Systems: Selected Papers
+from ADCIS 2022, Volume 2, pp. 267–279, Springer, 2023.
+[108] S. Rezayi, Z. Liu, Z. Wu, C. Dhakal, B. Ge, C. Zhen, T. Liu, and
+S. Li, “Agribert: Knowledge-infused agricultural language models for
+matching food and nutrition.,” in IJCAI, pp. 5150–5156, 2022.
+[109] G. Veena, V. Kanjirangat, and D. Gupta, “Agroner: An unsupervised
+agriculture named entity recognition using weighted distributional se-
+mantic model,” Expert Systems with Applications, vol. 229, p. 120440,
+2023.
+[110] R. Palma, I. Roussaki, T. D¨ohmen, R. Atkinson, S. Brahma, C. Lange,
+G. Routis, M. Plociennik, and S. Mueller, “Agricultural information
+model,” in Information and Communication Technologies for Agricul-
+ture—Theme III: Decision, pp. 3–36, Springer, 2022.
+[111] P. P. Ray, “Ai-assisted sustainable farming: Harnessing the power
+of chatgpt in modern agricultural sciences and technology,” ACS
+Agricultural Science & Technology, vol. 3, no. 6, pp. 460–462, 2023.
+[112] A. Moustafa, “Smart-insect monitoring system integration and interac-
+tion via ai cloud deployment and gpt,” scholarworksUARK, 2023.
+[113] B. P. Weichelt, M. Pilz, R. Burke, D. Puthoff, and K. Namkoong,
+“The potential of ai and chatgpt in improving agricultural injury
+and illness surveillance programming and dissemination,” Journal of
+agromedicine, vol. 29, no. 2, pp. 150–154, 2024.
+[114] Z. Liang, M. Cui, R. Wu, X. Ye, and G. Su, “Harnessing the power of
+gpt-3 and lstm for natural language processing in agricultural product
+news: Focus on soybeans,” in 2023 4th International Conference on
+
+
+--- Page 22 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+22
+Computer Engineering and Intelligent Control (ICCEIC), pp. 307–311,
+IEEE, 2023.
+[115] W. Ting, W. Na, C. Yunpeng, and L. Juan, “Agricultural technology
+knowledge intelligent question-answering system based on large lan-
+guage model,” Smart agriculture, vol. 5, no. 4, p. 105, 2023.
+[116] Z. Li, Y. Ding, J. Chen, and M. Zhao, “How far are green products
+from the chinese dinner table?——chinese farmers’ acceptance of
+green planting technology,” Journal of Cleaner Production, vol. 410,
+p. 137141, 2023.
+[117] Y. Hu, M. A. Koondhar, and R. Kong, “From traditional to smart: Ex-
+ploring the effects of smart agriculture on green production technology
+diversity in family farms,” Agriculture, vol. 13, no. 6, p. 1236, 2023.
+[118] D. De Clercq, E. Nehring, H. Mayne, and A. Mahdi, “Large language
+models can help boost food production, but be mindful of their risks,”
+arXiv preprint arXiv:2403.15475, 2024.
+[119] N. Zhang, C. Vergara-Marcillo, G. Diamantopoulos, J. Shen, N. Tzir-
+itas, R. Bahsoon, and G. Theodoropoulos, “Large language models
+for explainable decisions in dynamic digital twins,” arXiv preprint
+arXiv:2405.14411, 2024.
+[120] S. Jiang, R. Angarita, S. Cormier, and F. Rousseaux, “Fine-tuning bert-
+based models for plant health bulletin classification,” arXiv preprint
+arXiv:2102.00838, 2021.
+[121] J. Wu, D. Pichler, D. Marley, D. Wilson, N. Hovakimyan, and
+J. Hobbs, “Extended agriculture-vision: An extension of a large
+aerial image dataset for agricultural pattern analysis,” arXiv preprint
+arXiv:2303.02460, 2023.
+[122] B. Deforce, B. Baesens, and E. S. Asensio, “Leveraging time-series
+foundation models in smart agriculture for soil moisture forecasting,”
+arXiv preprint arXiv:2405.18913, 2024.
+[123] Y. Wu, X. Hu, Z. Fu, S. Zhou, and J. Li, “Gpt-4o: Visual perception
+performance of multimodal large language models in piglet activity
+understanding,” arXiv preprint arXiv:2406.09781, 2024.
+[124] N. Darapaneni, S. Raj, V. Sivaraman, S. Mohan, A. R. Paduri, et al.,
+“Lstm-rasa based agri farm assistant for farmers,” arXiv preprint
+arXiv:2204.09717, 2022.
+[125] Z. Rui, Z. Zhang, M. Zhang, A. Azizi, C. Igathinathane, H. Cen,
+S. Vougioukas, H. Li, J. Zhang, Y. Jiang, et al., “High-throughput
+proximal ground crop phenotyping systems–a comprehensive review,”
+Computers and Electronics in Agriculture, vol. 224, p. 109108, 2024.
+[126] J. Roberts, T. L¨uddecke, R. Sheikh, K. Han, and S. Albanie, “Charting
+new territories: Exploring the geographic and geospatial capabilities
+of multimodal llms,” in Proceedings of the IEEE/CVF Conference on
+Computer Vision and Pattern Recognition, pp. 554–563, 2024.
+[127] K. Pan, X. Zhang, and L. Chen, “Research on the training and
+application methods of a lightweight agricultural domain-specific large
+language model supporting mandarin chinese and uyghur,” Applied
+Sciences, vol. 14, no. 13, p. 5764, 2024.
+[128] M. T. Kuska, M. Wahabzada, and S. Paulus, “Ai for crop production–
+where can large language models (llms) provide substantial value?,”
+Computers and Electronics in Agriculture, vol. 221, p. 108924, 2024.
+[129] J. Wu, Z. Lai, S. Chen, R. Tao, P. Zhao, and N. Hovakimyan, “The
+new agronomists: Language models are experts in crop management,”
+in Proceedings of the IEEE/CVF Conference on Computer Vision and
+Pattern Recognition, pp. 5346–5356, 2024.
+[130] V. Nguyen, S. Karimi, W. Hallgren, A. Harkin, and M. Prakash,
+“My climate advisor: An application of nlp in climate adaptation for
+agriculture,” in Proceedings of the 1st Workshop on Natural Language
+Processing Meets Climate Change (ClimateNLP 2024), pp. 27–45,
+2024.
+[131] Y. Lu, X. Lu, L. Zheng, M. Sun, S. Chen, B. Chen, T. Wang, J. Yang,
+and C. Lv, “Application of multimodal transformer model in intelligent
+agricultural disease detection and question-answering systems,” Plants,
+vol. 13, no. 7, p. 972, 2024.
+[132] Y. Hue, J. H. Kim, G. Lee, B. Choi, H. Sim, J. Jeon, M.-I. Ahn, Y. K.
+Han, and K.-T. Kim, “Artificial intelligence plant doctor: Plant disease
+diagnosis using gpt4-vision,” Research in Plant Disease, vol. 30, no. 1,
+pp. 99–102, 2024.
+[133] C. Dhavale, T. Pawar, A. Singh, S. Pole, and K. Sabat, “Revolution-
+izing farming: Gan-enhanced imaging, cnn disease detection, and llm
+farmer assistant,” in 2024 2nd International Conference on Computer,
+Communication and Control (IC4), pp. 1–6, IEEE, 2024.
+[134] V. Madaan, G. Bindal, S. Singh, S. K. Yadav, A. Singh, P. Sinha,
+and D. Nagpal, “Integrating language models and machine learning for
+crop disease detection for farmer guidance,” Workshop on Advances in
+Computational Intelligence at ICAIDS 2023: https://ceur-ws.org/Vol-
+3706/Paper11.pdf, 2024.
+[135] S. Yang, Z. Yuan, S. Li, R. Peng, K. Liu, and P. Yang, “Gpt-4 as
+evaluator: Evaluating large language models on pest management in
+agriculture,” arXiv preprint arXiv:2403.11858, 2024.
+[136] J. Wu, Z. Lai, S. Chen, R. Tao, P. Zhao, and N. Hovakimyan, “The
+new agronomists: Language models are experts in crop management,”
+2024.
+[137] W. Huang, P. Abbeel, D. Pathak, and I. Mordatch, “Language models
+as zero-shot planners: Extracting actionable knowledge for embodied
+agents,” 2022.
+[138] S. S. Raman, V. Cohen, E. Rosen, I. Idrees, D. Paulius, and S. Tellex,
+“Planning with large language models via corrective re-prompting,”
+in NeurIPS 2022 Foundation Models for Decision Making Workshop,
+2022.
+[139] W. Huang, F. Xia, T. Xiao, H. Chan, J. Liang, P. Florence, A. Zeng,
+J. Tompson, I. Mordatch, Y. Chebotar, P. Sermanet, N. Brown, T. Jack-
+son, L. Luu, S. Levine, K. Hausman, and B. Ichter, “Inner monologue:
+Embodied reasoning through planning with language models,” 2022.
+[140] V. Sanh, L. Debut, J. Chaumond, and T. Wolf, “Distilbert, a distilled
+version of bert: smaller, faster, cheaper and lighter,” 2020.
+[141] J. S. Park, J. C. O’Brien, C. J. Cai, M. R. Morris, P. Liang, and
+M. S. Bernstein, “Generative agents: Interactive simulacra of human
+behavior,” 2023.
+[142] J. Wei, X. Wang, D. Schuurmans, M. Bosma, B. Ichter, F. Xia, E. Chi,
+Q. Le, and D. Zhou, “Chain-of-thought prompting elicits reasoning in
+large language models,” 2023.
+[143] B. Arora, D. S. Chaudhary, M. Satsangi, M. Yadav, L. Singh, and
+P. S. Sudhish, “Agribot: a natural language generative neural networks
+engine for agricultural applications,” in 2020 International Conference
+on Contemporary Computing and Applications (IC3A), pp. 28–33,
+IEEE, 2020.
+[144] kissanAi, “KissanAI — kissan.ai.” https://kissan.ai/, 2024. [Accessed
+15-07-2024].
+[145] T. L. Marxhall, A. D. Hagerman, H. E. Shear, K. H. Burdine, and B. B.
+Jablonski, “Building up the next generation of extension specialists,”
+Applied Economics Teaching Resources (AETR), vol. 4, no. 3, pp. 1–11,
+2022.
+[146] R. Priyanka, “Assessing the attitude of farmers towards artificial
+intelligence in agriculture,” Asian Journal of Agricultural Extension,
+Economics & Sociology, vol. 42, no. 7, pp. 59–63, 2024.
+[147] D. K. Jayasingh, A. Anand, and K. S. Das, “Artificial intelligence in
+agricultural extension,” Jyotishree Anshuman, p. 115, 2024.
+[148] A. Ibrahim, K. Senthilkumar, and K. Saito, “Evaluating responses by
+chatgpt to farmers’ questions on irrigated lowland rice cultivation in
+nigeria,” Scientific Reports, vol. 14, no. 1, p. 3407, 2024.
+[149] P. A. Hill and L. K. Narine, “Ensuring responsible and transparent use
+of generative ai in extension,” The Journal of Extension, vol. 61, no. 2,
+p. 13, 2023.
+[150] T. A. Shaikh, T. Rasool, and F. R. Lone, “Towards leveraging the role of
+machine learning and artificial intelligence in precision agriculture and
+smart farming,” Computers and Electronics in Agriculture, vol. 198,
+p. 107119, 2022.
+[151] C. Atzberger, “Advances in remote sensing of agriculture: Context
+description, existing operational monitoring systems and major infor-
+mation needs,” Remote sensing, vol. 5, no. 2, pp. 949–981, 2013.
+[152] S. C. Steele-Dunne, H. McNairn, A. Monsivais-Huertero, J. Judge, P.-
+W. Liu, and K. Papathanassiou, “Radar remote sensing of agricultural
+canopies: A review,” IEEE Journal of Selected Topics in Applied Earth
+Observations and Remote Sensing, vol. 10, no. 5, pp. 2249–2273, 2017.
+[153] P. Shanmugapriya, S. Rathika, T. Ramesh, and P. Janaki, “Applications
+of remote sensing in agriculture-a review,” Int. J. Curr. Microbiol. Appl.
+Sci, vol. 8, no. 01, pp. 2270–2283, 2019.
+[154] R. P. Sishodia, R. L. Ray, and S. K. Singh, “Applications of remote
+sensing in precision agriculture: A review,” Remote sensing, vol. 12,
+no. 19, p. 3136, 2020.
+[155] M. Weiss, F. Jacob, and G. Duveiller, “Remote sensing for agricultural
+applications: A meta-review,” Remote sensing of environment, vol. 236,
+p. 111402, 2020.
+[156] J. Segarra, M. L. Buchaillot, J. L. Araus, and S. C. Kefauver, “Remote
+sensing for precision agriculture: Sentinel-2 improved features and
+applications,” Agronomy, vol. 10, no. 5, p. 641, 2020.
+[157] S. Khanal, K. Kc, J. P. Fulton, S. Shearer, and E. Ozkan, “Remote
+sensing in agriculture—accomplishments, limitations, and opportuni-
+ties,” Remote Sensing, vol. 12, no. 22, p. 3783, 2020.
+[158] R. Jim´enez-Lao, F. J. Aguilar, A. Nemmaoui, and M. A. Aguilar, “Re-
+mote sensing of agricultural greenhouses and plastic-mulched farmland:
+An analysis of worldwide research,” Remote Sensing, vol. 12, no. 16,
+p. 2649, 2020.
+
+
+--- Page 23 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+23
+[159] V. Martos, A. Ahmad, P. Cartujo, and J. Ordo˜nez, “Ensuring agricul-
+tural sustainability through remote sensing in the era of agriculture
+5.0,” Applied Sciences, vol. 11, no. 13, p. 5911, 2021.
+[160] I. M. Mehedi, M. S. Hanif, M. Bilal, M. T. Vellingiri, and
+T. Palaniswamy, “Remote sensing and decision support system appli-
+cations in precision agriculture: Challenges and possibilities,” IEEE
+Access, 2024.
+[161] L. P. Osco, E. L. d. Lemos, W. N. Gonc¸alves, A. P. M. Ramos, and
+J. Marcato Junior, “The potential of visual chatgpt for remote sensing,”
+Remote Sensing, vol. 15, no. 13, p. 3232, 2023.
+[162] Y. Hu, J. Yuan, C. Wen, X. Lu, and X. Li, “Rsgpt: A remote
+sensing vision language model and benchmark,” arXiv preprint
+arXiv:2307.15266, 2023.
+[163] K. Kuckreja, M. S. Danish, M. Naseer, A. Das, S. Khan, and F. S. Khan,
+“Geochat: Grounded large vision-language model for remote sensing,”
+in Proceedings of the IEEE/CVF Conference on Computer Vision and
+Pattern Recognition, pp. 27831–27840, 2024.
+[164] C. Zhang and S. Wang, “Good at captioning, bad at counting:
+Benchmarking gpt-4v on earth observation data,” arXiv preprint
+arXiv:2401.17600, 2024.
+[165] H. Guo, X. Su, C. Wu, B. Du, L. Zhang, and D. Li, “Remote sensing
+chatgpt: Solving remote sensing tasks with chatgpt and visual models,”
+arXiv preprint arXiv:2401.09083, 2024.
+[166] Y. Zhan, Z. Xiong, and Y. Yuan, “Skyeyegpt: Unifying remote sens-
+ing vision-language tasks via instruction tuning with large language
+model,” arXiv preprint arXiv:2401.09712, 2024.
+[167] J. D. Silva, J. Magalh˜aes, D. Tuia, and B. Martins, “Large language
+models for captioning and retrieving remote sensing images,” arXiv
+preprint arXiv:2402.06475, 2024.
+[168] C. Pang, J. Wu, J. Li, Y. Liu, J. Sun, W. Li, X. Weng, S. Wang, L. Feng,
+G.-S. Xia, et al., “H2rsvlm: Towards helpful and honest remote sensing
+large vision language model,” arXiv preprint arXiv:2403.20213, 2024.
+[169] D. Muhtar, Z. Li, F. Gu, X. Zhang, and P. Xiao, “Lhrs-bot: Empowering
+remote sensing with vgi-enhanced large multimodal language model,”
+arXiv preprint arXiv:2402.02544, 2024.
+[170] Y. Zhang, Z. Wang, Z. He, J. Li, G. Mai, J. Lin, C. Wei, and W. Yu,
+“Bb-geogpt: A framework for learning a large language model for geo-
+graphic information science,” Information Processing & Management,
+vol. 61, no. 5, p. 103808, 2024.
+[171] W. Zhang, M. Cai, T. Zhang, Y. Zhuang, and X. Mao, “Earthgpt: A
+universal multi-modal large language model for multi-sensor image
+comprehension in remote sensing domain,” IEEE Transactions on
+Geoscience and Remote Sensing, 2024.
+[172] L. Xu, L. Zhao, W. Guo, Q. Li, K. Long, K. Zou, Y. Wang, and H. Li,
+“Rs-gpt4v: A unified multimodal instruction-following dataset for re-
+mote sensing image understanding,” arXiv preprint arXiv:2406.12479,
+2024.
+[173] T. R. Wanasinghe, R. G. Gosine, O. De Silva, G. K. Mann, L. A.
+James, and P. Warrian, “Unmanned aerial systems for the oil and gas
+industry: Overview, applications, and challenges,” IEEE access, vol. 8,
+pp. 166980–166997, 2020.
+[174] S. Z. Hassan, P. Sun, M. Gokgoz, J. Chen, D. R. Reinhart, and
+S. Gustitus-Graham, “Uav-based approach for municipal solid waste
+landfill monitoring and water ponding issue detection using sensor
+fusion,” Journal of Hydroinformatics, vol. 25, no. 6, pp. 2107–2127,
+2023.
+[175] S. Hassan, M. Gokgoz, P. Sun, J. Chen, and B. Nam, “A cost-effective
+uav-based sensing system for waste landfill management,” in The
+9th International Conference on Water Resources and Environment
+Research, Virtual Conference, 2022.
+[176] C. Ju and H. I. Son, “Multiple uav systems for agricultural applications:
+Control, implementation, and evaluation,” Electronics, vol. 7, no. 9,
+p. 162, 2018.
+[177] E. Alvarez-Vanhard, T. Corpetti, and T. Houet, “Uav & satellite
+synergies for optical remote sensing applications: A literature review,”
+Science of remote sensing, vol. 3, p. 100019, 2021.
+[178] S. Asadzadeh, W. J. de Oliveira, and C. R. de Souza Filho, “Uav-
+based remote sensing for the petroleum industry and environmental
+monitoring: State-of-the-art and perspectives,” Journal of Petroleum
+Science and Engineering, vol. 208, p. 109633, 2022.
+[179] F. Toscano, C. Fiorentino, N. Capece, U. Erra, D. Travascia, A. Scopa,
+M. Drosos, and P. D’Antonio, “Unmanned aerial vehicle for precision
+agriculture: A review,” IEEE Access, 2024.
+[180] J. Bendig, A. Bolten, and G. Bareth, “Uav-based imaging for multi-
+temporal, very high resolution crop surface models to monitor crop
+growth variability,” Unmanned aerial vehicles (UAVs) for multi-
+temporal crop surface modelling, vol. 44, 2013.
+[181] S. Gokool, M. Mahomed, R. Kunz, A. Clulow, M. Sibanda, V. Naiken,
+K. Chetty, and T. Mabhaudhi, “Crop monitoring in smallholder farms
+using unmanned aerial vehicles to facilitate precision agriculture
+practices: a scoping review and bibliometric analysis,” Sustainability,
+vol. 15, no. 4, p. 3557, 2023.
+[182] M. Schirrmann, A. Giebel, F. Gleiniger, M. Pflanz, J. Lentschke, and
+K.-H. Dammer, “Monitoring agronomic parameters of winter wheat
+crops with low-cost uav imagery,” Remote Sensing, vol. 8, no. 9, p. 706,
+2016.
+[183] J. Anderegg, F. Tschurr, N. Kirchgessner, S. Treier, M. Schmucki,
+B. Streit, and A. Walter, “On-farm evaluation of uav-based aerial im-
+agery for season-long weed monitoring under contrasting management
+and pedoclimatic conditions in wheat,” Computers and Electronics in
+Agriculture, vol. 204, p. 107558, 2023.
+[184] Y. Huang, K. N. Reddy, R. S. Fletcher, and D. Pennington, “Uav
+low-altitude remote sensing for precision weed management,” Weed
+technology, vol. 32, no. 1, pp. 2–6, 2018.
+[185] P. Lottes, R. Khanna, J. Pfeifer, R. Siegwart, and C. Stachniss, “Uav-
+based crop and weed classification for smart farming,” in 2017 IEEE
+international conference on robotics and automation (ICRA), pp. 3024–
+3031, IEEE, 2017.
+[186] D. Gao, Q. Sun, B. Hu, and S. Zhang, “A framework for agricultural
+pest and disease monitoring based on internet-of-things and unmanned
+aerial vehicles,” Sensors, vol. 20, no. 5, p. 1487, 2020.
+[187] K. Neupane and F. Baysal-Gurel, “Automatic identification and mon-
+itoring of plant diseases using unmanned aerial vehicles: A review,”
+Remote Sensing, vol. 13, no. 19, p. 3841, 2021.
+[188] T. B. Shahi, C.-Y. Xu, A. Neupane, and W. Guo, “Recent advances in
+crop disease detection using uav and deep learning techniques,” Remote
+Sensing, vol. 15, no. 9, p. 2450, 2023.
+[189] G. Sona, D. Passoni, L. Pinto, D. Pagliari, D. Masseroni, B. Ortuani,
+and A. Facchi, “Uav multispectral survey to map soil and crop for
+precision farming applications,” The international archives of the pho-
+togrammetry, remote sensing and spatial information sciences, vol. 41,
+pp. 1023–1029, 2016.
+[190] K. Ivushkin, H. Bartholomeus, A. K. Bregt, A. Pulatov, M. H.
+Franceschini, H. Kramer, E. N. van Loo, V. J. Roman, and R. Finkers,
+“Uav based soil salinity assessment of cropland,” Geoderma, vol. 338,
+pp. 502–512, 2019.
+[191] Z. Yuan, Z. Xiong, L. Mou, and X. X. Zhu, “Chatearthnet: A global-
+scale image-text dataset empowering vision-language geo-foundation
+models,” Earth System Science Data Discussions, vol. 2024, pp. 1–24,
+2024.
+[192] X. Li, J. Ding, and M. Elhoseiny, “Vrsbench: A versatile vision-
+language benchmark dataset for remote sensing image understanding,”
+arXiv preprint arXiv:2406.12384, 2024.
+[193] P. Richter, “World agri-tech 2024: Pioneering agriculture resilience
+with ai,” Microsoft Industry Blog, April 2024.
+[194] R. Courtney and T. Mullinax, “Digital dialogues offer orcharding
+advice,” Good Fruit Grower, August 2023. Accessed: 2024-08-17.
+[195] S. Thomas, “Agvisorpro launches first large language model for equip-
+ment dealers,” Precision Farming Dealer, July 2023.
+[196] Cropin Technology, “Cropin launches aks.ara: A micro language model
+(µ-lm) for climate smart agriculture, targeting underserved farmers in
+the global south,” Cropin Press Release, April 2024.
+[197] S. P, “Cropin partners with google’s gemini to launch agri intelligence
+tool,” The Economic Times, August 2024.
+[198] K. A. Solution, “Harvest Enginer.” https://www.kragworks.com/, 2024.
+Accessed: 2024-08-18.
+[199] J. Mendoza-Revilla, E. Trop, L. Gonzalez, M. Roller, H. Dalla-Torre,
+B. P. de Almeida, G. Richard, J. Caton, N. Lopez Carranza, M. Skwark,
+et al., “A foundational large language model for edible plant genomes,”
+Communications Biology, vol. 7, no. 1, p. 835, 2024.
+[200] E. N. Mol and M. S. Kumar, “End-to-end framework for agricultural
+entity extraction–a hybrid model with transformer,” Computers and
+Electronics in Agriculture, vol. 225, p. 109309, 2024.
+[201] A. Chebbi, G. Kniesel, N. Abdennadher, and G. Dimarzo, “Enhancing
+named entity recognition for agricultural commodity monitoring with
+large language models,” in Proceedings of the 4th Workshop on
+Machine Learning and Systems, pp. 208–213, 2024.
+[202] J. M. Muller, D. J. Petti, C. Li, M. Pilz, B. Weichelt, et al., “Investigat-
+ing the use of large language models in agricultural injury surveillance,”
+in 2024 ASABE Annual International Meeting, p. 1, American Society
+of Agricultural and Biological Engineers, 2024.
+[203] J. M. Shutske, “Harnessing the power of large language models in
+agricultural safety & health,” Journal of Agricultural Safety and Health,
+p. 0, 2023.
+
+
+--- Page 24 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+24
+[204] X. Li, D. Ma, and B. Yin, “Advance research in agricultural text-
+to-speech: the word segmentation of analytic language and the deep
+learning-based end-to-end system,” Computers and Electronics in Agri-
+culture, vol. 180, p. 105908, 2021.
+[205] H. Panoutsopoulos, B. Espejo-Garcia, S. Raaijmakers, X. Wang,
+S. Fountas, and C. Brewster, “Investigating the effect of different fine-
+tuning configuration scenarios on agricultural term extraction using
+bert,” Computers and Electronics in Agriculture, vol. 225, p. 109268,
+2024.
+[206] M. Ali, M. Fromm, K. Thellmann, R. Rutmann, M. L¨ubbering,
+J. Leveling, K. Klug, J. Ebert, N. Doll, J. S. Buschhoff, et al.,
+“Tokenizer choice for llm training: Negligible or crucial?,” arXiv
+preprint arXiv:2310.08754, 2023.
+[207] Y. Sun and J. Ortiz, “An ai-based system utilizing iot-enabled am-
+bient sensors and llms for complex activity tracking,” arXiv preprint
+arXiv:2407.02606, 2024.
+[208] U. Jayasinghe and D. Ghoshal, “Fertiliser ban decimates sri lankan
+crops as government popularity ebbs,” Reuters. March, vol. 3, 2022.
+[209] X. Tang, Q. Jin, K. Zhu, T. Yuan, Y. Zhang, W. Zhou, M. Qu, Y. Zhao,
+J. Tang, Z. Zhang, et al., “Prioritizing safeguarding over autonomy:
+Risks of llm agents for science,” arXiv preprint arXiv:2402.04247,
+2024.
+[210] B. C. Das, M. H. Amini, and Y. Wu, “Security and privacy challenges
+of large language models: A survey,” arXiv preprint arXiv:2402.00888,
+2024.
+[211] S. Javaid, N. Saeed, and B. He, “Large language models for uavs: Cur-
+rent state and pathways to the future,” arXiv preprint arXiv:2405.01745,
+2024.
+[212] C. Rose, R. McMurray, and M. U. Hadi, “A reinforcement learning
+control and fault detection method for the madni drone,” in 2024 35th
+Irish Signals and Systems Conference (ISSC), pp. 1–6, 2024.
+[213] R. Rajathanakodi and M. U. Hadi, “Mad-storm: Maneuverable au-
+tonomous drone with sensing technologies for observing rainfall and
+meteorology in northern ireland,” in 2024 35th Irish Signals and
+Systems Conference (ISSC), pp. 1–6, 2024.
+[214] N. Singh, D. Gupta, M. Joshi, K. Yadav, S. Nayak, M. Kumar,
+K. Nayak, S. Gulaiya, and A. S. Rajpoot, “Application of drones
+technology in agriculture: A modern approach,” Journal of Scientific
+Research and Reports, vol. 30, pp. 142–152, Jun 2024.
+[215] Z. Yu, Y. Wu, N. Zhang, C. Wang, Y. Vorobeychik, and C. Xiao,
+“Codeipprompt: Intellectual property infringement assessment of code
+language models,” in International Conference on Machine Learning,
+pp. 40373–40389, PMLR, 2023.
+[216] A. George and T. Walsh, “Artificial intelligence is breaking patent law,”
+Nature, vol. 605, no. 7911, pp. 616–618, 2022.
+[217] G. Hegde, V. R. Hulipalled, and J. Simha, “Price prediction of
+agriculture commodities using machine learning and nlp,” in 2021
+Second International Conference on Smart Technologies in Computing,
+Electrical and Electronics (ICSTCEE), pp. 1–6, IEEE, 2021.
+[218] A. G. Dom´ınguez, N. Roig-Tierno, N. Chaparro-Banegas, and J.-M.
+Garc´ıa- ´Alvarez-Coque, “Natural language processing of social network
+data for the evaluation of agricultural and rural policies,” Journal of
+Rural Studies, vol. 109, p. 103341, 2024.
+[219] R. Sapkota and M. Karkee, “Creating image datasets in agricultural en-
+vironments using dall.e: Generative ai-powered large language model,”
+2024.
+[220] R. Sapkota, Z. Meng, and M. Karkee, “Synthetic meets authentic:
+Leveraging large language model generated datasets for yolov10-based
+apple detection in orchard environments,” Available at SSRN 4941582.
+[221] R. Sapkota, R. Qureshi, M. F. Calero, M. Hussain, C. Badjugar,
+U. Nepal, A. Poulose, P. Zeno, U. B. P. Vaddevolu, H. Yan, et al.,
+“Yolov10 to its genesis: A decadal and comprehensive review of the
+you only look once series,” arXiv preprint arXiv:2406.19407, 2024.
+[222] R. Sapkota, Z. Meng, D. Ahmed, M. Churuvija, X. Du, Z. Ma,
+and M. Karkee, “Comprehensive performance evaluation of yolov10,
+yolov9 and yolov8 on detecting and counting fruitlet in complex
+orchard environments,” arXiv preprint arXiv:2407.12040, 2024.
+[223] R. Sapkota, D. Ahmed, and M. Karkee, “Comparing yolov8 and mask
+r-cnn for instance segmentation in complex orchard environments,”
+Artificial Intelligence in Agriculture, vol. 13, pp. 84–99, 2024.
+[224] R. Sapkota, D. Ahmed, and M. Karkee, “Comparing yolov8 and mask
+rcnn for object segmentation in complex orchard environments,” arXiv
+preprint arXiv:2312.07935, 2023.
+Ranjan Sapkota ( Member, IEEE) obtained his
+B.Tech degree in Electrical and Electronics Engi-
+neering from Uttarakhand Technical University, In-
+dia in 2019. He then pursued his MS in Agricultural
+and Biosystems Engineering from North Dakota
+State University from 2020 to 2022. Currently, Mr.
+Sapkota is a Ph.D. student at Washington State
+University in the Department of Biological Systems
+Engineering and Center for Precision and Automated
+Agricultural Systems. His research primarily focuses
+on Automation and Robotics for Agriculture, utiliz-
+ing Artificial Intelligence, Large Language Models, Machine Vision, Robot
+Manipulation Systems, Deep Learning, Machine Learning and Generative AI
+Technologies.
+Rizwan Qureshi (Senior Member, IEEE) received
+the Ph.D. degree from the City University of Hong
+Kong, Hong Kong, in 2021. He was an Assistant
+Professor with the Fast School of Computing, Na-
+tional University of Computer and Emerging Sci-
+ences, Karachi, Pakistan. He was also a Postdoctoral
+Researcher with the College of Science and Engi-
+neering, Hamad Bin Khalifa University, Doha, Qatar,
+and The University of Texas MD Anderson Cancer
+Center, Houston, TX, USA and AI-team lead at the
+Center for Regenerative Medicine and Health, Hong
+Kong Institute of Science and Innovation, Chinese Academy of Sciences,
+Hong Kong. Currently, he is with the Center for Research in Computer Vision
+(CRCV), University of Central Florida, Orlando, USA. His research interests
+include AI applications in life sciences, cancer data sciences, computer vision,
+large language models, and machine learning. He was also shortlisted for the
+USERN International Prize in 2024.
+Syed Zohaib Hassan is a Ph.D. candidate in the
+Department of Civil, Environmental and Construc-
+tion Engineering at the University of Central Florida,
+Orlando, USA. He received his B.S in Civil En-
+gineering from NED University, Karachi, Pakistan
+in 2018 and his M.S. in Construction Automation
+from Yonsei University, Seoul, South Korea in 2021.
+His current research focuses on remote sensing,
+computer vision and atrificial intelligence in envi-
+ronment, smart cities and agriculture.
+John Shutske , a professor and extension specialist
+in biological systems engineering at the University
+of Wisconsin-Madison, focuses on safety engineer-
+ing and technology-driven risk control in agriculture.
+He also studies the adoption and barriers of digital
+tools and connectivity among agricultural producers
+and rural service providers.
+
+
+--- Page 25 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+25
+Maged Shoman is currently a postdoctoral re-
+searcher at UCF. Prior to joining UCF, Dr. Shoman
+was a visiting scholar at the University of British
+Columbia (UBC). He received his Ph.D. in trans-
+portation engineering from the University of Mis-
+souri, Columbia, USA, in 2022, focusing on com-
+puter vision and machine learning. Dr. Shoman
+has authored over 15 peer-reviewed publications in
+several prestigious journals and has presented at
+multiple conferences. His papers have been pub-
+lished in top venues, including IEEE CVPR, the
+ASCE Journal of Transportation Engineering, and the Transportation Research
+Record. His research interests include computer vision, transportation sensing,
+big data analytics, and deep learning. Dr. Shoman has received numerous
+awards and distinctions, including multiple placements in the NVIDIA AI City
+Challenge and the Outstanding PhD Student Award. He has also been actively
+involved in academic and professional organizations, holding leadership roles
+in the Institute of Transportation Engineers and the American Society of Civil
+Engineers.
+Dr. Muhammad Sajjad (Member, IEEE) works on
+the frontiers of interdisciplinary climate research (In-
+tegrated Physical science, Social Aspects, and Tech-
+nology) to explore the risk-resilience-sustainability
+nexus using geospatial and remote sensing data
+science approaches to provide practical solutions. He
+maintains research interests in Environmental Sus-
+tainability, Urban Planning/Design, Public Health,
+Geo-AI, Machine Learning, Location Intelligence,
+and interdisciplinary Climate Science.
+Fayaz Ali Dharejo (Senior Member, IEEE) is cur-
+rently Postdoc fellow at University of W¨urzburg,
+Ger- many. Previously he was postdoc fellow at
+Khalifa University,U.A..E. He received his PhD De-
+gree in Computer Applied Engineering from the
+Institute of Computer Network Information Cen-
+ter Chinese Academy of Sciences, University of
+Chinese Academy of Sciences Beijing, China. He
+received B.E. degree in Electronic Engineering from
+QUEST, Pakistan and received M.S. degrees from
+University of Electronic Science and Technology of
+China, Chengdu, China. He has published more than 50 articles in reputed ISI
+impact factor journals including; IEEE TFS, ACM TIST, International Journal
+of Intelligent Systems, IEEE TCBB, IEEEE GRSL and etc. He is a member
+of professional bodies such as PEC, ACM, IEEE, IEEE Societies, such as
+IEEE Geoscience and Remote Sensing Society, IEEE Computer Society and
+IEEE Signal Processing Society. His research interests are computer vision,
+image enhancement, lightweight models, and Super-resolution.
+Achyut Paudel is a Ph.D. candidate in Agricultural
+Engineering at Washington State University, where
+he also earned his M.S. in Mechanical Engineer-
+ing. He holds a B.S. in Mechanical Engineering
+from Tribhuvan University, Nepal. Currently serving
+as a Machine Learning/Computer Vision Research
+Engineer at Orchard Robotics, Paudel focuses on
+automating various tasks in orchards and vineyards.
+His research leverages machine vision and artificial
+intelligence to enhance agricultural practices.
+Jiajia Li is a Ph.D. candidate in the Department of
+Electrical and Computer Engineering at Michigan
+State University, MI, USA. She obtained her mas-
+ter’s degree from MSU and her bachelor’s degree
+from the University of Electronic Science and Tech-
+nology of China. Her research interests include smart
+agriculture, remote sensing, and computer vision.
+Zhichao Meng is a Ph.D. candidate in Mechani-
+cal Engineering at Zhejiang Sci-Tech University in
+China. He holds a Bachelor’s degree in Mechan-
+ical Design, Manufacturing, and Automation from
+Huzhou University in China. His research focuses
+on agricultural robotics, machine vision, and robotic
+arm control.
+Ferhat Sadak received the M.Sc. degree in ad-
+vanced mechanical engineering and the Ph.D. degree
+in medical robotics from the University of Birm-
+ingham, in 2016 and 2021, respectively. He was
+a Postdoctoral Researcher at Sorbonne University,
+Paris. He is currently an Assistant Professor at Bartin
+University, Turkey. His research interests include
+image processing, machine learning, and vision-
+guided for robotic automatization.
+Muhammad Usman Hadi (Member, IEEE) re-
+ceived M.S. and Ph.D. degrees from the University
+of Bologna, Italy. He was a Postdoctoral Researcher
+with Aalborg University, Denmark, in close collab-
+oration with Nokia. He was a Visiting Researcher
+with ESIEE Paris, France, and Nokia Bell Labora-
+tories. He is an Assistant Professor at the School
+of Engineering, Ulster University, Belfast, UK. He
+has been included in top 2% of researchers for three
+consecutive years since 2021. He has authored more
+than 60 journal articles and transactions. He has
+received the Research and Impact fund, ISPF, Proof of Concept RI and
+Garfield Weston Trust fundings as a Principal Investigator and has been Co-
+Investigator for EPSRC, DFE and ISPF research grants. His research interests
+include machine learning for engineering applications, LLMs, unmanned
+aerial vehicles, fiber wireless communication, microwave photonics, and
+devices for telecommunications
+Prof. Dr. Manoj Karkee obtained his BS in Com-
+puter Engineering from Tribhuwan University in
+2002. He pursued his MS in Remote Sensing and
+Geographic Information Systems at Asian Institute
+of Technology, Thailand, and earned his Doctorate
+in Agricultural Engineering and Human-Computer
+Interaction from Iowa State University in 2009. Dr.
+Karkee currently serves as the Professor and Director
+of the Center for Precision and Automated Agri-
+cultural Systems at Washington State University.
+His research focuses on agricultural automation and
+mechanization programs, with an emphasis on machine vision-based sensing,
+automation and robotic technologies for specialty crop production.
+
+
+--- Page 26 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+26
+TABLE V: Mapping of Research Questions (RQs) to the Application of Large Language Models (LLMs) in Agriculture. This
+table systematically categorizes the selected literature based on seven key research questions, focusing on data sources and
+integration, evaluation metrics, prompt engineering techniques, optimization strategies, challenges and limitations, benefits over
+traditional machine learning (ML) and deep learning (DL) methods, and comparative performance outcomes.
+Paper Reference
+RQ1:
+Data
+Sources
+and
+Integration
+RQ2: Evaluation
+Metrics
+RQ3:
+Prompt
+Engineering
+Techniques
+RQ4: Optimiza-
+tion Strategies
+RQ5: Challenges
+and Limitations
+RQ6:
+Benefits
+over Traditional
+ML/DL
+RQ7:
+Outperformance
+over ML/DL
+ChatAgri:
+Exploring potentials
+of
+ChatGPT
+on
+cross-linguistic
+agricultural
+text
+classification [100]
+Multi-source
+data:
+Internet
+news
+on
+pests,
+hazards, markets
+Semantic
+understanding,
+reasoning
+accuracy
+in
+text classification
+Task-specific
+prompting,
+optimized
+answer alignment
+strategies
+Cross-linguistic
+transfer learning,
+zero-shot
+capabilities
+Limited
+agricultural
+training
+data,
+deployment costs
+Cost-effective,
+no
+need
+for
+supervised
+training data
+Outperformed
+PLMs
+in
+multilingual zero-
+shot scenarios
+A
+foundational
+large
+language
+model
+for
+edible
+plant
+genomes
+[199]
+Genomic
+data
+from
+48
+plant
+species, focusing
+on crops
+AUROC, AUPRC
+for evaluating ge-
+nomic predictions
+Masked language
+modeling,
+fine-
+tuning
+with
+IA3
+Parameter-
+efficient
+fine-
+tuning
+via
+IA3
+technique
+Diverse
+genomic
+data,
+reference
+genome
+limitations
+Zero-shot
+learning
+enables
+broader
+genomic
+predictions
+Superior
+performance
+in
+plant
+genomics,
+zero-shot
+classification
+AgriBERT:
+Knowledge-
+Infused Agricultural
+Language
+Models
+for Matching Food
+and Nutrition [108]
+Domain-
+specific
+corpora,
+agricultural
+literature,
+FoodOn ontology
+Precision@1,
+Mean
+Average
+Precision
+(MAP)
+used
+for assessment
+Knowledge-based
+fine-tuning
+with
+external entities
+Fine-tuning using
+a domain-specific
+agricultural
+corpus
+External
+knowledge
+integration,
+domain-specific
+challenges
+Enhanced
+semantic
+matching
+in
+food-nutrition
+tasks
+Exceeded
+BERT
+in precision, ef-
+fective answer se-
+lection tasks
+GPT-aided diagno-
+sis on agricultural
+image based on a
+new light YOLOPC
+[102]
+Integration
+of
+GPT-4
+with
+YOLOPC
+model
+for diagnostics
+94.5%
+accuracy
+in pest detection,
+90%
+reasoning
+accuracy
+GPT-4
+induced
+logical reasoning,
+report generation
+Enhanced
+accuracy
+via
+partial
+convolution
+in YOLOPC
+Image recognition
+accuracy,
+data
+scarcity
+challenges
+Improved
+diagnostic
+accuracy
+with
+reduced
+model
+parameters
+Greater efficiency
+in real-time agri-
+cultural
+diagnos-
+tics
+AGRONER:
+An
+unsupervised
+agriculture
+named
+entity
+recognition
+using
+weighted
+distributional
+semantic
+model
+[109]
+Custom
+agricultural
+corpus of 30,000
+sentences
+F-measure
+for
+evaluation,
+macro-average
+scoring
+Extended
+BERT
+with
+LDA
+for
+entity recognition
+Weighted
+distributional
+semantics,
+unsupervised
+NER
+Lack
+of
+annotated
+data,
+domain-specific
+challenges
+Effective
+unsupervised
+entity recognition,
+domain
+specificity
+Outperformed
+standard
+models
+in
+agricultural
+NER tasks
+Building
+Natural
+Language
+Interfaces
+Using
+Natural
+Language
+Understanding and
+Generation: A Case
+Study on Human–
+Machine Interaction
+in Agriculture [106]
+Real-time
+agricultural
+command
+data
+collected
+via
+dynamic
+tuple
+extraction
+framework
+Accuracy,
+precision,
+recall,
+and
+F-score
+metrics
+for
+NL2AOM
+task
+evaluation
+BERT-based
+Seq2Seq
+model
+with
+special
+masking
+for
+sequence-to-
+sequence learning
+Mask-based
+self-attention
+mechanism
+for
+enhanced
+global
+context
+understanding
+Limited
+high-
+quality
+training
+datasets,
+order
+problem
+in
+sequence
+generation
+High
+generalization
+capability,
+efficient
+data
+collection,
+structured
+AOM
+statement
+generation
+Outperformed
+traditional models
+in
+accuracy,
+response
+time,
+and
+command parsing
+performance
+AI-assisted
+sustainable farming:
+Harnessing
+the
+power
+of
+ChatGPT
+in
+modern agricultural
+sciences
+and
+technology [111]
+Integration
+of
+real-time
+data
+from
+sensors,
+weather forecasts,
+and market trends
+Accuracy,
+data-driven
+decision-making
+effectiveness
+Tailored prompts
+for
+precise
+decision-making
+Continuous learn-
+ing with real-time
+data
+Data
+quality,
+accessibility, and
+digital literacy
+Real-time
+insights,
+personalized
+recommendations
+Outperformed tra-
+ditional models in
+precision farming
+and data interpre-
+tation
+The
+potential
+of
+AI
+and
+ChatGPT
+in
+improving
+agricultural
+injury
+and
+illness
+surveillance
+programming
+and
+dissemination
+[113]
+Integration
+of
+AI
+with
+text-
+intensive
+natural
+language
+reports
+from
+injury
+surveillance
+systems
+Efficiency in data
+analysis,
+report
+generation,
+and
+dissemination
+Custom
+prompts
+for injury surveil-
+lance and preven-
+tion reports
+Enhanced
+workflows
+reducing
+human
+and
+financial
+resources
+Data
+quality,
+system
+customization,
+and
+privacy
+concerns
+Streamlined
+data
+analysis and re-
+porting processes
+Demonstrated
+improved
+outputs in injury
+surveillance
+and
+prevention
+Harnessing
+the
+Power
+of
+GPT-3
+and
+LSTM
+for
+Natural
+Language
+Processing
+in
+Agricultural
+Product
+News:
+Focus on Soybeans
+[114]
+Integration
+of
+GPT-3
+for
+semantic
+scoring
+of
+soybean-
+related
+news
+headlines
+from
+online
+agricultural news
+sources
+Performance
+evaluated
+using
+Mean
+Squared
+Error
+(MSE)
+on
+sentiment
+prediction
+accuracy
+of
+LSTM model
+Utilized
+GPT-
+3
+for
+initial
+sentiment
+analysis
+and
+LSTM
+for
+sequence
+dependency
+Joint use of GPT-
+3 and LSTM to
+capture sentiment
+patterns
+in
+domain-specific
+news
+Challenge
+in
+handling vast and
+diverse
+soybean-
+related news data,
+requiring
+robust
+NLP models
+Combined
+NLP
+techniques
+showed
+substantial
+improvements
+in
+sentiment
+analysis accuracy
+for
+agricultural
+product news
+Outperformed
+traditional
+sentiment
+analysis
+models,
+achieving
+high
+accuracy
+in
+predicting
+sentiment trends
+Investigating
+the
+effect
+of
+different fine-tuning
+configuration
+scenarios
+on
+agricultural
+term
+extraction
+using
+BERT [205]
+Comparison
+of
+Agriculture-
+BERT with Sci-
+BERT, RoBERTa,
+and vanilla BERT
+for
+extracting
+agriculture-
+related terms
+Evaluated
+performance
+using
+memorization,
+synonym,
+and
+novel
+term
+test
+sets
+Tested
+different
+fine-tuning
+configurations,
+including
+layer
+freezing
+and
+updating
+scenarios
+Investigated
+the
+impact
+of
+updating
+embedding
+and
+encoder layers on
+term
+extraction
+performance
+Scarcity
+of
+agriculture-
+related
+gold
+standard corpora;
+reliance
+on
+a
+silver
+standard
+corpus
+from
+AGRIS database
+Agriculture-
+BERT
+outperformed
+other
+BERT
+models,
+especially
+in
+identifying
+synonyms
+and
+novel agricultural
+terms
+Significant
+improvement
+in
+automatic
+agricultural
+term
+extraction
+using
+specialized
+fine-
+tuning strategies
+Continued on next page
+
+
+--- Page 27 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+27
+TABLE V – continued from previous page
+Paper Reference
+RQ1:
+Data
+Sources
+and
+Integration
+RQ2: Evaluation
+Metrics
+RQ3:
+Prompt
+Engineering
+Techniques
+RQ4: Optimiza-
+tion Strategies
+RQ5: Challenges
+and Limitations
+RQ6:
+Benefits
+over Traditional
+ML/DL
+RQ7:
+Outperformance
+over ML/DL
+Price
+Prediction
+of
+Agriculture
+Commodities Using
+Machine
+Learning
+and NLP [217]
+Forecasting
+agriculture
+commodity prices
+using
+ARIMA,
+SARIMA,
+and
+RNN
+for
+Kannada-
+speaking farmers
+Evaluated
+performance
+using
+Mean
+Absolute
+Percentage
+Error
+(MAPE)
+Developed
+a
+voice
+bot
+to
+provide
+price
+forecasts
+in
+Kannada
+Addressed
+language barriers
+using
+NLP
+for
+Kannada in rural
+India
+Limited
+availability
+of
+region-specific
+data and language
+processing
+capabilities
+Enhanced
+decision-making
+for
+farmers
+through
+accurate
+price
+forecasting
+in
+their
+native
+language
+Demonstrated
+improved
+forecasting
+and
+accessibility
+in
+regional
+languages
+for
+rural farmers
+MyClimate
+Advisor:
+An
+Application
+of
+NLP
+in
+Climate
+Adaptation
+for
+Agriculture [130]
+Developed a QA
+tool
+for
+climate
+adaptation
+in
+agriculture
+using
+peer-
+reviewed
+and
+grey
+literature;
+achieved
+comparable
+scientific
+accuracy
+to
+proprietary
+models
+Evaluated system
+with
+domain-
+specific criteria in
+a
+user
+study;
+moderate
+agreement
+observed
+among
+climate
+and
+agriculture
+experts
+Integrated
+open-
+source generative
+models
+for
+data
+privacy;
+RAG
+technique
+enhanced answer
+accuracy,
+though
+readability
+slightly decreased
+Addressed
+data
+trustworthiness
+and
+region-
+specific
+adaptation advice
+for
+climate
+resilience;
+small
+models struggled
+with
+specific
+regional queries
+Challenges in QA
+evaluation metrics
+specific to climate
+adaptation;
+scientific
+accuracy showed
+significant
+annotator
+disagreement
+Improved
+accessibility
+to
+climate
+adaptation
+knowledge
+for
+farmers
+and
+advisors;
+user
+study
+showed
+promising
+usability results
+Demonstrated
+the
+first
+study
+to
+provide
+tailored
+climate
+adaptation advice
+using
+LLMs
+in
+agriculture;
+promising
+potential
+for
+future
+improvements
+Enhancing
+Named
+Entity Recognition
+for
+Agricultural
+Commodity
+Monitoring
+with
+Large
+Language
+Models [201]
+Developed
+a
+solution
+to
+improve
+NER
+for
+agricultural
+data using LLMs,
+achieving
+high
+precision
+and
+recall
+in
+entity
+recognition
+Evaluated system
+using
+F1
+score
+across
+five
+key
+entities;
+LLMs
+demonstrated
+strong
+performance,
+particularly GPT-
+4
+and
+Claude
+v2
+Utilized few-shot
+prompting
+for
+LLMs
+and
+fine-tuned
+Multilingual
+BERT;
+LLMs
+showed
+adaptability
+with
+minimal
+domain-specific
+training
+Addressed
+challenges
+of
+diverse
+and
+unstructured
+agricultural data;
+LLMs
+excelled
+in
+recognizing
+new and context-
+dependent entities
+Limited
+by
+scarcity
+of
+specialized
+agricultural
+datasets;
+fine-
+tuned
+models
+performed
+better
+on
+specific
+tasks, but LLMs
+required
+less
+maintenance
+Showcased
+LLMs’
+potential
+for
+real-time
+data analysis and
+decision
+support
+in
+agriculture;
+promising results
+for
+future
+deployments
+Demonstrated
+LLMs’
+effectiveness
+in
+NER
+tasks
+for
+agriculture,
+with GPT-4 and
+Multilingual
+BERT
+leading
+in accuracy and
+adaptability
+Investigating
+the
+Use
+of
+Large
+Language
+Models
+in
+Agricultural
+Injury Surveillance
+[202]
+Explored
+LLMs
+for
+automating
+data extraction in
+agricultural injury
+surveillance,
+specifically
+within
+the
+AgInjuryNews
+database
+Evaluated
+LLMs
+such as ChatGPT
+and
+fine-tuned
+Llama2
+against
+human-coded
+data
+with
+an
+average accuracy
+of 93%
+Applied
+fine-tuning
+and
+prompt
+engineering
+to
+enhance
+data
+extraction
+accuracy
+in
+unstructured texts
+Addressed
+challenges
+of
+accuracy
+and
+interpretability
+in
+extracting
+incident
+and
+victim data from
+diverse sources
+Limited
+by
+LLMs’ occasional
+misidentification
+and
+reliance
+on
+high-quality input
+data
+from
+local
+journalism
+Demonstrated
+potential
+for
+scaling
+injury
+surveillance with
+LLMs, achieving
+near-human
+performance
+in
+coding
+incident
+reports
+Validated
+LLMs
+as
+viable
+tools
+for
+enhancing
+efficiency
+in
+agricultural injury
+data
+collection
+and analysis
+Harnessing
+the
+Power
+of
+Large
+Language
+Models
+in
+Agricultural
+Safety
+&
+Health
+[203]
+Explored
+the
+potential
+of
+LLMs to support
+agricultural safety
+professionals
+by
+answering
+technical
+questions
+and
+interpreting
+research articles
+Evaluated
+the
+accuracy
+and
+completeness
+of
+LLM-generated
+responses
+in
+agricultural
+safety
+contexts,
+highlighting
+the
+importance
+of
+prompt
+engineering
+Implemented
+use
+cases
+in
+responding
+to
+safety
+queries,
+interpreting
+regulatory
+standards,
+and
+summarizing
+incident
+reports
+with
+generative
+AI
+Addressed
+challenges
+of
+bias,
+intellectual
+property,
+and
+accuracy
+in
+the
+use of LLMs in
+agricultural safety
+Limited by risks
+of
+inaccurate
+or
+incomplete
+responses
+and
+ethical
+concerns
+in the application
+of LLMs
+Demonstrated
+the
+effectiveness
+of
+LLMs
+in
+enhancing
+efficiency
+and
+supporting
+decision-making
+in
+agricultural
+safety
+Emphasized
+the
+need
+for
+responsible
+use
+and
+continuous
+improvement
+of
+LLMs
+to
+address
+ethical
+and
+practical
+challenges in the
+field
+Overcoming
+LLM
+Challenges
+using
+RAG-Driven
+Precision in Coffee
+Leaf
+Disease
+Remediation [26]
+Proposed an AI-
+driven system us-
+ing YOLOv8 for
+disease identifica-
+tion and RAG for
+context-aware di-
+agnostics in cof-
+fee production
+Addressed
+LLM
+limitations
+by
+integrating
+RAG
+to
+enhance
+accuracy
+and
+reduce
+hallucinations
+in
+context-
+specific
+disease
+management
+Implemented
+real-time
+monitoring,
+collaborative
+dataset
+expansion,
+and
+organizational
+involvement
+to
+ensure
+system
+adaptability
+in
+diverse settings
+Focused
+on
+sustainable
+agriculture
+by
+promoting
+precise
+disease
+identification and
+reducing reliance
+on
+pesticides
+through
+eco-
+friendly practices
+Demonstrated
+successful
+reduction in LLM
+inaccuracies
+using
+RAG,
+achieving reliable
+and
+context-
+aware
+solutions
+for PA
+Highlighted
+challenges
+in
+model
+training,
+prompt
+formulation,
+and
+dataset handling,
+stressing
+expert
+input for refining
+model outputs
+Laid
+the
+groundwork
+for
+future
+research focusing
+on
+scalability,
+reliability,
+and
+expanding disease
+management
+capabilities
+in
+coffee agriculture
+Using
+LLMs
+in
+Cyber-Physical
+Systems
+for
+Agriculture
+-
+ZEMELA [22]
+Proposed
+integrating LLMs
+into
+ZEMELA
+platform
+for
+smart agriculture,
+enhancing
+advisory services
+for farmers
+Focused
+on
+assessing risks in
+agricultural
+projects
+considering
+Bulgarian
+legislation
+and
+program
+requirements
+Summarized
+feasibility
+analysis
+and
+discussed
+two
+potential
+architectural
+approaches
+for
+LLM integration
+Aimed to refine
+operational
+capabilities
+of
+ZEMELA
+through
+integration,
+enhancing project
+preparation
+and
+implementation
+for farmers
+Results indicated
+LLMs’
+potential
+in
+organizing
+agricultural data,
+aiding
+in
+risk
+assessment,
+and
+providing
+context-aware
+advice
+Demonstrated
+the architecture’s
+potential
+in
+improving project
+preparation
+efficiency
+and
+compliance
+with
+regulations
+Planned
+experiments
+to determine the
+most
+effective
+architecture
+for
+the
+advisory
+service prototype
+in ZEMELA
+Continued on next page
+
+
+--- Page 28 ---
+R. SAPKOTA ET AL., MULTI-MODAL LLMS IN AGRICULTURE: A COMPREHENSIVE REVIEW, 2024
+28
+TABLE V – continued from previous page
+Paper Reference
+RQ1:
+Data
+Sources
+and
+Integration
+RQ2: Evaluation
+Metrics
+RQ3:
+Prompt
+Engineering
+Techniques
+RQ4: Optimiza-
+tion Strategies
+RQ5: Challenges
+and Limitations
+RQ6:
+Benefits
+over Traditional
+ML/DL
+RQ7:
+Outperformance
+over ML/DL
+Comparative Study
+of Pre-trained Lan-
+guage Models for
+Text
+Classification
+in Smart Agricul-
+ture Domain [107]
+Conducted a com-
+parative study on
+transformer mod-
+els for sentiment
+analysis in smart
+agriculture
+Evaluated
+the
+performance
+of
+GPT-2,
+agricultural
+BERT,
+and
+DistilBERT
+on
+text classification
+in the agricultural
+domain
+Focused
+on
+analyzing
+user
+perception
+towards
+smart
+farming
+technologies
+through sentiment
+analysis
+of
+YouTube data
+Aimed
+to
+determine
+the
+effectiveness
+of
+transformer
+models
+in
+classifying
+agricultural
+and
+technical text
+Results
+showed
+the
+domain-
+specific
+pre-trained
+agricultural
+BERT
+outperformed
+GPT-2
+and
+DistilBERT
+in
+macro-F1-score
+and accuracy
+Demonstrated
+transformers’
+viability for text
+classification
+in
+smart agriculture,
+with
+agricultural
+BERT
+as
+the
+superior model
+Contributed
+insights into the
+application
+of
+DTs
+and
+ICTs
+in smart farming
+through sentiment
+analysis
+Natural
+Language
+Processing of Social
+Network Data for
+the
+Evaluation
+of
+Agricultural
+and
+Rural Policies [218]
+Applied NLP and
+sentiment
+analy-
+sis on Twitter data
+to evaluate pub-
+lic opinion on Eu-
+ropean
+Common
+Agricultural Pol-
+icy (CAP)
+Analyzed
+the
+evolution
+of
+sentiment towards
+CAP
+over
+five
+years,
+focusing
+on
+key
+issues
+like
+Brexit,
+environmental
+measures,
+and
+corruption
+Investigated
+the
+ability
+of
+NLP
+to
+provide
+insights
+into
+social
+sentiment
+on
+global
+agricultural
+policy issues
+Demonstrated
+the
+potential
+of
+sentiment
+analysis
+to
+support inclusive
+and
+responsive
+policymaking
+in
+agriculture
+Findings revealed
+that
+sentiment
+analysis
+can
+enhance
+agricultural
+policy
+design
+by aligning with
+public opinion
+Highlighted
+limitations
+of
+social media data
+in
+representing
+all
+agricultural
+stakeholders,
+particularly
+farmers
+Suggested
+future
+research
+directions,
+including
+the
+use
+of
+diverse
+NLP
+techniques
+and
+analysis
+of
+longer periods
+End-to-end Frame-
+work for Agricul-
+tural Entity Extrac-
+tion
+–
+A
+Hybrid
+Model with Trans-
+former [200]
+Developed
+a
+comprehensive
+framework
+for
+extracting
+agricultural
+entities
+from
+unstructured
+text
+using
+a
+hybrid
+approach
+Combined
+dictionary-based,
+rule-based,
+and
+transformer-based
+deep
+learning
+techniques
+to
+construct
+an
+annotated dataset
+for training
+Proposed
+a
+BERT-based
+transformer
+model
+with
+Conditional
+Random
+Field
+(CRF)
+for
+improved
+entity
+extraction
+Achieved
+high
+performance
+metrics
+with
+Precision
+of
+88.84%,
+Recall
+of
+88.9%,
+and
+F1-Score
+of
+88.87%
+Enhanced
+entity
+extraction without
+relying
+on
+pre-
+labeled
+datasets,
+addressing
+challenges
+in
+agricultural
+NLP
+tasks
+Demonstrated the
+effectiveness
+of
+transfer
+learning
+and
+CRF
+in
+improving model
+performance
+Provided
+a
+robust
+solution
+for
+agricultural
+entity
+extraction,
+contributing
+to
+advancements
+in
+NLP applications
+in agriculture
+Advance
+Research
+in
+Agricultural
+Text-to-Speech:
+The
+Word
+Segmentation
+of
+Analytic Language
+and
+the
+Deep
+Learning-Based
+End-to-End System
+[204]
+Discussed
+the
+framework
+and
+key
+technologies
+of Text-to-Speech
+(TTS) systems in
+agriculture
+Summarized
+advancements
+in
+agricultural TTS,
+focusing on word
+segmentation
+of
+analytic
+languages
+and
+deep
+learning-
+based end-to-end
+TTS systems
+Proposed
+solutions
+to
+improve
+training
+speed,
+synthesis
+speed, and real-
+time
+deployment
+on mobile devices
+Emphasized
+challenges
+such
+as
+word
+segmentation
+in
+analytic
+languages
+like
+Chinese
+and
+the
+need
+for
+high-quality,
+fast
+speech synthesis
+Aimed to enhance
+the
+intelligibility
+and naturalness of
+synthetic
+speech
+in agricultural ap-
+plications
+Identified
+research
+directions
+including weakly-
+supervised
+learning
+and
+optimization
+for
+mobile
+deployment
+Highlighted
+the
+potential
+of
+deep
+learning
+in
+advancing
+agricultural
+TTS
+technology,
+addressing
+specific
+challenges
+in
+the domain
+Note*: We extend our sincere gratitude to our scientific readers for engaging with our study on Multi-modal LLMs in agriculture. Your insights and discourse are invaluable
+to us. Should you wish to discuss further or have any inquiries, please do not hesitate to contact Ranjan Sapkota at ranjan.sapkota@wsu.edu or ranjansapkota5@gmail.com or call
+701-793-3563. LinkedIn: https://www.linkedin.com/in/ranjan-sapkota-069645118/ We are eager to explore collaborative opportunities and gain from your expertise. Reference to our
+other papers:
+•
+Exploring Multi-modal Large Language Model for Creating Image Datasets in Agriculture: An Experimental Study [219]
+•
+Synthetic Meets Authentic: Leveraging Large Language Model Generated Datasets for Yolov10-Based Apple Detection in Orchard Environments [220]
+•
+Yolov10 to its genesis: A decadal and comprehensive review of the you only look once (YOLO) series [221]
+•
+Comprehensive Performance Evaluation of YOLOv10, YOLOv9 and YOLOv8 on Detecting and Counting Fruitlet in Complex Orchard Environments [222]
+•
+Comparing YOLOv8 and Mask R-CNN for instance segmentation in complex orchard environments [223], [224]
+Agriculture Keywords: Large Language Models in agriculture, LLM applications in farming, Agricultural efficiency LLM, Multi-modal LLMs for agriculture, Precision agriculture
+LLM technology, LLM for crop management, Decision support systems LLM, AI in agriculture, LLM for farm automation, Smart farming with LLM, Artificial intelligence crop
+monitoring, LLM farm technology, LLM agricultural innovations, Future of LLM in agriculture, LLM for sustainable farming, LLM and agricultural data, Farm management AI,
+LLM for soil analysis, AI-driven agricultural methods, LLM for pest control, Crop yield prediction LLM, LLM in agri-tech, AI tools for agriculture, Precision farming AI, LLM
+data processing in agriculture, Agricultural AI advancements, LLM for weather prediction in farming, LLM agricultural applications, Farming AI technologies, LLM for agricultural
+research, AI in crop production, LLM benefits in agriculture, LLM for farm productivity, AI for agricultural decision-making, LLM agricultural challenges, LLM agricultural
+solutions, AI farming efficiency, AI agricultural analysis, LLM crop health monitoring, AI for farm management, LLM technology in agriculture, LLM in precision agriculture,
+AI-enhanced farming, Smart agriculture AI, AI applications in farming, LLM for agricultural improvement, Agricultural AI impact, LLM for farming optimization, AI-driven farming
+solutions, AI technology in agriculture.
+General Keywords: Artificial intelligence applications, machine learning in business, AI for healthcare, data analytics tools, LLM technology, AI in education, natural language
+processing, robotics automation, AI-driven analytics, cloud computing services, big data solutions, AI in retail, cybersecurity and AI, smart home technology, IoT devices, blockchain
+technology, fintech innovations, AI in entertainment, virtual reality experiences, augmented reality applications, AI in transportation, AI for customer service, speech recognition
+software, AI in real estate, machine learning algorithms, deep learning models, AI for energy management, predictive analytics, AI content generation, technology trends in AI,
+Robotics and LLM integration, AI robots with natural language processing, LLM-enhanced robotic automation, Autonomous robots with LLM, AI and robotics in manufacturing,
+LLM applications in robotics, Smart robotics and AI, Machine learning in robotics, AI-driven robotics development, LLM for robotic control systems, Robotics using deep learning,
+LLM in industrial robots, Collaborative robots with AI, LLM in autonomous vehicles, Robotic process automation AI, LLM in robotics research, AI for robotics programming,
+Cognitive robotics and AI, Machine learning models for robotics, AI-enhanced robotics training.
+
+
