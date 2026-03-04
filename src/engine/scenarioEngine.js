@@ -208,4 +208,6 @@ export const getScenarioList = () => Object.values(SCENARIOS).map(s => ({
     riskLevel: s.riskLevel,
     eventCount: s.events.length,
     expectedOutcome: s.expectedOutcome,
+    daysToHarvest: s.daysToHarvest,
+    startDay: s.startDay,
 }));

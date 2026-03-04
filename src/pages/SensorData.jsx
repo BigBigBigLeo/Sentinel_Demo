@@ -1,55 +1,87 @@
-import { useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { fields, currentSensors, sensorTimeSeries, pestMonitoring } from '../data/mockData';
+import React from 'react';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, AreaChart, Area } from 'recharts';
+import useStore from '../engine/store';
 import Icon from '../components/Icon';
 import StatusBadge from '../components/StatusBadge';
+import MultimodalGallery from '../components/MultimodalGallery';
+import { currentSensors, sensorTimeSeries, sensorForecasts, sensorThresholds, pestMonitoring, thresholdBreaches, trendAlerts } from '../data/mockData';
 
-export default function SensorData({ selectedField }) {
-    const [timeRange, setTimeRange] = useState('24H');
-    const field = fields.find(f => f.id === selectedField);
-    const sensors = currentSensors[selectedField];
-    const timeSeries = sensorTimeSeries[selectedField];
-    const pests = pestMonitoring[selectedField];
+const SENSOR_CONFIG = [
+    { key: 'temperature', label: 'Temperature', unit: '°C', color: '#ef4444', sensorKey: 'temp_C', trend: 'stable' },
+    { key: 'humidity', label: 'Humidity', unit: '%', color: '#38bdf8', sensorKey: 'humidity_pct', trend: 'rising' },
+    { key: 'soilMoisture', label: 'Soil Moisture', unit: '%', color: '#34d399', sensorKey: 'soil_moist_pct', trend: 'stable' },
+    { key: 'leafWetness', label: 'Leaf Wetness', unit: 'h', color: '#a78bfa', sensorKey: 'leaf_wetness_h', trend: 'rising' },
+    { key: 'wind', label: 'Wind Speed', unit: 'm/s', color: '#f59e0b', sensorKey: 'wind_speed_ms', trend: 'stable' },
+    { key: 'light', label: 'Light Intensity', unit: 'Lux', color: '#06b6d4', sensorKey: 'light_Lux', trend: 'falling' },
+];
 
-    const sensorCards = [
-        { label: 'Temperature', value: sensors?.temp_C, unit: '°C', icon: 'thermostat', color: '#3dabf5', threshold: 28 },
-        { label: 'Humidity', value: sensors?.humidity_pct, unit: '%', icon: 'water-drop', color: '#ef4444', threshold: field?.crop === 'blueberry' ? 65 : 90 },
-        { label: 'Soil Moisture', value: sensors?.soil_moist_pct, unit: '%', icon: 'leaf', color: '#22d87a', threshold: 40 },
-        { label: 'Light', value: sensors?.light_Lux, unit: 'Lux', icon: 'sun', color: '#f5a623', threshold: null },
-        { label: 'Wind Speed', value: sensors?.wind_speed_ms, unit: 'm/s', icon: 'wind', color: '#a78bfa', threshold: 3 },
-        { label: 'Rainfall', value: sensors?.rainfall_mm, unit: 'mm', icon: 'cloud-rain', color: '#3dabf5', threshold: null },
-    ];
+export default function SensorData() {
+    const { fields, activeFieldId } = useStore();
+    const field = fields[activeFieldId];
+    const fieldId = activeFieldId || 'BS-B3';
+    const sensors = currentSensors[fieldId] || {};
+    const timeSeries = sensorTimeSeries[fieldId] || {};
+    const forecasts = sensorForecasts[fieldId] || {};
+    const pest = pestMonitoring[fieldId] || {};
+    const alerts = trendAlerts[fieldId] || [];
+    const breaches = thresholdBreaches.filter(b => b.zone === fieldId?.split('-')[1] || true);
 
-    const chartConfigs = [
-        { key: 'temperature', label: 'Temperature (°C)', color: '#3dabf5', threshold: 28 },
-        { key: 'humidity', label: 'Humidity (%)', color: '#ef4444', threshold: field?.crop === 'blueberry' ? 65 : 90 },
-        { key: 'soilMoisture', label: 'Soil Moisture (%)', color: '#22d87a', threshold: 40 },
-        { key: 'light', label: 'Light (Lux)', color: '#f5a623', threshold: null },
-    ];
+    const formatNow = () => new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
 
     return (
-        <div className="animate-in">
-            {/* Sensor Cards Grid */}
-            <div className="grid-3 mb-24">
-                {sensorCards.map((s, i) => {
-                    const breached = s.threshold && (
-                        s.label === 'Humidity' ? s.value > s.threshold :
-                            s.label === 'Wind Speed' ? s.value > s.threshold :
-                                s.value > s.threshold
-                    );
+        <div className="page">
+            <div className="page-header">
+                <div>
+                    <h1 className="page-title">Sensor Telemetry</h1>
+                    <p className="page-subtitle">Stage 1: Perception — {field?.name} | Updated: {formatNow()}</p>
+                </div>
+            </div>
+
+            {/* Sensor Grid — 24h chart + 12h AI forecast per sensor */}
+            <div className="sensor-grid">
+                {SENSOR_CONFIG.map(s => {
+                    const value = sensors[s.sensorKey] || 0;
+                    const series = timeSeries[s.key] || [];
+                    const forecast = forecasts[s.key] || [];
+                    const threshold = sensorThresholds[s.key];
+                    const isAbove = threshold && value > threshold.max;
+
+                    const chartData = [
+                        ...series.slice(-18).map(d => ({ time: d.time, actual: d.value })),
+                        ...forecast.slice(0, 8).map(d => ({ time: d.time, forecast: d.value })),
+                    ];
+
                     return (
-                        <div className={`sensor-card animate-in animate-in-delay-${i % 4 + 1}`} key={i}>
-                            <div className="sensor-header">
-                                <div className="sensor-icon" style={{ background: `${s.color}20`, color: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <Icon name={s.icon} size={28} />
+                        <div key={s.key} className="sensor-sparkline-card" style={isAbove ? { borderLeft: `3px solid ${s.color}` } : {}}>
+                            <div className="sensor-card-header">
+                                <div>
+                                    <div className="sensor-card-name">{s.label}</div>
+                                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                                        <span className="sensor-card-reading" style={{ color: isAbove ? '#ef4444' : s.color }}>
+                                            {s.key === 'light' ? `${(value / 1000).toFixed(1)}k` : value}
+                                        </span>
+                                        <span className="sensor-card-unit">{s.unit}</span>
+                                    </div>
                                 </div>
-                                {breached && <StatusBadge status="critical" label="BREACHED" />}
+                                <span className={`sensor-card-trend ${s.trend}`}>
+                                    {s.trend === 'rising' ? '↑' : s.trend === 'falling' ? '↓' : '→'} {s.trend}
+                                </span>
                             </div>
-                            <div className="sensor-value" style={{ color: s.color }}>{s.value}</div>
-                            <div className="sensor-unit">{s.label} ({s.unit})</div>
-                            {s.threshold && (
-                                <div className="sensor-change" style={{ color: breached ? '#ef4444' : '#94a3b8' }}>
-                                    Threshold: {s.threshold}{s.unit}
+                            <ResponsiveContainer width="100%" height={70}>
+                                <LineChart data={chartData}>
+                                    <XAxis dataKey="time" tick={{ fill: '#475569', fontSize: 8 }} axisLine={false} tickLine={false} interval={3} />
+                                    <YAxis hide domain={['auto', 'auto']} />
+                                    <Tooltip contentStyle={{ background: '#1a2235', border: '1px solid #1e293b', borderRadius: 8, color: '#e2e8f0', fontSize: 12 }} />
+                                    <Line type="monotone" dataKey="actual" stroke={s.color} strokeWidth={2} dot={false} name="Actual" />
+                                    <Line type="monotone" dataKey="forecast" stroke="#f59e0b" strokeWidth={1.5} dot={false} strokeDasharray="4 4" name="AI Forecast" />
+                                    {threshold && <ReferenceLine y={threshold.max} stroke="#ef4444" strokeDasharray="3 3" strokeWidth={0.8} />}
+                                    {threshold && <ReferenceLine y={threshold.min} stroke="#34d399" strokeDasharray="3 3" strokeWidth={0.8} />}
+                                </LineChart>
+                            </ResponsiveContainer>
+                            {threshold && <div className="sensor-card-threshold">Threshold: {threshold.min}–{threshold.max} {s.unit}</div>}
+                            {forecast.length > 0 && (
+                                <div className="sensor-card-forecast">
+                                    AI 12h forecast: {forecast[forecast.length - 1]?.value?.toFixed(1)} {s.unit} ({forecast[0]?.confidence}% conf.)
                                 </div>
                             )}
                         </div>
@@ -57,123 +89,72 @@ export default function SensorData({ selectedField }) {
                 })}
             </div>
 
-            {/* Time-series Charts */}
-            <div className="card mb-24">
-                <div className="card-header">
-                    <h3>Sensor Time Series</h3>
-                    <div className="tab-group">
-                        {['24H', '7D', '30D'].map(r => (
-                            <button key={r} className={`tab-btn ${timeRange === r ? 'active' : ''}`} onClick={() => setTimeRange(r)}>
-                                {r}
-                            </button>
+            {/* Multimodal Sensor Imagery */}
+            <MultimodalGallery />
+
+            {/* Trend Alerts */}
+            {alerts.length > 0 && (
+                <div className="card" style={{ marginBottom: 16 }}>
+                    <h3 className="card-title">AI Trend Alerts — Proactive Monitoring</h3>
+                    <div className="trend-alerts" style={{ marginBottom: 0 }}>
+                        {alerts.map(alert => (
+                            <div key={alert.id} className={`trend-alert-card severity-${alert.severity}`}>
+                                <div className="trend-alert-header">
+                                    <div className="trend-alert-title">
+                                        <Icon name={alert.icon} size={16} /> {alert.title}
+                                    </div>
+                                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                        <span className="timestamp-full">{new Date(alert.timestamp).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })}</span>
+                                        <StatusBadge status={alert.status} />
+                                    </div>
+                                </div>
+                                <div className="trend-alert-detail">{alert.detail}</div>
+                                <div className="trend-alert-prediction">⚡ {alert.prediction}</div>
+                                <div className="trend-alert-action"><Icon name="play" size={10} /> {alert.recommended}</div>
+                            </div>
                         ))}
                     </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-                    {chartConfigs.map(cfg => (
-                        <div key={cfg.key} style={{ height: 200 }}>
-                            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: 8 }}>{cfg.label}</div>
-                            <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={timeSeries?.[cfg.key] || []}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.08)" />
-                                    <XAxis dataKey="time" tick={{ fontSize: 9, fill: '#64748b' }} tickLine={false} interval={3} />
-                                    <YAxis tick={{ fontSize: 9, fill: '#64748b' }} tickLine={false} />
-                                    <Tooltip
-                                        contentStyle={{ background: '#111827', border: '1px solid rgba(148,163,184,0.15)', borderRadius: 8, fontSize: 11 }}
-                                    />
-                                    {cfg.threshold && (
-                                        <ReferenceLine y={cfg.threshold} stroke="#ef4444" strokeDasharray="5 5" label={{ value: `Threshold: ${cfg.threshold}`, position: 'right', fontSize: 9, fill: '#ef4444' }} />
-                                    )}
-                                    <Line type="monotone" dataKey="value" stroke={cfg.color} strokeWidth={2} dot={false} />
-                                </LineChart>
-                            </ResponsiveContainer>
+            )}
+
+            {/* Threshold Breach Log */}
+            <div className="card" style={{ marginBottom: 16 }}>
+                <h3 className="card-title">Threshold Breach Log — {breaches.length} Events</h3>
+                <table className="data-table">
+                    <thead>
+                        <tr><th>Date / Time</th><th>Sensor</th><th>Value</th><th>Threshold</th><th>Zone</th><th>Action Taken</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        {breaches.map((b, i) => (
+                            <tr key={i}>
+                                <td className="timestamp-full">{new Date(b.time).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })}</td>
+                                <td style={{ fontWeight: 600, color: '#e2e8f0' }}>{b.sensor}</td>
+                                <td style={{ fontFamily: 'JetBrains Mono, monospace', color: '#ef4444', fontWeight: 700 }}>{b.value}</td>
+                                <td style={{ fontFamily: 'JetBrains Mono, monospace', color: '#64748b' }}>{b.threshold}</td>
+                                <td><span className="zone-badge">{b.zone}</span></td>
+                                <td style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{b.action}</td>
+                                <td><StatusBadge status={b.status} /></td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Pest Monitoring */}
+            <div className="card">
+                <h3 className="card-title">Pest Monitoring — IoT Trap Data</h3>
+                <div className="grid grid-3" style={{ gap: 12, marginTop: 8 }}>
+                    {Object.entries(pest).map(([key, value]) => (
+                        <div key={key} style={{ padding: 12, background: '#0c1322', borderRadius: 8, textAlign: 'center' }}>
+                            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: value > 5 ? '#f59e0b' : '#34d399', fontFamily: 'JetBrains Mono, monospace' }}>
+                                {value}
+                            </div>
+                            <div style={{ fontSize: '0.65rem', color: '#94a3b8', textTransform: 'uppercase', marginTop: 4 }}>
+                                {key.replace(/_/g, ' ')}
+                            </div>
                         </div>
                     ))}
                 </div>
-            </div>
-
-            {/* Pest Monitoring Manual Input */}
-            <div className="grid-2" style={{ gap: 16 }}>
-                <div className="card">
-                    <div className="card-header">
-                        <h3>Pest & Disease Monitoring</h3>
-                        <StatusBadge status="monitoring" label="Latest readings" />
-                    </div>
-                    <table className="data-table">
-                        <thead>
-                            <tr>
-                                <th>Indicator</th>
-                                <th>Value</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {Object.entries(pests || {}).map(([key, val]) => {
-                                const label = key.replace(/_/g, ' ').replace(/pct/g, '%').replace(/\b\w/g, l => l.toUpperCase());
-                                const isHigh = (key.includes('aphid') && val > 5) || (key.includes('botrytis') && val > 2) || (key.includes('mite') && val > 5);
-                                return (
-                                    <tr key={key}>
-                                        <td style={{ fontWeight: 500 }}>{label}</td>
-                                        <td>{val}</td>
-                                        <td>{isHigh ? <StatusBadge status="critical" label="HIGH" /> : <StatusBadge status="pass" label="NORMAL" />}</td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-
-                <div className="card">
-                    <div className="card-header">
-                        <h3>Manual Data Entry</h3>
-                        <StatusBadge status="monitoring" label="Field inspection" />
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                        <div>
-                            <label className="form-label">Aphids per Leaf</label>
-                            <input type="number" className="form-input" defaultValue={pests?.aphids_per_leaf || 0} />
-                        </div>
-                        <div>
-                            <label className="form-label">Sticky Trap Count</label>
-                            <input type="number" className="form-input" defaultValue={pests?.sticky_trap_daily || 0} />
-                        </div>
-                        <div>
-                            <label className="form-label">Infection Rate (%)</label>
-                            <input type="number" className="form-input" defaultValue={pests?.botrytis_infection_pct || 0} />
-                        </div>
-                        <div>
-                            <label className="form-label">Soil pH</label>
-                            <input type="number" className="form-input" defaultValue={sensors?.soil_ph || 5.0} step="0.1" />
-                        </div>
-                    </div>
-                    <button className="btn btn-primary" style={{ marginTop: 16, width: '100%', justifyContent: 'center', display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <Icon name="save" size={16} />
-                        Update Readings
-                    </button>
-                </div>
-            </div>
-
-            {/* JSON Data Preview */}
-            <div className="card" style={{ marginTop: 20 }}>
-                <div className="card-header">
-                    <h3>Raw JSON Input</h3>
-                    <StatusBadge status="low" label="API Format" />
-                </div>
-                <pre style={{
-                    background: '#0a0e1a', padding: 16, borderRadius: '8px',
-                    fontSize: '0.78rem', color: '#10b981', overflow: 'auto', maxHeight: 180,
-                    border: '1px solid #1e293b',
-                }}>
-                    {JSON.stringify({
-                        crop: field?.crop,
-                        field_id: field?.name,
-                        date: new Date().toISOString(),
-                        growth_stage: field?.growthStageZh,
-                        env: sensors,
-                        pest: pests,
-                        prev_actions: { last_spray: '10 days ago' },
-                    }, null, 2)}
-                </pre>
             </div>
         </div>
     );

@@ -7,6 +7,7 @@ import { assessRisks, generatePrescription, calculateRevenueAtRisk } from './dec
 import { executePresciption } from './executionEngine.js';
 import { generateAuditRecord } from './auditEngine.js';
 import { SCENARIOS } from './scenarioEngine.js';
+import { generateRiskThinkingChain, generatePrescriptionThinkingChain } from './thinkingEngine.js';
 
 // Field definitions
 const FIELDS = {
@@ -54,8 +55,17 @@ const useStore = create((set, get) => ({
     // ─── Event Log ────────────────────────────────────────────────────
     eventLog: [],
 
+    // ─── Pipeline & Approval ──────────────────────────────────────────
+    pipelineStage: 1,          // 1=Dashboard, 2=Sensors, 3=Risk, 4=Rx, 5=Exec, 6=Audit, 7=History
+    approvalQueue: [],         // critical decisions pending human sign-off
+
     // ─── UI State ─────────────────────────────────────────────────────
     sidebarCollapsed: false,
+
+    // ─── AI Thinking State ────────────────────────────────────────────
+    thinkingChain: [],
+    isThinking: false,
+    thinkingContext: null,     // 'risk' | 'prescription' | 'audit'
 
     // ─── Actions ──────────────────────────────────────────────────────
 
@@ -215,15 +225,41 @@ const useStore = create((set, get) => ({
         const rx = generatePrescription(activeFieldId, currentSnapshot, riskResults, daysToHarvest);
         if (!rx) return;
 
-        set(state => ({
-            activePrescription: rx,
-            prescriptions: [...state.prescriptions, rx],
-            eventLog: [...state.eventLog, {
+        const topRisk = riskResults.reduce((max, r) => r.score > (max?.score || 0) ? r : max, null);
+        const isCritical = topRisk && topRisk.score >= 70;
+
+        if (isCritical) {
+            // Critical: route to approval queue
+            const approvalItem = {
+                id: `APR-${Date.now()}`,
                 timestamp: new Date().toISOString(),
-                type: 'prescription',
-                message: `Rx ${rx.id} generated: ${rx.actionLabel} for ${rx.threatName}${rx.usedFallback ? ' (fallback — PHI constraint)' : ''}`,
-            }],
-        }));
+                prescription: rx,
+                riskScore: topRisk.score,
+                threat: topRisk.name,
+                evidence: (topRisk.factors || []).map((f, i) => ({ description: f, points: Math.round((topRisk.score / (topRisk.factors?.length || 1))), impact: topRisk.score >= 70 ? 'high' : 'medium' })),
+                status: 'pending',
+            };
+            set(state => ({
+                activePrescription: rx,
+                prescriptions: [...state.prescriptions, rx],
+                approvalQueue: [...state.approvalQueue, approvalItem],
+                eventLog: [...state.eventLog, {
+                    timestamp: new Date().toISOString(),
+                    type: 'prescription',
+                    message: `Rx ${rx.id} generated: ${rx.actionLabel} for ${rx.threatName} — ⚠ CRITICAL: routed to human approval queue`,
+                }],
+            }));
+        } else {
+            set(state => ({
+                activePrescription: rx,
+                prescriptions: [...state.prescriptions, rx],
+                eventLog: [...state.eventLog, {
+                    timestamp: new Date().toISOString(),
+                    type: 'prescription',
+                    message: `Rx ${rx.id} generated: ${rx.actionLabel} for ${rx.threatName}${rx.usedFallback ? ' (fallback — PHI constraint)' : ''} — auto-approved (low risk)`,
+                }],
+            }));
+        }
     },
 
     modifyRx: (rxId, modifications) => {
@@ -288,9 +324,68 @@ const useStore = create((set, get) => ({
         }));
     },
 
+    // ─── Approval Actions ──────────────────────────────────────────────
+
+    approveDecision: (approvalId) => {
+        set(state => {
+            const item = state.approvalQueue.find(a => a.id === approvalId);
+            if (!item) return state;
+            return {
+                approvalQueue: state.approvalQueue.filter(a => a.id !== approvalId),
+                eventLog: [...state.eventLog, {
+                    timestamp: new Date().toISOString(),
+                    type: 'approval',
+                    message: `Decision ${approvalId} APPROVED by operator. Rx ${item.prescription?.id} cleared for execution.`,
+                }],
+            };
+        });
+    },
+
+    rejectDecision: (approvalId) => {
+        set(state => {
+            const item = state.approvalQueue.find(a => a.id === approvalId);
+            if (!item) return state;
+            return {
+                approvalQueue: state.approvalQueue.filter(a => a.id !== approvalId),
+                activePrescription: state.activePrescription?.id === item.prescription?.id ? null : state.activePrescription,
+                eventLog: [...state.eventLog, {
+                    timestamp: new Date().toISOString(),
+                    type: 'rejection',
+                    message: `Decision ${approvalId} REJECTED by operator. Rx ${item.prescription?.id} cancelled.`,
+                }],
+            };
+        });
+    },
+
+    setPipelineStage: (stage) => set({ pipelineStage: stage }),
+
     // ─── UI Actions ───────────────────────────────────────────────────
 
     toggleSidebar: () => set(state => ({ sidebarCollapsed: !state.sidebarCollapsed })),
+
+    // ─── AI Thinking Actions ──────────────────────────────────────────
+
+    startRiskThinking: () => {
+        const { currentSnapshot, fields, activeFieldId, riskResults } = get();
+        const field = fields[activeFieldId];
+        const chain = generateRiskThinkingChain(currentSnapshot, field, riskResults);
+        set({ thinkingChain: chain, isThinking: true, thinkingContext: 'risk' });
+    },
+
+    startPrescriptionThinking: () => {
+        const { currentSnapshot, fields, activeFieldId, riskResults, activePrescription } = get();
+        const field = fields[activeFieldId];
+        const chain = generatePrescriptionThinkingChain(currentSnapshot, field, riskResults, activePrescription);
+        set({ thinkingChain: chain, isThinking: true, thinkingContext: 'prescription' });
+    },
+
+    stopThinking: () => {
+        set({ isThinking: false });
+    },
+
+    clearThinking: () => {
+        set({ thinkingChain: [], isThinking: false, thinkingContext: null });
+    },
 }));
 
 export default useStore;

@@ -4,6 +4,7 @@ import thresholds from '../data/thresholds';
 import { bannedPesticides, phiConstraints } from '../data/constraints';
 import StatusBadge from '../components/StatusBadge';
 import Icon from '../components/Icon';
+import PipelineBreadcrumb from '../components/PipelineBreadcrumb';
 
 export default function Admin() {
     const { fields, activeFieldId } = useStore();
@@ -30,6 +31,7 @@ export default function Admin() {
 
     return (
         <div className="page">
+            <PipelineBreadcrumb />
             <div className="page-header">
                 <div>
                     <h1 className="page-title">Admin & Configuration</h1>

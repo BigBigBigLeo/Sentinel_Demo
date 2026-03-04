@@ -1,11 +1,13 @@
 import React, { useEffect } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import useStore from '../engine/store';
+import { aiWatchdog, trendAlerts } from '../data/mockData';
+import PageClock from './PageClock';
 
 const navItems = [
     { path: '/', label: 'Dashboard', labelZh: '指挥中心', iconName: 'dashboard' },
     { path: '/sensors', label: 'Sensor Telemetry', labelZh: '传感数据', iconName: 'sensors' },
-    { path: '/risk', label: 'Risk Assessment', labelZh: '风险评估', iconName: 'risk' },
+    { path: '/risk', label: 'Risk Assessment', labelZh: '风险评估', iconName: 'risk', alertKey: 'risk' },
     { path: '/prescription', label: 'Prescription', labelZh: '处方', iconName: 'prescription' },
     { path: '/execution', label: 'Execution', labelZh: '执行', iconName: 'execution' },
     { path: '/audit', label: 'Audit Report', labelZh: '审计', iconName: 'audit' },
@@ -30,22 +32,29 @@ const renderIcon = (name) => {
     }
 };
 
+// Check if any active alerts exist for the sidebar badge
+const hasActiveAlerts = () => {
+    const allAlerts = [...(trendAlerts['BS-B3'] || []), ...(trendAlerts['YN-A2'] || [])];
+    return allAlerts.filter(a => a.status === 'active' && (a.severity === 'critical' || a.severity === 'warning')).length > 0;
+};
 
 export default function Layout() {
-    const { activeFieldId, setActiveField, fields, activeScenario, scenarioStep, initSimulation, currentDay } = useStore();
+    const { activeFieldId, setActiveField, fields, activeScenario, scenarioStep, initSimulation, currentDay, approvalQueue } = useStore();
 
     useEffect(() => {
         initSimulation();
     }, [initSimulation]);
+
+    const showAlertBadge = hasActiveAlerts();
 
     return (
         <div className="app-shell">
             {/* Sidebar */}
             <aside className="sidebar">
                 <div className="sidebar-brand">
-                    <img src="/sentinel_logo.png" alt="Sentinel" className="sidebar-logo" />
+                    <img src="/sentinel_logo.png" alt="Sentinel" className="sidebar-logo" style={{ width: 36, height: 36 }} />
                     <div>
-                        <div className="sidebar-title">SENTINEL</div>
+                        <div className="sidebar-title" style={{ fontSize: '1.2rem', letterSpacing: 3 }}>SENTINEL</div>
                         <div className="sidebar-subtitle">Decision OS</div>
                     </div>
                 </div>
@@ -57,15 +66,26 @@ export default function Layout() {
                             to={item.path}
                             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
                             end={item.path === '/'}
+                            style={{ position: 'relative' }}
                         >
-                            <span className="sidebar-icon">{item.icon}</span>
+                            <span className="sidebar-icon">{renderIcon(item.iconName)}</span>
                             <span className="sidebar-label">{item.label}</span>
+                            {item.alertKey === 'risk' && showAlertBadge && <span className="nav-badge" />}
+                            {item.path === '/prescription' && approvalQueue.length > 0 && (
+                                <span className="nav-approval-badge">{approvalQueue.length}</span>
+                            )}
                         </NavLink>
                     ))}
                 </nav>
 
                 <div className="sidebar-footer">
-                    <div style={{ fontSize: '0.65rem', color: '#64748b' }}>Sentinel Engine v4.2</div>
+                    <div style={{ fontSize: '0.6rem', color: '#475569', marginBottom: 4 }}>
+                        Season: Flowering → Harvest
+                    </div>
+                    <div style={{ fontSize: '0.6rem', color: '#475569' }}>
+                        Day {currentDay || 18} / 120
+                    </div>
+                    <div style={{ fontSize: '0.65rem', color: '#64748b', marginTop: 6 }}>Sentinel Engine v4.2</div>
                     <div style={{ fontSize: '0.65rem', color: '#64748b' }}>Build 2026.03</div>
                 </div>
             </aside>
@@ -95,10 +115,22 @@ export default function Layout() {
                     </div>
 
                     <div className="topbar-right">
-                        <div className="topbar-clock">
-                            <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>SIM DAY</span>
-                            <span style={{ color: '#e2e8f0', fontWeight: 600 }}>{currentDay}</span>
+                        {/* Approval Queue */}
+                        {approvalQueue.length > 0 && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: 'rgba(245,158,11,0.08)', borderRadius: 8, marginRight: 8, border: '1px solid rgba(245,158,11,0.2)' }}>
+                                <span style={{ fontSize: '0.68rem', color: '#f59e0b', fontWeight: 700 }}>⚠ {approvalQueue.length} Pending Approval{approvalQueue.length > 1 ? 's' : ''}</span>
+                            </div>
+                        )}
+
+                        {/* AI Watchdog Indicator */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: 'rgba(52,211,153,0.06)', borderRadius: 8, marginRight: 8 }}>
+                            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', animation: 'watchdog-pulse 2s infinite' }} />
+                            <span style={{ fontSize: '0.68rem', color: '#34d399', fontWeight: 600 }}>AI Active</span>
+                            <span style={{ fontSize: '0.6rem', color: '#64748b' }}>Last scan {new Date(aiWatchdog.lastScan).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
                         </div>
+
+                        <PageClock />
+
                         <div className="topbar-status">
                             <span className="status-light" />
                             <span>System Online</span>
