@@ -109,7 +109,7 @@ export default function SensorData() {
                                     </div>
                                 </div>
                                 <div className="trend-alert-detail">{alert.detail}</div>
-                                <div className="trend-alert-prediction">⚡ {alert.prediction}</div>
+                                <div className="trend-alert-prediction"><Icon name="bolt" size={10} color="#f59e0b" /> {alert.prediction}</div>
                                 <div className="trend-alert-action"><Icon name="play" size={10} /> {alert.recommended}</div>
                             </div>
                         ))}

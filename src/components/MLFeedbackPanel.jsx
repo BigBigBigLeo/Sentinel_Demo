@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import Icon from './Icon';
 
 const MODEL_VERSIONS = [
@@ -27,7 +27,7 @@ export default function MLFeedbackPanel({ prediction, actual }) {
     const predReduction = prediction || 55;
     const actReduction = actual || 48;
     const calibrationError = Math.abs(predReduction - actReduction);
-    const trainingPoints = Math.round(120 + Math.random() * 80);
+    const trainingPoints = 120 + Math.round((predReduction + actReduction) * 0.8);
 
     return (
         <div className="ml-feedback-panel">
@@ -99,7 +99,7 @@ export default function MLFeedbackPanel({ prediction, actual }) {
 
                 {/* Feature Importance */}
                 <div style={{ marginTop: 16 }}>
-                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 8 }}>Feature Importance — This Decision</div>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 8 }}>Feature Importance  - This Decision</div>
                     {FEATURE_IMPORTANCE.map(f => (
                         <div key={f.feature} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 0' }}>
                             <span style={{ fontSize: '0.72rem', color: '#94a3b8', flex: 1 }}>{f.feature}</span>
@@ -114,3 +114,4 @@ export default function MLFeedbackPanel({ prediction, actual }) {
         </div>
     );
 }
+

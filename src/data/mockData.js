@@ -1,4 +1,4 @@
-// Sentinel AgriAI — Mock Data Layer
+﻿// Sentinel AgriAI  - Mock Data Layer
 // Realistic data for Yunnan blueberry and fresh-cut flower scenarios
 
 export const fields = [
@@ -15,7 +15,7 @@ export const fields = [
   },
   {
     id: 'YN-A2',
-    name: 'YN-温棚A2',
+    name: 'YN-温室A2',
     nameEn: 'Rose Greenhouse A2',
     crop: 'flower',
     area: '1.2 hectares',
@@ -145,7 +145,7 @@ export const sensorThresholds = {
   co2: { min: 300, max: 600, unit: 'ppm', warningDelta: 50 },
   uvIndex: { min: 0, max: 8, unit: 'UV', warningDelta: 1 },
   irrigationFlow: { min: 0, max: 5, unit: 'L/min', warningDelta: 0.5 },
-  sporeCount: { min: 0, max: 50, unit: 'spores/m³', warningDelta: 10 },
+  sporeCount: { min: 0, max: 50, unit: 'spores/m3', warningDelta: 10 },
 };
 
 // Zone interval definitions (for chart bands: green=normal, amber=risky, red=critical)
@@ -172,7 +172,7 @@ export const trendAlerts = {
       sensor: 'Humidity',
       icon: 'activity',
       title: 'Humidity approaching critical threshold',
-      detail: 'Rising 3.2% over last 6h — predicted to breach 85% threshold in ~2h. Historical correlation: 87% chance of Botrytis spore activation above 85% RH during flowering.',
+      detail: 'Rising 3.2% over last 6h  - predicted to breach 85% threshold in ~2h. Historical correlation: 87% chance of Botrytis spore activation above 85% RH during flowering.',
       prediction: 'Breach at 85% by 00:15 tonight',
       recommended: 'Preemptive ventilation increase to 70% fan speed',
       status: 'active',
@@ -187,7 +187,7 @@ export const trendAlerts = {
       title: 'Leaf wetness duration extending',
       detail: 'Consecutive wet hours: 2.62h and rising. Critical threshold: 3h. Correlated with night temperature drop below dew point.',
       prediction: 'Will exceed 3h threshold by 23:30',
-      recommended: 'Monitor — auto-alert at 3h | Consider heated air blower deployment',
+      recommended: 'Monitor  - auto-alert at 3h | Consider heated air blower deployment',
       status: 'monitoring',
       trendData: [1.8, 2.0, 2.2, 2.4, 2.5, 2.62],
     },
@@ -200,7 +200,7 @@ export const trendAlerts = {
       title: 'Night temperature drop detected',
       detail: 'Cooling rate: -1.2°C/h since sunset. Current: 18.5°C. Forecast min: 14.2°C at 05:00.',
       prediction: 'No frost risk (min 14.2°C > 5°C threshold)',
-      recommended: 'No action required — within safe range for flowering stage',
+      recommended: 'No action required  - within safe range for flowering stage',
       status: 'resolved',
       trendData: [22, 21, 20, 19, 18.5],
     },
@@ -213,7 +213,7 @@ export const trendAlerts = {
       sensor: 'Humidity',
       icon: 'alert-triangle',
       title: 'Greenhouse humidity above critical level',
-      detail: 'Humidity at 92% — 7% above 85% threshold for 3+ hours. Spider mite reproduction accelerates above 90% RH. Powdery mildew risk HIGH.',
+      detail: 'Humidity at 92%  - 7% above 85% threshold for 3+ hours. Spider mite reproduction accelerates above 90% RH. Powdery mildew risk HIGH.',
       prediction: 'Sustained above 85% until ventilation correction',
       recommended: 'IMMEDIATE: Exhaust fan 100% + dehumidifier activation',
       status: 'active',
@@ -246,14 +246,14 @@ export const aiWatchdog = {
   uptime: '99.97%',
   modelVersion: 'Sentinel-Agri v4.2',
   scanHistory: [
-    { time: '22:10:45', result: 'ANOMALY — Humidity trend breach predicted', severity: 'warning' },
-    { time: '22:09:45', result: 'OK — All sensors within thresholds', severity: 'ok' },
-    { time: '22:08:45', result: 'ANOMALY — Greenhouse A2 humidity critical', severity: 'critical' },
-    { time: '22:07:45', result: 'OK — All sensors within thresholds', severity: 'ok' },
-    { time: '22:06:45', result: 'OK — All sensors within thresholds', severity: 'ok' },
-    { time: '22:05:45', result: 'ANOMALY — Leaf wetness duration approaching limit', severity: 'info' },
-    { time: '22:04:45', result: 'OK — All sensors within thresholds', severity: 'ok' },
-    { time: '22:03:45', result: 'OK — All sensors within thresholds', severity: 'ok' },
+    { time: '22:10:45', result: 'ANOMALY  - Humidity trend breach predicted', severity: 'warning' },
+    { time: '22:09:45', result: 'OK  - All sensors within thresholds', severity: 'ok' },
+    { time: '22:08:45', result: 'ANOMALY  - Greenhouse A2 humidity critical', severity: 'critical' },
+    { time: '22:07:45', result: 'OK  - All sensors within thresholds', severity: 'ok' },
+    { time: '22:06:45', result: 'OK  - All sensors within thresholds', severity: 'ok' },
+    { time: '22:05:45', result: 'ANOMALY  - Leaf wetness duration approaching limit', severity: 'info' },
+    { time: '22:04:45', result: 'OK  - All sensors within thresholds', severity: 'ok' },
+    { time: '22:03:45', result: 'OK  - All sensors within thresholds', severity: 'ok' },
   ],
 };
 
@@ -275,7 +275,7 @@ export const seasonFinancials = {
     interventions: 8,
     netBenefit: 137250,
     seasonROI: 7.3,
-    currency: '¥',
+    currency: 'CNY ',
   },
   'YN-A2': {
     seasonStart: '2025-09-20',
@@ -293,7 +293,7 @@ export const seasonFinancials = {
     interventions: 6,
     netBenefit: 197600,
     seasonROI: 15.9,
-    currency: '¥',
+    currency: 'CNY ',
   },
 };
 
@@ -345,18 +345,18 @@ export const previousActions = {
 
 export const growthStages = {
   blueberry: [
-    { name: 'Dormancy', nameZh: '休眠期', months: 'Jan–Mar', status: 'completed' },
-    { name: 'Bud Break', nameZh: '芽萌发期', months: 'Mar–Apr', status: 'completed' },
-    { name: 'Flowering', nameZh: '花序期', months: 'Apr–May', status: 'active' },
-    { name: 'Fruit Set', nameZh: '结果膨大期', months: 'Jun–Jul', status: 'upcoming' },
-    { name: 'Harvest', nameZh: '采收期', months: 'Aug–Sep', status: 'upcoming' },
+    { name: 'Dormancy', nameZh: '休眠期', months: 'Jan-Mar', status: 'completed' },
+    { name: 'Bud Break', nameZh: '萌芽期', months: 'Mar-Apr', status: 'completed' },
+    { name: 'Flowering', nameZh: '花序期', months: 'Apr-May', status: 'active' },
+    { name: 'Fruit Set', nameZh: '坐果膨大期', months: 'Jun-Jul', status: 'upcoming' },
+    { name: 'Harvest', nameZh: '采收期', months: 'Aug-Sep', status: 'upcoming' },
   ],
   flower: [
-    { name: 'Seedling', nameZh: '育苗期', months: 'Sep–Oct', status: 'completed' },
-    { name: 'Vegetative', nameZh: '营养生长期', months: 'Nov–Dec', status: 'completed' },
-    { name: 'Bud Development', nameZh: '花蕾期', months: 'Jan–Mar', status: 'active' },
-    { name: 'Bloom & Harvest', nameZh: '开花采收期', months: 'Mar–May', status: 'upcoming' },
-    { name: 'Rest', nameZh: '休整期', months: 'Jun–Aug', status: 'upcoming' },
+    { name: 'Seedling', nameZh: '育苗期', months: 'Sep-Oct', status: 'completed' },
+    { name: 'Vegetative', nameZh: '营养生长期', months: 'Nov-Dec', status: 'completed' },
+    { name: 'Bud Development', nameZh: '花蕾期', months: 'Jan-Mar', status: 'active' },
+    { name: 'Bloom & Harvest', nameZh: '开花采收期', months: 'Mar-May', status: 'upcoming' },
+    { name: 'Rest', nameZh: '休整期', months: 'Jun-Aug', status: 'upcoming' },
   ],
 };
 
@@ -392,7 +392,7 @@ export const decisionHistory = [
   {
     id: 'RX-0918',
     date: '2026-02-25',
-    field: 'YN-温棚A2',
+    field: 'YN-温室A2',
     threat: 'Spider Mites',
     action: 'Acaricide rotation spray',
     status: 'completed',
@@ -425,7 +425,7 @@ export const decisionHistory = [
   {
     id: 'RX-0897',
     date: '2026-02-08',
-    field: 'YN-温棚A2',
+    field: 'YN-温室A2',
     threat: 'Gray Mold (Botrytis)',
     action: 'Dehumidification + preventive fungicide',
     status: 'completed',
@@ -441,7 +441,7 @@ export const auditRecords = [
     prescriptionId: 'RX-0923',
     timestamp: '2026-03-01T10:32:00',
     field: 'BS-区B3号园',
-    decisionBasis: 'Humidity 88% + 3 consecutive overcast days during flowering stage → Gray Mold risk score 82/100 (threshold: 70)',
+    decisionBasis: 'Humidity 88% + 3 consecutive overcast days during flowering stage  -> Gray Mold risk score 82/100 (threshold: 70)',
     actionTaken: 'Localized fungicide spray (MoA Group 9), dose ratio 0.7x standard',
     executionMatch: true,
     executionFingerprint: {
@@ -460,7 +460,7 @@ export const auditRecords = [
     },
     riskBefore: 82,
     riskAfter: 34,
-    responsibilityNote: 'Decision generated by Sentinel, executed by field team. Execution fingerprint matched — responsibility on system.',
+    responsibilityNote: 'Decision generated by Sentinel, executed by field team. Execution fingerprint matched  - responsibility on system.',
   },
 ];
 
@@ -481,7 +481,7 @@ export const multimodalImagery = [
   {
     id: 'IMG-001',
     source: 'Drone-01 RGB',
-    sourceZh: '无人机RGB',
+    sourceZh: '无人机 RGB',
     type: 'drone_rgb',
     timestamp: '2026-03-03T16:30:00+08:00',
     zone: 'Rows 4-7, East',
@@ -503,7 +503,7 @@ export const multimodalImagery = [
   {
     id: 'IMG-003',
     source: 'Sentinel-2 Satellite',
-    sourceZh: '卫星NDVI',
+    sourceZh: '卫星 NDVI',
     type: 'satellite_ndvi',
     timestamp: '2026-03-03T10:45:00+08:00',
     zone: 'Full farm overview',
@@ -519,7 +519,7 @@ export const multimodalImagery = [
     timestamp: '2026-03-03T06:00:00+08:00',
     zone: 'Trap Station #7',
     resolution: 'Macro 1:1',
-    annotation: 'Species identified: Aphis gossypii (棉蚜) x12, Frankliniella occidentalis (西花蓟马) x3. Below treatment threshold.',
+    annotation: 'Species identified: Aphis gossypii x12, Frankliniella occidentalis x3. Below treatment threshold.',
     filename: 'pest_trap_macro.png',
   },
   {
@@ -546,7 +546,7 @@ export const multimodalImagery = [
   },
 ];
 
-// ─── Multi-Unit Sensor Fleet (Req #4) ─────────────────────────────────────
+// 鈹€鈹€鈹€ Multi-Unit Sensor Fleet (Req #4) 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 export const sensorFleet = {
   'BS-B3': [
     { id: 'T-01', type: 'temperature', zone: 'B3-East', value: 18.5, unit: '°C', status: 'online', battery: 87, signalDb: -42, lastCalibration: '2026-02-15', lastReading: '2026-03-04T00:55:00+08:00' },
@@ -579,8 +579,8 @@ export const sensorFleet = {
     { id: 'UV-02', type: 'uvIndex', zone: 'B3-West', value: 4.8, unit: 'UV', status: 'online', battery: 91, signalDb: -34, lastCalibration: '2026-02-20', lastReading: '2026-03-04T00:55:00+08:00' },
     { id: 'IRR-01', type: 'irrigationFlow', zone: 'B3-East', value: 2.8, unit: 'L/min', status: 'online', battery: 93, signalDb: -32, lastCalibration: '2026-02-15', lastReading: '2026-03-04T00:55:00+08:00' },
     { id: 'IRR-02', type: 'irrigationFlow', zone: 'B3-West', value: 3.1, unit: 'L/min', status: 'online', battery: 87, signalDb: -39, lastCalibration: '2026-02-15', lastReading: '2026-03-04T00:55:00+08:00' },
-    { id: 'SP-01', type: 'sporeCount', zone: 'B3-East', value: 32, unit: 'spores/m³', status: 'warning', battery: 71, signalDb: -50, lastCalibration: '2026-03-01', lastReading: '2026-03-04T00:55:00+08:00' },
-    { id: 'SP-02', type: 'sporeCount', zone: 'B3-West', value: 38, unit: 'spores/m³', status: 'warning', battery: 64, signalDb: -53, lastCalibration: '2026-03-01', lastReading: '2026-03-04T00:55:00+08:00' },
+    { id: 'SP-01', type: 'sporeCount', zone: 'B3-East', value: 32, unit: 'spores/m3', status: 'warning', battery: 71, signalDb: -50, lastCalibration: '2026-03-01', lastReading: '2026-03-04T00:55:00+08:00' },
+    { id: 'SP-02', type: 'sporeCount', zone: 'B3-West', value: 38, unit: 'spores/m3', status: 'warning', battery: 64, signalDb: -53, lastCalibration: '2026-03-01', lastReading: '2026-03-04T00:55:00+08:00' },
   ],
   'YN-A2': [
     { id: 'GT-01', type: 'temperature', zone: 'A2-Main', value: 22.3, unit: '°C', status: 'online', battery: 90, signalDb: -36, lastCalibration: '2026-02-15', lastReading: '2026-03-04T00:55:00+08:00' },
@@ -592,25 +592,25 @@ export const sensorFleet = {
   ],
 };
 
-// ─── Historical Decision Log ──────────────────────────────────────────────
+// 鈹€鈹€鈹€ Historical Decision Log 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 export const historicalDecisions = [
   {
     id: 'DEC-2026-001', timestamp: '2026-02-12T09:15:00+08:00', field: 'BS-B3',
-    threat: 'Gray Mold (Botrytis)', riskScore: 72, action: 'Spot Spray — Mancozeb 70% WP',
+    threat: 'Gray Mold (Botrytis)', riskScore: 72, action: 'Spot Spray  - Mancozeb 70% WP',
     prescriptionId: 'RX-20260212-001', executionId: 'EX-20260212-001', auditId: 'AUD-20260212-001',
     outcome: 'success', costYuan: 2800, savingsYuan: 18500, note: 'Contained within 48h. Zero spread to adjacent rows.',
     approvedBy: 'Human Operator', approvalType: 'critical',
   },
   {
     id: 'DEC-2026-002', timestamp: '2026-02-18T14:30:00+08:00', field: 'BS-B3',
-    threat: 'Aphids', riskScore: 45, action: 'Biocontrol — Ladybug Release',
+    threat: 'Aphids', riskScore: 45, action: 'Biocontrol  - Ladybug Release',
     prescriptionId: 'RX-20260218-001', executionId: 'EX-20260218-001', auditId: 'AUD-20260218-001',
     outcome: 'success', costYuan: 1200, savingsYuan: 8400, note: 'Auto-approved (low risk). Population reduced 85% in 5 days.',
     approvedBy: 'System (Auto)', approvalType: 'auto',
   },
   {
     id: 'DEC-2026-003', timestamp: '2026-02-22T07:00:00+08:00', field: 'BS-B3',
-    threat: 'Environmental — Frost Warning', riskScore: 58, action: 'Activate Frost Protection System',
+    threat: 'Environmental  - Frost Warning', riskScore: 58, action: 'Activate Frost Protection System',
     prescriptionId: 'RX-20260222-001', executionId: 'EX-20260222-001', auditId: 'AUD-20260222-001',
     outcome: 'success', costYuan: 800, savingsYuan: 45000, note: 'Temperature dropped to 3.2°C. Protection activated. Zero frost damage.',
     approvedBy: 'System (Auto)', approvalType: 'auto',
@@ -645,14 +645,14 @@ export const historicalDecisions = [
   },
   {
     id: 'DEC-2026-008', timestamp: '2026-03-03T06:00:00+08:00', field: 'BS-B3',
-    threat: 'Routine Monitoring — All Clear', riskScore: 18, action: 'Continue Monitoring',
+    threat: 'Routine Monitoring  - All Clear', riskScore: 18, action: 'Continue Monitoring',
     prescriptionId: null, executionId: null, auditId: null,
     outcome: 'no_action', costYuan: 0, savingsYuan: 0, note: 'All sensors within thresholds. No intervention required.',
     approvedBy: 'System (Auto)', approvalType: 'auto',
   },
 ];
 
-// ─── Completed Execution Records ──────────────────────────────────────────
+// 鈹€鈹€鈹€ Completed Execution Records 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 export const executionRecords = [
   {
     id: 'EX-20260212-001', rxId: 'RX-20260212-001', timestamp: '2026-02-12T10:00:00+08:00',
@@ -686,7 +686,7 @@ export const executionRecords = [
   },
 ];
 
-// ─── Historical Performance KPIs ──────────────────────────────────────────
+// 鈹€鈹€鈹€ Historical Performance KPIs 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 export const performanceKPIs = {
   totalInterventions: 7,
   successRate: 85.7,
@@ -721,7 +721,7 @@ export const performanceKPIs = {
   ],
 };
 
-// ─── Per-Unit Sensor Mini Time Series (for individual sensor charts) ──────
+// 鈹€鈹€鈹€ Per-Unit Sensor Mini Time Series (for individual sensor charts) 鈹€鈹€鈹€鈹€鈹€鈹€
 const generateMiniSeries = (base, variance, points = 24) => {
   const data = [];
   let v = base;
@@ -757,3 +757,4 @@ Object.entries({
     perUnitTimeSeries[field][id] = generateMiniSeries(base, variance);
   });
 });
+

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+﻿import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, ReferenceLine, ReferenceArea } from 'recharts';
 import useStore from '../engine/store';
@@ -11,25 +11,32 @@ import DataIngestionPanel from '../components/DataIngestionPanel';
 import FinancialKPI from '../components/FinancialKPI';
 import MultimodalGallery from '../components/MultimodalGallery';
 import PipelineBreadcrumb from '../components/PipelineBreadcrumb';
+import AIAgentPanel from '../components/AIAgentPanel';
+import SystemActivityRail from '../components/SystemActivityRail';
 import { sensorTimeSeries, sensorForecasts, trendAlerts, aiWatchdog, seasonFinancials, currentSensors, sensorThresholds, zoneIntervals } from '../data/mockData';
 
 export default function Dashboard() {
     const navigate = useNavigate();
     const {
         currentSnapshot, riskResults, revenueAtRisk, fields, activeFieldId,
-        prescriptions, auditRecords, activeScenario, simulationData, currentDay,
+        prescriptions, auditRecords, activeScenario, simulationData,
         thinkingChain, isThinking, thinkingContext, startRiskThinking, stopThinking,
+        autonomousState, agentAssignments, operatorAlerts, approvalQueue, autonomousMode,
+        startActionRequiredFlow, activeExecution,
     } = useStore();
     const field = fields[activeFieldId];
     const topRisk = riskResults.reduce((max, r) => r.score > (max?.score || 0) ? r : max, null);
 
     const fieldId = activeFieldId || 'BS-B3';
-    const sensors = currentSensors[fieldId] || {};
+    const sensors = currentSnapshot?.sensors || currentSensors[fieldId] || {};
     const timeSeries = sensorTimeSeries[fieldId] || {};
     const forecasts = sensorForecasts[fieldId] || {};
     const alerts = trendAlerts[fieldId] || [];
     const financials = seasonFinancials[fieldId];
     const activeAlerts = alerts.filter(a => a.status === 'active');
+    const latestOperatorAlert = operatorAlerts.length ? operatorAlerts[operatorAlerts.length - 1] : null;
+    const latestCycleId = agentAssignments.length ? agentAssignments[agentAssignments.length - 1].cycleId : null;
+    const latestCycleTasks = latestCycleId ? agentAssignments.filter(a => a.cycleId === latestCycleId) : [];
 
     const simArray = Array.isArray(simulationData) ? simulationData : Object.values(simulationData || {});
     const riskTrend = simArray.map(d => ({
@@ -47,6 +54,11 @@ export default function Dashboard() {
         }, 300);
     };
 
+    const handleActionRequired = () => {
+        startActionRequiredFlow();
+        setTimeout(() => navigate('/execution'), 1400);
+    };
+
     const aiRef = useRef(null);
 
     // Sensor display config
@@ -54,20 +66,26 @@ export default function Dashboard() {
         { key: 'temperature', label: 'Temperature', value: sensors.temp_C, unit: '°C', threshold: sensorThresholds.temperature, trend: 'stable' },
         { key: 'humidity', label: 'Humidity', value: sensors.humidity_pct, unit: '%', threshold: sensorThresholds.humidity, trend: 'rising' },
         { key: 'soilMoisture', label: 'Soil Moisture', value: sensors.soil_moist_pct, unit: '%', threshold: sensorThresholds.soilMoisture, trend: 'stable' },
-        { key: 'leafWetness', label: 'Leaf Wetness', value: sensors.leaf_wetness_h || 2.62, unit: 'h', threshold: sensorThresholds.leafWetness, trend: 'rising' },
+        { key: 'leafWetness', label: 'Leaf Wetness', value: sensors.leaf_wetness_h || sensors.leaf_wetness_hrs || 2.62, unit: 'h', threshold: sensorThresholds.leafWetness, trend: 'rising' },
         { key: 'wind', label: 'Wind Speed', value: sensors.wind_speed_ms, unit: 'm/s', threshold: sensorThresholds.wind, trend: 'stable' },
         { key: 'light', label: 'Light', value: sensors.light_Lux, unit: 'Lux', threshold: sensorThresholds.light, trend: 'falling' },
     ];
 
     const formatNow = () => new Date().toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    const isActionRequired = (topRisk?.score || 0) >= 70 && !activeExecution?.comparisonReport;
 
     return (
-        <div className="page">
+        <div className="page dashboard-page">
             <PipelineBreadcrumb />
+            <div className="dashboard-layout">
+                <section className="dashboard-main-column">
             <div className="page-header">
                 <div>
-                    <h1 className="page-title">Mission Control</h1>
-                    <p className="page-subtitle">{field?.name} — {field?.nameZh} | Stage: {currentSnapshot?.stageName || '—'}</p>
+                    <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <Icon name="dashboard" size={22} color="#38bdf8" />
+                        Mission Control
+                    </h1>
+                    <p className="page-subtitle">{field?.name} | {field?.nameZh} | Stage: {currentSnapshot?.stageName || '--'}</p>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
                     <button className="btn btn-secondary" onClick={handleRunAnalysis} disabled={isThinking} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -82,7 +100,7 @@ export default function Dashboard() {
             {/* AI Watchdog Status Bar */}
             <div className="ai-watchdog-bar">
                 <div className="watchdog-dot" />
-                <span className="watchdog-label">AI Monitoring: Active 24×7</span>
+                <span className="watchdog-label">AI Monitoring: Active 24x7</span>
                 <div className="watchdog-divider" />
                 <span className="watchdog-stat">Last scan: <strong>{new Date(aiWatchdog.lastScan).toLocaleString('en-US', { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}</strong></span>
                 <div className="watchdog-divider" />
@@ -97,8 +115,70 @@ export default function Dashboard() {
                 <span className="watchdog-stat" style={{ color: '#475569' }}>{aiWatchdog.modelVersion}</span>
             </div>
 
-            {/* Financial KPIs — Compact */}
+            {/* Financial KPIs  - Compact */}
             {financials && <FinancialKPI financials={financials} compact />}
+
+            <div className="grid grid-4" style={{ marginTop: 10 }}>
+                <MetricCard
+                    label="Autonomous Cycles"
+                    value={autonomousState?.cycleCount || 0}
+                    subtitle={`${autonomousMode ? 'Running' : 'Paused'} | ${autonomousState?.lowRiskCycles || 0} low-risk loops`}
+                    icon="activity"
+                />
+                <MetricCard
+                    label="Auto Executions"
+                    value={autonomousState?.autoExecutions || 0}
+                    subtitle={`${autonomousState?.auditsGenerated || 0} audits generated`}
+                    icon="play"
+                />
+                <MetricCard
+                    label="Escalations"
+                    value={autonomousState?.escalations || 0}
+                    subtitle={`${approvalQueue?.length || 0} pending approvals`}
+                    status={(approvalQueue?.length || 0) > 0 ? 'warning' : 'low'}
+                    icon="warning"
+                />
+                <MetricCard
+                    label="Task Cells / Cycle"
+                    value={latestCycleTasks.length}
+                    subtitle={`${latestCycleTasks.reduce((sum, task) => sum + (task.members?.length || 0), 0)} agent assignments`}
+                    icon="users"
+                />
+            </div>
+
+            {latestOperatorAlert && (
+                <div className="alert-banner alert-warning" style={{ marginTop: 10 }}>
+                    <div className="alert-content">
+                        <span className="alert-icon"><Icon name="warning" size={22} /></span>
+                        <div>
+                            <div className="alert-title">ACTION REQUIRED</div>
+                            <div className="alert-body">{latestOperatorAlert.message}</div>
+                        </div>
+                    </div>
+                    <button className="btn btn-sm" onClick={handleActionRequired}>
+                        Start AI Response <Icon name="arrow-right" size={14} />
+                    </button>
+                </div>
+            )}
+
+            {isActionRequired && !latestOperatorAlert && (
+                <div className="alert-banner alert-critical" style={{ marginTop: 10 }}>
+                    <div className="alert-content">
+                        <span className="alert-icon"><Icon name="warning" size={22} /></span>
+                        <div>
+                            <div className="alert-title">ACTION REQUIRED</div>
+                            <div className="alert-body">
+                                {topRisk?.name} at {topRisk?.score}/100 requires guided response workflow.
+                            </div>
+                        </div>
+                    </div>
+                    <button className="btn btn-sm" onClick={handleActionRequired}>
+                        Start AI Response <Icon name="arrow-right" size={14} />
+                    </button>
+                </div>
+            )}
+
+            <AIAgentPanel />
 
             {/* Trend Alerts (Proactive) */}
             {activeAlerts.length > 0 && (
@@ -116,7 +196,10 @@ export default function Dashboard() {
                                 </div>
                             </div>
                             <div className="trend-alert-detail">{alert.detail}</div>
-                            <div className="trend-alert-prediction">⚡ Prediction: {alert.prediction}</div>
+                            <div className="trend-alert-prediction" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <Icon name="activity" size={11} color="#38bdf8" />
+                                Prediction: {alert.prediction}
+                            </div>
                             <div className="trend-alert-action">
                                 <Icon name="play" size={10} />
                                 Recommended: {alert.recommended}
@@ -126,9 +209,9 @@ export default function Dashboard() {
                 </div>
             )}
 
-            {/* Live Environment Strip — Sensor Sparkline Cards */}
+            {/* Live Environment Strip  - Sensor Sparkline Cards */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#e2e8f0', margin: 0 }}>Live Environment — Real-Time Sensors</h3>
+                <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#e2e8f0', margin: 0 }}>Live Environment  - Real-Time Sensors</h3>
                 <span className="section-timestamp">Updated: {formatNow()}</span>
             </div>
             <div className="sensor-grid">
@@ -180,10 +263,10 @@ export default function Dashboard() {
             {/* Multimodal Data Ingestion */}
             <DataIngestionPanel isActive={true} />
 
-            {/* Multimodal Sensor Feed — Compact Strip */}
+            {/* Multimodal Sensor Feed  - Compact Strip */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, marginTop: 8 }}>
                 <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#e2e8f0', margin: 0 }}>Multimodal Sensor Imagery</h3>
-                <button className="btn btn-sm" onClick={() => navigate('/sensors')} style={{ fontSize: '0.65rem', padding: '3px 10px' }}>View All →</button>
+                <button className="btn btn-sm" onClick={() => navigate('/sensors')} style={{ fontSize: '0.65rem', padding: '3px 10px', display: 'flex', alignItems: 'center', gap: 4 }}>View All <Icon name="arrow-right" size={11} /></button>
             </div>
             <MultimodalGallery compact />
 
@@ -204,7 +287,7 @@ export default function Dashboard() {
                     <div className="alert-content">
                         <span className="alert-icon"><Icon name={topRisk.score >= 70 ? 'alert-triangle' : 'alert-triangle'} size={24} /></span>
                         <div>
-                            <div className="alert-title">{topRisk.name} — Risk Score {topRisk.score}/100</div>
+                            <div className="alert-title">{topRisk.name}  - Risk Score {topRisk.score}/100</div>
                             <div className="alert-body">
                                 {topRisk.factors?.join(' | ') || 'Elevated risk detected. Review recommended.'}
                                 {activeScenario && ` | Scenario ${activeScenario.id} active`}
@@ -228,14 +311,14 @@ export default function Dashboard() {
                 <MetricCard
                     label="Grade Class"
                     value={field?.gradeClass || 'A'}
-                    subtitle={`¥${field?.gradeClass === 'A' ? '180' : '120'}/kg export`}
+                    subtitle={`CNY ${field?.gradeClass === 'A' ? '180' : '120'}/kg export`}
                     icon="star"
                 />
                 <MetricCard
                     label="Revenue at Risk"
-                    value={revenueAtRisk ? `¥${(revenueAtRisk.total / 1000).toFixed(1)}k` : '¥0.0k'}
+                    value={revenueAtRisk ? `CNY ${(revenueAtRisk.total / 1000).toFixed(1)}k` : 'CNY 0.0k'}
                     status={revenueAtRisk?.total > 30000 ? 'critical' : 'low'}
-                    subtitle={revenueAtRisk ? `${revenueAtRisk.downgradeProbability}% downgrade prob.` : '—'}
+                    subtitle={revenueAtRisk ? `${revenueAtRisk.downgradeProbability}% downgrade prob.` : '--'}
                     icon="dollar"
                 />
                 <MetricCard
@@ -269,17 +352,17 @@ export default function Dashboard() {
                     </div>
                     <div className="grid grid-3" style={{ gap: 12, marginTop: 8 }}>
                         <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#e2e8f0' }}>{currentSnapshot?.temperature?.toFixed(1) || '—'}<span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>°C</span></div>
+                            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#e2e8f0' }}>{Number.isFinite(Number(sensors.temp_C)) ? Number(sensors.temp_C).toFixed(1) : '--'}<span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>°C</span></div>
                             <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase' }}>Temperature</div>
-                            <div style={{ fontSize: '0.55rem', color: '#475569' }}>→ {currentSnapshot?.temperatureTrend || 'stable'}</div>
+                            <div style={{ fontSize: '0.55rem', color: '#475569' }}>Trend: stable</div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: sensors.humidity_pct > 85 ? '#ef4444' : '#e2e8f0' }}>{currentSnapshot?.humidity?.toFixed(1) || '—'}<span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>%</span></div>
+                            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: sensors.humidity_pct > 85 ? '#ef4444' : '#e2e8f0' }}>{Number.isFinite(Number(sensors.humidity_pct)) ? Number(sensors.humidity_pct).toFixed(1) : '--'}<span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>%</span></div>
                             <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase' }}>Humidity</div>
-                            <div style={{ fontSize: '0.55rem', color: '#ef4444', fontWeight: 600 }}>↑ rising</div>
+                            <div style={{ fontSize: '0.55rem', color: '#ef4444', fontWeight: 600 }}>Trend: rising</div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#e2e8f0' }}>{currentSnapshot?.soilMoisture?.toFixed(1) || '—'}<span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>%</span></div>
+                            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#e2e8f0' }}>{Number.isFinite(Number(sensors.soil_moist_pct)) ? Number(sensors.soil_moist_pct).toFixed(1) : '--'}<span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>%</span></div>
                             <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase' }}>Soil Moisture</div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
@@ -287,7 +370,7 @@ export default function Dashboard() {
                             <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase' }}>Wind</div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: sensors.leaf_wetness_h > 3 ? '#ef4444' : '#e2e8f0' }}>{sensors.leaf_wetness_h || 2.62}<span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>h</span></div>
+                            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: (sensors.leaf_wetness_h || sensors.leaf_wetness_hrs || 0) > 3 ? '#ef4444' : '#e2e8f0' }}>{sensors.leaf_wetness_h || sensors.leaf_wetness_hrs || 2.62}<span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>h</span></div>
                             <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase' }}>Leaf Wetness</div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
@@ -301,7 +384,7 @@ export default function Dashboard() {
             {/* 30-Day Risk Profile */}
             <div className="card" style={{ marginTop: 16 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3 className="card-title">30-Day Risk Profile — AI Predicted Trend</h3>
+                    <h3 className="card-title">30-Day Risk Profile  - AI Predicted Trend</h3>
                     <span className="section-timestamp">{formatNow()}</span>
                 </div>
                 <ResponsiveContainer width="100%" height={180}>
@@ -323,7 +406,7 @@ export default function Dashboard() {
 
             {/* AI Watchdog Scan History (last 8) */}
             <div className="card" style={{ marginTop: 16 }}>
-                <h3 className="card-title">AI Watchdog — Recent Scan Log</h3>
+                <h3 className="card-title">AI Watchdog  - Recent Scan Log</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     {aiWatchdog.scanHistory.map((scan, i) => (
                         <div key={i} style={{ display: 'flex', gap: 12, padding: '4px 0', borderBottom: '1px solid rgba(148,163,184,0.04)', alignItems: 'center' }}>
@@ -334,6 +417,13 @@ export default function Dashboard() {
                     ))}
                 </div>
             </div>
+                </section>
+                <SystemActivityRail />
+            </div>
         </div>
     );
 }
+
+
+
+

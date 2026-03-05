@@ -1,78 +1,78 @@
-import React, { useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, Cell, PieChart, Pie, Legend } from 'recharts';
-import useStore from '../engine/store';
-import StatusBadge from '../components/StatusBadge';
+﻿import React, { useMemo, useState } from 'react';
 import Icon from '../components/Icon';
+import StatusBadge from '../components/StatusBadge';
 import PipelineBreadcrumb from '../components/PipelineBreadcrumb';
-import { historicalDecisions, performanceKPIs } from '../data/mockData';
+import { historicalDecisions } from '../data/mockData';
+import {
+    AreaChart, Area, BarChart, Bar, LineChart, Line,
+    XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell, PieChart, Pie, Legend,
+} from 'recharts';
 
-const kpi = performanceKPIs;
+// Expanded historical records for all 6 scenarios
+const scenarioOutcomes = [
+    { id: 'A', name: 'Blueberry PHI Constraint', date: '2025-11-08', crop: 'Blueberry', riskPeak: 85, riskFinal: 42, grade: 'A+', revenueProtected: 44000, cost: 3200, responseMin: 18, chemical: 'Trichoderma (Bio)', aiAccuracy: 94 },
+    { id: 'B', name: 'Monsoon Rose Gray Mold', date: '2025-11-15', crop: 'Rose', riskPeak: 88, riskFinal: 55, grade: 'B (30% downgraded)', revenueProtected: 51000, cost: 4500, responseMin: 380, chemical: 'Carbendazim', aiAccuracy: 91, loss: 12600 },
+    { id: 'C', name: 'Execution Deviation', date: '2025-12-02', crop: 'Blueberry', riskPeak: 72, riskFinal: 18, grade: 'A+', revenueProtected: 28000, cost: 3640, responseMin: 22, chemical: 'Chlorothalonil', aiAccuracy: 92, excessCost: 840 },
+    { id: 'D', name: 'Multi-Pest Cascade', date: '2025-12-18', crop: 'Blueberry', riskPeak: 78, riskFinal: 22, grade: 'A+', revenueProtected: 68000, cost: 5800, responseMin: 35, chemical: 'Sequential', aiAccuracy: 96 },
+    { id: 'E', name: 'Frost Emergency', date: '2026-01-05', crop: 'Blueberry', riskPeak: 82, riskFinal: 10, grade: 'A+', revenueProtected: 52000, cost: 1800, responseMin: 8, chemical: 'None (Non-chemical)', aiAccuracy: 98 },
+    { id: 'F', name: 'Ventilation Failure', date: '2026-01-22', crop: 'Rose', riskPeak: 82, riskFinal: 28, grade: 'A+', revenueProtected: 72000, cost: 6200, responseMin: 12, chemical: 'Carbendazim (Emergency)', aiAccuracy: 95 },
+];
 
-const KPICard = ({ label, value, suffix, trend, trendLabel, color = '#38bdf8', sparkData }) => (
-    <div style={{
-        padding: '16px 18px', background: 'rgba(15,23,42,0.5)', borderRadius: 12,
-        border: '1px solid var(--border-subtle)', position: 'relative', overflow: 'hidden',
-    }}>
-        <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 6 }}>{label}</div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-            <span style={{ fontSize: '2rem', fontWeight: 800, color, fontFamily: "'Inter', sans-serif", lineHeight: 1 }}>{value}</span>
-            {suffix && <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 500 }}>{suffix}</span>}
-        </div>
-        {trendLabel && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 6 }}>
-                <span style={{ fontSize: '0.7rem', color: trend === 'up' ? '#34d399' : trend === 'down' ? '#ef4444' : '#94a3b8' }}>
-                    {trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→'} {trendLabel}
-                </span>
-            </div>
-        )}
-        {sparkData && (
-            <div style={{ position: 'absolute', right: 8, bottom: 8, width: 70, height: 28, opacity: 0.4 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={sparkData.map((v, i) => ({ v, i }))}>
-                        <Line type="monotone" dataKey="v" stroke={color} strokeWidth={1.5} dot={false} />
-                    </LineChart>
-                </ResponsiveContainer>
-            </div>
-        )}
-    </div>
-);
+const aiAccuracyTrend = [
+    { month: 'Sep', accuracy: 82, decisions: 3 },
+    { month: 'Oct', accuracy: 86, decisions: 5 },
+    { month: 'Nov', accuracy: 91, decisions: 8 },
+    { month: 'Dec', accuracy: 94, decisions: 6 },
+    { month: 'Jan', accuracy: 97, decisions: 7 },
+    { month: 'Feb', accuracy: 98, decisions: 4 },
+];
+
+const chemicalUsageTrend = [
+    { month: 'Sep', sentinel: 12, traditional: 28 },
+    { month: 'Oct', sentinel: 9, traditional: 26 },
+    { month: 'Nov', sentinel: 7, traditional: 25 },
+    { month: 'Dec', sentinel: 5, traditional: 24 },
+    { month: 'Jan', sentinel: 3, traditional: 23 },
+    { month: 'Feb', sentinel: 4, traditional: 22 },
+];
+
+const revenueCumulative = [
+    { month: 'Sep', protected: 12000, cost: 3200 },
+    { month: 'Oct', protected: 35000, cost: 7800 },
+    { month: 'Nov', protected: 128000, cost: 15500 },
+    { month: 'Dec', protected: 224000, cost: 25100 },
+    { month: 'Jan', protected: 348000, cost: 33100 },
+    { month: 'Feb', protected: 413000, cost: 39200 },
+];
+
+const responseTimeData = [
+    { range: '<15min', count: 8, fill: '#34d399' },
+    { range: '15-30min', count: 12, fill: '#38bdf8' },
+    { range: '30-60min', count: 5, fill: '#f59e0b' },
+    { range: '1-4hr', count: 3, fill: '#f97316' },
+    { range: '>4hr', count: 1, fill: '#ef4444' },
+];
 
 export default function History() {
-    const { eventLog } = useStore();
-    const [searchTerm, setSearchTerm] = useState('');
+    const [filter, setFilter] = useState('all');
+    const [expandedScenario, setExpandedScenario] = useState(null);
+    const [selectedDecisionId, setSelectedDecisionId] = useState(null);
 
-    const filteredDecisions = historicalDecisions.filter(d =>
-        !searchTerm || d.threat.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        d.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        d.id.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredOutcomes = filter === 'all' ? scenarioOutcomes
+        : filter === 'success' ? scenarioOutcomes.filter(s => s.grade.includes('+'))
+            : scenarioOutcomes.filter(s => !s.grade.includes('+'));
+
+    const totalProtected = scenarioOutcomes.reduce((s, o) => s + o.revenueProtected, 0);
+    const totalCost = scenarioOutcomes.reduce((s, o) => s + o.cost, 0);
+    const avgAccuracy = (scenarioOutcomes.reduce((s, o) => s + o.aiAccuracy, 0) / scenarioOutcomes.length).toFixed(1);
+    const avgResponse = Math.round(scenarioOutcomes.reduce((s, o) => s + o.responseMin, 0) / scenarioOutcomes.length);
+    const decisionEntries = useMemo(
+        () => [...historicalDecisions]
+            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+            .slice(0, 16),
+        [],
     );
-
-    // Chart Data
-    const costSavingsData = historicalDecisions.filter(d => d.costYuan > 0).map(d => ({
-        name: d.id.slice(-3),
-        cost: d.costYuan,
-        savings: d.savingsYuan,
-    }));
-
-    const riskTrendData = historicalDecisions.map(d => ({
-        name: new Date(d.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        risk: d.riskScore,
-    }));
-
-    const threatData = {};
-    historicalDecisions.forEach(d => {
-        const t = d.threat.split(' (')[0].split(' — ')[0];
-        threatData[t] = (threatData[t] || 0) + 1;
-    });
-    const threatChartData = Object.entries(threatData).map(([name, count]) => ({ name, count }));
-
-    const outcomeData = [
-        { name: 'Success', value: historicalDecisions.filter(d => d.outcome === 'success').length, color: '#34d399' },
-        { name: 'Partial', value: historicalDecisions.filter(d => d.outcome === 'partial').length, color: '#f59e0b' },
-        { name: 'No Action', value: historicalDecisions.filter(d => d.outcome === 'no_action').length, color: '#64748b' },
-    ].filter(d => d.value > 0);
-
-    const monthlyData = kpi.monthlyBreakdown || [];
+    const selectedDecision = decisionEntries.find(item => item.id === selectedDecisionId) || decisionEntries[0];
 
     return (
         <div className="page">
@@ -80,192 +80,382 @@ export default function History() {
 
             <div className="page-header">
                 <div>
-                    <h1 className="page-title">History & Performance</h1>
-                    <p className="page-subtitle">Stage 7: Continuous Improvement — Season Performance Analytics</p>
+                    <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <Icon name="history" size={20} color="#38bdf8" /> Analytics & History
+                    </h1>
+                    <p className="page-subtitle">Season Performance Dashboard  - {scenarioOutcomes.length} Interventions Tracked</p>
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                    {['all', 'success', 'issues'].map(f => (
+                        <button key={f} className={`btn ${filter === f ? 'btn-primary' : 'btn-secondary'}`}
+                            onClick={() => setFilter(f)} style={{ textTransform: 'capitalize', fontSize: '0.75rem' }}>
+                            {f === 'all' ? 'All' : f === 'success' ? 'Success' : 'Issues'}
+                        </button>
+                    ))}
                 </div>
             </div>
 
-            {/* KPI Cards — Row 1: Financial */}
-            <div style={{ fontSize: '0.72rem', color: '#64748b', marginBottom: 6, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Financial Performance</div>
-            <div className="grid grid-4" style={{ marginBottom: 16 }}>
-                <KPICard label="Total Spent" value={`¥${(kpi.totalSpent / 1000).toFixed(1)}k`} color="#f59e0b" trend="down" trendLabel="vs. ¥42k conventional" sparkData={[42, 38, 28, 18, 13.6]} />
-                <KPICard label="Revenue Protected" value={`¥${(kpi.totalSavings / 1000).toFixed(0)}k`} color="#34d399" trend="up" trendLabel="+18% vs last season" sparkData={[40, 55, 72, 95, 122.9]} />
-                <KPICard label="Season ROI" value={`${kpi.seasonROI}×`} color="#38bdf8" trend="up" trendLabel="cost to savings ratio" sparkData={[3.2, 5.1, 7.4, 8.1, 9.04]} />
-                <KPICard label="Chemical Cost Saved" value={`${kpi.chemicalReduction}%`} suffix="reduction" color="#a78bfa" trend="up" trendLabel="vs. conventional approach" sparkData={[20, 35, 48, 58, 68]} />
-            </div>
-
-            {/* KPI Cards — Row 2: Operations */}
-            <div style={{ fontSize: '0.72rem', color: '#64748b', marginBottom: 6, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Operational Metrics</div>
-            <div className="grid grid-4" style={{ marginBottom: 16 }}>
-                <KPICard label="Interventions" value={kpi.totalInterventions} color="#e2e8f0" trend="up" trendLabel={`${kpi.successRate}% success rate`} sparkData={[1, 2, 4, 6, 7]} />
-                <KPICard label="Avg Response" value={kpi.avgResponseTimeMin} suffix="min" color="#06b6d4" trend="down" trendLabel="detection to action" sparkData={[22, 18, 15, 13, 12]} />
-                <KPICard label="Drone Flights" value={kpi.droneFlightsTotal} suffix="total" color="#38bdf8" trend="up" trendLabel={`${kpi.droneFlightHours}h total flight time`} />
-                <KPICard label="Area Treated" value={kpi.areaTreatedHa} suffix="ha" color="#34d399" trend="up" trendLabel="precision coverage" />
-            </div>
-
-            {/* KPI Cards — Row 3: AI & Compliance */}
-            <div style={{ fontSize: '0.72rem', color: '#64748b', marginBottom: 6, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>AI & Compliance</div>
-            <div className="grid grid-4" style={{ marginBottom: 16 }}>
-                <KPICard label="AI Accuracy" value={`${kpi.aiPredictionAccuracy}%`} color="#10b981" trend="up" trendLabel="prediction accuracy" sparkData={[82, 85, 88, 90, 91.3]} />
-                <KPICard label="False Positives" value={`${kpi.falsePositiveRate}%`} color="#f59e0b" trend="down" trendLabel="continuously improving" sparkData={[12, 9, 7, 5, 4.2]} />
-                <KPICard label="Data Processed" value={`${(kpi.dataPointsProcessed / 1000).toFixed(0)}k`} suffix="points" color="#818cf8" trend="up" trendLabel="multimodal data" />
-                <KPICard label="Zero Residue" value={`${kpi.zeroResidueCompliance}%`} color="#34d399" trend="up" trendLabel="compliance maintained" />
-            </div>
-
-            {/* KPI Cards — Row 4: Environmental */}
-            <div style={{ fontSize: '0.72rem', color: '#64748b', marginBottom: 6, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Environmental Impact</div>
-            <div className="grid grid-4" style={{ marginBottom: 16 }}>
-                <KPICard label="Pesticide Used" value={kpi.pesticideUsedLiters} suffix="L" color="#fb7185" trend="down" trendLabel="68% less than conventional" />
-                <KPICard label="Water Saved" value={`${(kpi.waterSavedLiters / 1000).toFixed(1)}k`} suffix="L" color="#06b6d4" trend="up" trendLabel="precision irrigation" />
-                <KPICard label="Carbon Footprint" value={kpi.carbonFootprintKg} suffix="kg CO₂" color="#94a3b8" trend="down" trendLabel="drone vs tractor" />
-                <KPICard label="Biocontrol" value={kpi.biocontrolDeployments} suffix="deployments" color="#34d399" trend="up" trendLabel="chemical-free interventions" />
-            </div>
-
-            {/* Charts Row 1 */}
-            <div className="grid grid-2" style={{ marginBottom: 16 }}>
-                <div className="card">
-                    <h3 className="card-title">Cost vs. Revenue Protected</h3>
-                    <ResponsiveContainer width="100%" height={200}>
-                        <BarChart data={costSavingsData}>
-                            <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 10 }} axisLine={{ stroke: '#1e293b' }} />
-                            <YAxis tick={{ fill: '#475569', fontSize: 10 }} axisLine={{ stroke: '#1e293b' }} />
-                            <Tooltip contentStyle={{ background: '#1a2235', border: '1px solid #1e293b', borderRadius: 8, fontSize: '0.7rem' }} />
-                            <Bar dataKey="cost" name="Cost (¥)" fill="#ef4444" radius={[3, 3, 0, 0]} />
-                            <Bar dataKey="savings" name="Protected (¥)" fill="#34d399" radius={[3, 3, 0, 0]} />
-                            <Legend wrapperStyle={{ fontSize: '0.65rem' }} />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
-
-                <div className="card">
-                    <h3 className="card-title">Risk Score Trend</h3>
-                    <ResponsiveContainer width="100%" height={200}>
-                        <LineChart data={riskTrendData}>
-                            <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 10 }} axisLine={{ stroke: '#1e293b' }} />
-                            <YAxis domain={[0, 100]} tick={{ fill: '#475569', fontSize: 10 }} axisLine={{ stroke: '#1e293b' }} />
-                            <Tooltip contentStyle={{ background: '#1a2235', border: '1px solid #1e293b', borderRadius: 8, fontSize: '0.7rem' }} />
-                            <Line type="monotone" dataKey="risk" stroke="#f59e0b" strokeWidth={2} dot={{ fill: '#f59e0b', r: 3 }} />
-                        </LineChart>
-                    </ResponsiveContainer>
-                </div>
-            </div>
-
-            {/* Charts Row 2 */}
-            <div className="grid grid-3" style={{ marginBottom: 16 }}>
-                <div className="card">
-                    <h3 className="card-title">Threat Distribution</h3>
-                    <ResponsiveContainer width="100%" height={200}>
-                        <BarChart data={threatChartData} layout="vertical">
-                            <XAxis type="number" tick={{ fill: '#475569', fontSize: 10 }} axisLine={{ stroke: '#1e293b' }} />
-                            <YAxis type="category" dataKey="name" tick={{ fill: '#94a3b8', fontSize: 9 }} width={100} axisLine={false} />
-                            <Tooltip contentStyle={{ background: '#1a2235', border: '1px solid #1e293b', borderRadius: 8, fontSize: '0.7rem' }} />
-                            <Bar dataKey="count" fill="#38bdf8" radius={[0, 4, 4, 0]} />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
-
-                <div className="card">
-                    <h3 className="card-title">Outcome Distribution</h3>
-                    <ResponsiveContainer width="100%" height={200}>
-                        <PieChart>
-                            <Pie data={outcomeData} cx="50%" cy="50%" innerRadius={40} outerRadius={70} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                                {outcomeData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
-                            </Pie>
-                            <Tooltip contentStyle={{ background: '#1a2235', border: '1px solid #1e293b', borderRadius: 8, fontSize: '0.7rem' }} />
-                        </PieChart>
-                    </ResponsiveContainer>
-                </div>
-
-                <div className="card">
-                    <h3 className="card-title">Monthly Cost vs Savings</h3>
-                    <ResponsiveContainer width="100%" height={200}>
-                        <BarChart data={monthlyData}>
-                            <XAxis dataKey="month" tick={{ fill: '#94a3b8', fontSize: 10 }} axisLine={{ stroke: '#1e293b' }} />
-                            <YAxis tick={{ fill: '#475569', fontSize: 10 }} axisLine={{ stroke: '#1e293b' }} />
-                            <Tooltip contentStyle={{ background: '#1a2235', border: '1px solid #1e293b', borderRadius: 8, fontSize: '0.7rem' }} />
-                            <Bar dataKey="cost" name="Cost (¥)" fill="#ef4444" radius={[3, 3, 0, 0]} />
-                            <Bar dataKey="savings" name="Savings (¥)" fill="#34d399" radius={[3, 3, 0, 0]} />
-                            <Legend wrapperStyle={{ fontSize: '0.65rem' }} />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
-            </div>
-
-            {/* Model Performance */}
-            <div className="card" style={{ marginBottom: 16 }}>
-                <h3 className="card-title">AI Model Performance — Continuous Learning</h3>
-                <div className="grid grid-3" style={{ gap: 12 }}>
-                    <div style={{ padding: 14, background: 'rgba(15,23,42,0.4)', borderRadius: 10, borderLeft: '3px solid #10b981' }}>
-                        <div style={{ fontSize: '0.65rem', color: '#64748b', marginBottom: 4 }}>Prediction Accuracy</div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#10b981' }}>{kpi.aiPredictionAccuracy}%</div>
-                        <div style={{ height: 4, background: '#1e293b', borderRadius: 2, marginTop: 6 }}>
-                            <div style={{ height: '100%', width: `${kpi.aiPredictionAccuracy}%`, background: '#10b981', borderRadius: 2 }} />
-                        </div>
+            {/* 鈹佲攣鈹?Summary KPI Cards 鈹佲攣鈹?*/}
+            <div className="grid grid-4" style={{ gap: 12, marginBottom: 20 }}>
+                {[
+                    { label: 'Revenue Protected', value: `CNY ${(totalProtected / 1000).toFixed(0)}K`, sub: `from ${scenarioOutcomes.length} interventions`, color: '#34d399', icon: 'money' },
+                    { label: 'Total Cost', value: `CNY ${(totalCost / 1000).toFixed(1)}K`, sub: `ROI: ${(totalProtected / totalCost).toFixed(1)}x`, color: '#f59e0b', icon: 'clipboard' },
+                    { label: 'AI Accuracy', value: `${avgAccuracy}%`, sub: 'avg decision quality', color: '#38bdf8', icon: 'robot' },
+                    { label: 'Avg Response', value: `${avgResponse} min`, sub: 'detection to execution', color: '#a78bfa', icon: 'bolt' },
+                ].map((kpi, i) => (
+                    <div key={i} className="card" style={{
+                        background: `linear-gradient(135deg, ${kpi.color}08 0%, transparent 100%)`,
+                        borderTop: `2px solid ${kpi.color}40`,
+                        textAlign: 'center', padding: '16px 12px',
+                    }}>
+                        <div style={{ marginBottom: 6, display: 'flex', justifyContent: 'center' }}><Icon name={kpi.icon} size={24} color={kpi.color} /></div>
+                        <div style={{ fontSize: '1.4rem', fontWeight: 800, color: kpi.color, fontFamily: 'monospace', lineHeight: 1.2 }}>{kpi.value}</div>
+                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: 4 }}>{kpi.label}</div>
+                        <div style={{ fontSize: '0.6rem', color: '#64748b', marginTop: 2 }}>{kpi.sub}</div>
                     </div>
-                    <div style={{ padding: 14, background: 'rgba(15,23,42,0.4)', borderRadius: 10, borderLeft: '3px solid #f59e0b' }}>
-                        <div style={{ fontSize: '0.65rem', color: '#64748b', marginBottom: 4 }}>Decision Confidence</div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f59e0b' }}>{kpi.avgDecisionConfidence}%</div>
-                        <div style={{ height: 4, background: '#1e293b', borderRadius: 2, marginTop: 6 }}>
-                            <div style={{ height: '100%', width: `${kpi.avgDecisionConfidence}%`, background: '#f59e0b', borderRadius: 2 }} />
-                        </div>
-                    </div>
-                    <div style={{ padding: 14, background: 'rgba(15,23,42,0.4)', borderRadius: 10, borderLeft: '3px solid #38bdf8' }}>
-                        <div style={{ fontSize: '0.65rem', color: '#64748b', marginBottom: 4 }}>Best ROI Intervention</div>
-                        <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#38bdf8' }}>{kpi.bestROIIntervention?.roi}×</div>
-                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: 4 }}>{kpi.bestROIIntervention?.name}</div>
-                    </div>
-                </div>
+                ))}
             </div>
 
-            {/* Decision Log Table */}
-            <div className="card" style={{ marginBottom: 16 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                    <h3 className="card-title" style={{ margin: 0 }}>Decision Log — All Interventions</h3>
-                    <input
-                        type="text"
-                        placeholder="Search decisions..."
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
-                        style={{ padding: '6px 12px', background: '#0f172a', border: '1px solid #1e293b', borderRadius: 8, color: '#e2e8f0', fontSize: '0.75rem', width: 220 }}
-                    />
-                </div>
-                <table className="data-table">
-                    <thead>
-                        <tr><th>ID</th><th>Timestamp</th><th>Threat</th><th>Risk</th><th>Action</th><th>Cost</th><th>Saved</th><th>Approved</th><th>Outcome</th></tr>
-                    </thead>
-                    <tbody>
-                        {filteredDecisions.map((d, i) => (
-                            <tr key={i}>
-                                <td style={{ fontFamily: 'monospace', fontSize: '0.68rem' }}>{d.id}</td>
-                                <td style={{ fontFamily: 'monospace', fontSize: '0.68rem' }}>{new Date(d.timestamp).toLocaleString('en-US', { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })}</td>
-                                <td style={{ fontSize: '0.72rem' }}>{d.threat}</td>
-                                <td><span style={{ fontWeight: 700, color: d.riskScore >= 70 ? '#ef4444' : d.riskScore >= 40 ? '#f59e0b' : '#34d399' }}>{d.riskScore}</span></td>
-                                <td style={{ fontSize: '0.7rem', maxWidth: 200 }}>{d.action}</td>
-                                <td style={{ fontFamily: 'monospace', color: '#f59e0b' }}>¥{d.costYuan.toLocaleString()}</td>
-                                <td style={{ fontFamily: 'monospace', color: '#34d399' }}>¥{d.savingsYuan.toLocaleString()}</td>
-                                <td style={{ fontSize: '0.68rem' }}>{d.approvedBy}</td>
-                                <td><StatusBadge status={d.outcome === 'success' ? 'monitoring' : d.outcome === 'partial' ? 'warning' : 'elevated'} label={d.outcome?.toUpperCase()} /></td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* Learning Notes */}
-            <div className="card" style={{ marginBottom: 16 }}>
-                <h3 className="card-title">Decision Notes & Learning Outcomes</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {historicalDecisions.filter(d => d.note).map((d, i) => (
-                        <div key={i} style={{ padding: '10px 14px', background: 'rgba(15,23,42,0.4)', borderRadius: 8, borderLeft: `3px solid ${d.outcome === 'success' ? '#34d399' : '#f59e0b'}` }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                                <span style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.78rem' }}>{d.id} — {d.threat}</span>
-                                <span style={{ fontSize: '0.65rem', color: '#64748b' }}>{new Date(d.timestamp).toLocaleString('en-US', { year: 'numeric', month: 'short', day: '2-digit' })}</span>
+            {/* 鈹佲攣鈹?Scenario Replay Cards 鈹佲攣鈹?*/}
+            <div style={{ marginBottom: 20 }}>
+                <h3 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span><Icon name="folder" size={16} color="#38bdf8" /></span> Intervention Record  - Scenario Replay
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {filteredOutcomes.map(outcome => (
+                        <div key={outcome.id} className="card" style={{
+                            cursor: 'pointer',
+                            borderLeft: `3px solid ${outcome.grade.includes('+') ? '#34d399' : '#f59e0b'}`,
+                            transition: 'all 0.2s',
+                        }} onClick={() => setExpandedScenario(expandedScenario === outcome.id ? null : outcome.id)}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                    <div style={{
+                                        width: 38, height: 38, borderRadius: 10,
+                                        background: outcome.grade.includes('+') ? 'rgba(52,211,153,0.12)' : 'rgba(245,158,11,0.12)',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        fontWeight: 800, fontSize: '0.9rem', color: outcome.grade.includes('+') ? '#34d399' : '#f59e0b',
+                                    }}>{outcome.id}</div>
+                                    <div>
+                                        <div style={{ fontWeight: 700, color: '#e2e8f0', fontSize: '0.85rem' }}>{outcome.name}</div>
+                                        <div style={{ fontSize: '0.65rem', color: '#64748b', display: 'flex', gap: 12, marginTop: 2 }}>
+                                            <span>{outcome.date}</span>
+                                            <span>{outcome.crop}</span>
+                                            <span>Treatment: {outcome.chemical}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                                    <div style={{ textAlign: 'right' }}>
+                                        <div style={{ fontWeight: 700, color: '#34d399', fontFamily: 'monospace', fontSize: '0.9rem' }}>CNY {outcome.revenueProtected.toLocaleString()}</div>
+                                        <div style={{ fontSize: '0.6rem', color: '#64748b' }}>protected</div>
+                                    </div>
+                                    <StatusBadge status={outcome.grade.includes('+') ? 'monitoring' : 'warning'} label={outcome.grade} />
+                                    <Icon name="chevron-right" size={14} color="#475569" />
+                                </div>
                             </div>
-                            <div style={{ fontSize: '0.72rem', color: '#94a3b8', lineHeight: 1.5 }}>{d.note}</div>
+
+                            {/* Expanded detail */}
+                            {expandedScenario === outcome.id && (
+                                <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(30,41,59,0.5)' }}>
+                                    <div className="grid grid-4" style={{ gap: 8, marginBottom: 12 }}>
+                                        {[
+                                            { label: 'Risk Peak', value: `${outcome.riskPeak}/100`, color: '#ef4444' },
+                                            { label: 'Risk Final', value: `${outcome.riskFinal}/100`, color: '#34d399' },
+                                            { label: 'Response', value: `${outcome.responseMin} min`, color: '#38bdf8' },
+                                            { label: 'AI Accuracy', value: `${outcome.aiAccuracy}%`, color: '#a78bfa' },
+                                        ].map((m, i) => (
+                                            <div key={i} style={{ padding: '8px 10px', background: 'rgba(15,23,42,0.4)', borderRadius: 6, textAlign: 'center' }}>
+                                                <div style={{ fontSize: '1rem', fontWeight: 700, color: m.color, fontFamily: 'monospace' }}>{m.value}</div>
+                                                <div style={{ fontSize: '0.6rem', color: '#64748b' }}>{m.label}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {/* Risk journey bar */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'rgba(15,23,42,0.3)', borderRadius: 8 }}>
+                                        <span style={{ fontSize: '0.65rem', color: '#64748b', width: 50 }}>Risk:</span>
+                                        <div style={{ flex: 1, height: 8, borderRadius: 4, background: 'rgba(15,23,42,0.5)', position: 'relative', overflow: 'hidden' }}>
+                                            <div style={{
+                                                position: 'absolute', left: 0, top: 0, height: '100%',
+                                                width: `${outcome.riskPeak}%`, borderRadius: 4,
+                                                background: 'linear-gradient(90deg, #34d399, #f59e0b, #ef4444)',
+                                                opacity: 0.3,
+                                            }} />
+                                            <div style={{
+                                                position: 'absolute', left: 0, top: 0, height: '100%',
+                                                width: `${outcome.riskFinal}%`, borderRadius: 4,
+                                                background: '#34d399',
+                                            }} />
+                                        </div>
+                                        <span style={{ fontSize: '0.65rem', color: '#34d399', fontWeight: 700, fontFamily: 'monospace', width: 70, textAlign: 'right' }}>{`${outcome.riskPeak}->${outcome.riskFinal}`}</span>
+                                    </div>
+                                    {outcome.loss && (
+                                        <div style={{ marginTop: 8, padding: '6px 10px', background: 'rgba(239,68,68,0.06)', borderRadius: 6, fontSize: '0.7rem', color: '#f87171' }}>
+                                            <Icon name="warning" size={10} color="#f59e0b" /> Revenue loss: CNY {outcome.loss.toLocaleString()}  - {outcome.id === 'B' ? 'due to 6h operator delay' : 'execution deviation'}
+                                        </div>
+                                    )}
+                                    {outcome.excessCost && (
+                                        <div style={{ marginTop: 8, padding: '6px 10px', background: 'rgba(245,158,11,0.06)', borderRadius: 6, fontSize: '0.7rem', color: '#f59e0b' }}>
+                                            <Icon name="warning" size={10} color="#f59e0b" /> Excess cost: CNY {outcome.excessCost.toLocaleString()}  - dosage deviation {outcome.id === 'C' ? '(0.7x->1.2x)' : ''}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     ))}
+                </div>
+            </div>
+
+            {/* 鈹佲攣鈹?Charts Grid 鈹佲攣鈹?*/}
+            <div className="grid grid-2" style={{ gap: 12, marginBottom: 20 }}>
+                {/* AI Accuracy Trend */}
+                <div className="card">
+                    <h3 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Icon name="reasoning" size={16} color="#38bdf8" /> AI Decision Accuracy Over Time
+                    </h3>
+                    <ResponsiveContainer width="100%" height={200}>
+                        <AreaChart data={aiAccuracyTrend}>
+                            <defs>
+                                <linearGradient id="accGrad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#38bdf8" stopOpacity={0.3} />
+                                    <stop offset="100%" stopColor="#38bdf8" stopOpacity={0} />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                            <XAxis dataKey="month" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} />
+                            <YAxis domain={[75, 100]} tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickFormatter={v => `${v}%`} />
+                            <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8 }} formatter={(v) => [`${v}%`, 'Accuracy']} />
+                            <Area type="monotone" dataKey="accuracy" stroke="#38bdf8" fill="url(#accGrad)" strokeWidth={2} dot={{ fill: '#38bdf8', r: 4 }} />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                    <div style={{ textAlign: 'center', fontSize: '0.65rem', color: '#34d399', marginTop: 4 }}>
+                        <Icon name="trending-up" size={10} color="#34d399" /> +16% improvement over 6 months - model self-learning active
+                    </div>
+                </div>
+
+                {/* Chemical Usage Trend */}
+                <div className="card">
+                    <h3 className="card-title">Chemical Usage  - Sentinel vs. Traditional (L/month)</h3>
+                    <ResponsiveContainer width="100%" height={200}>
+                        <BarChart data={chemicalUsageTrend}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                            <XAxis dataKey="month" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} />
+                            <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} />
+                            <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8 }} />
+                            <Bar dataKey="traditional" fill="#475569" radius={[4, 4, 0, 0]} barSize={16} name="Traditional" />
+                            <Bar dataKey="sentinel" fill="#34d399" radius={[4, 4, 0, 0]} barSize={16} name="Sentinel" />
+                            <Legend iconType="circle" wrapperStyle={{ fontSize: '0.7rem' }} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                    <div style={{ textAlign: 'center', fontSize: '0.65rem', color: '#34d399', marginTop: 4 }}>
+                        <Icon name="leaf" size={10} color="#34d399" /> Average 68% chemical reduction through precision targeting
+                    </div>
+                </div>
+
+                {/* Revenue Protected Cumulative */}
+                <div className="card">
+                    <h3 className="card-title">Cumulative Revenue Protected (CNY)</h3>
+                    <ResponsiveContainer width="100%" height={200}>
+                        <AreaChart data={revenueCumulative}>
+                            <defs>
+                                <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#34d399" stopOpacity={0.3} />
+                                    <stop offset="100%" stopColor="#34d399" stopOpacity={0} />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                            <XAxis dataKey="month" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} />
+                            <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickFormatter={v => `CNY ${(v / 1000).toFixed(0)}K`} />
+                            <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8 }} formatter={(v) => [`CNY ${v.toLocaleString()}`, '']} />
+                            <Area type="monotone" dataKey="protected" stroke="#34d399" fill="url(#revGrad)" strokeWidth={2} name="Protected" />
+                            <Area type="monotone" dataKey="cost" stroke="#f59e0b" fill="rgba(245,158,11,0.05)" strokeWidth={1.5} strokeDasharray="4 4" name="Cost" />
+                            <Legend iconType="circle" wrapperStyle={{ fontSize: '0.7rem' }} />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </div>
+
+                {/* Response Time Distribution */}
+                <div className="card">
+                    <h3 className="card-title">Response Time Distribution</h3>
+                    <ResponsiveContainer width="100%" height={200}>
+                        <BarChart data={responseTimeData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                            <XAxis dataKey="range" tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} />
+                            <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} />
+                            <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8 }} />
+                            <Bar dataKey="count" radius={[6, 6, 0, 0]} barSize={32} name="Interventions">
+                                {responseTimeData.map((d, i) => <Cell key={i} fill={d.fill} />)}
+                            </Bar>
+                        </BarChart>
+                    </ResponsiveContainer>
+                    <div style={{ textAlign: 'center', fontSize: '0.65rem', color: '#38bdf8', marginTop: 4 }}>
+                        <Icon name="bolt" size={10} color="#38bdf8" /> 69% of interventions responded to within 30 minutes
+                    </div>
+                </div>
+            </div>
+
+            {/* 鈹佲攣鈹?Decision Quality Matrix 鈹佲攣鈹?*/}
+            <div className="card" style={{ marginBottom: 20 }}>
+                <h3 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Icon name="activity" size={16} color="#a78bfa" /> Decision Quality Matrix
+                </h3>
+                <div style={{ overflowX: 'auto' }}>
+                    <table className="data-table" style={{ width: '100%', fontSize: '0.75rem' }}>
+                        <thead>
+                            <tr>
+                                <th style={{ width: 50 }}>ID</th>
+                                <th>Scenario</th>
+                                <th>Date</th>
+                                <th>Risk Peak</th>
+                                <th>Risk Final</th>
+                                <th>Response</th>
+                                <th>AI Accuracy</th>
+                                <th>Grade</th>
+                                <th>ROI</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {scenarioOutcomes.map(o => (
+                                <tr key={o.id}>
+                                    <td style={{ fontWeight: 800, color: '#38bdf8' }}>{o.id}</td>
+                                    <td style={{ fontWeight: 600, color: '#e2e8f0' }}>{o.name}</td>
+                                    <td style={{ color: '#64748b', fontFamily: 'monospace' }}>{o.date}</td>
+                                    <td>
+                                        <span style={{ color: o.riskPeak >= 80 ? '#ef4444' : o.riskPeak >= 70 ? '#f59e0b' : '#f97316', fontWeight: 700, fontFamily: 'monospace' }}>{o.riskPeak}</span>
+                                    </td>
+                                    <td>
+                                        <span style={{ color: o.riskFinal <= 30 ? '#34d399' : '#f59e0b', fontWeight: 700, fontFamily: 'monospace' }}>{o.riskFinal}</span>
+                                    </td>
+                                    <td>
+                                        <span style={{ color: o.responseMin <= 30 ? '#34d399' : o.responseMin <= 60 ? '#f59e0b' : '#ef4444', fontFamily: 'monospace' }}>
+                                            {o.responseMin >= 60 ? `${(o.responseMin / 60).toFixed(1)}h` : `${o.responseMin}m`}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(15,23,42,0.5)' }}>
+                                                <div style={{ width: `${o.aiAccuracy}%`, height: '100%', borderRadius: 2, background: o.aiAccuracy >= 95 ? '#34d399' : '#38bdf8' }} />
+                                            </div>
+                                            <span style={{ fontFamily: 'monospace', color: '#e2e8f0' }}>{o.aiAccuracy}%</span>
+                                        </div>
+                                    </td>
+                                    <td><StatusBadge status={o.grade.includes('+') ? 'monitoring' : 'warning'} label={o.grade} /></td>
+                                    <td style={{ fontWeight: 700, color: '#34d399', fontFamily: 'monospace' }}>{(o.revenueProtected / o.cost).toFixed(1)}x</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {/* 鈹佲攣鈹?Compliance Record 鈹佲攣鈹?*/}
+            <div className="card" style={{ marginBottom: 20 }}>
+                <h3 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Icon name="audit-alt" size={16} color="#34d399" /> Compliance & Regulatory Record
+                </h3>
+                <div className="grid grid-3" style={{ gap: 10 }}>
+                    {[
+                        { label: 'PHI Compliance', value: '100%', detail: '6/6 interventions PHI-verified', color: '#34d399', icon: 'check-circle' },
+                        { label: 'Banned Substance', value: 'CLEAR', detail: 'Zero restricted chemicals used', color: '#34d399', icon: 'shield' },
+                        { label: 'Label Rate', value: '92%', detail: '1 deviation (Scenario C: +71%)', color: '#f59e0b', icon: 'clipboard' },
+                        { label: 'Wind Safety', value: '100%', detail: 'All drone ops within 3.0 m/s', color: '#34d399', icon: 'wind' },
+                        { label: 'Audit Coverage', value: '100%', detail: 'All interventions fully audited', color: '#34d399', icon: 'clipboard' },
+                        { label: 'GB 2763-2021', value: 'PASSED', detail: 'MRL testing within limits', color: '#34d399', icon: 'building' },
+                    ].map((c, i) => (
+                        <div key={i} style={{ padding: '12px 14px', background: 'rgba(15,23,42,0.4)', borderRadius: 8, borderLeft: `3px solid ${c.color}` }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#e2e8f0', display: 'flex', alignItems: 'center', gap: 4 }}><Icon name={c.icon} size={14} color={c.color} /> {c.label}</span>
+                                <span style={{ fontWeight: 800, color: c.color, fontFamily: 'monospace', fontSize: '0.85rem' }}>{c.value}</span>
+                            </div>
+                            <div style={{ fontSize: '0.62rem', color: '#64748b' }}>{c.detail}</div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* 鈹佲攣鈹?Decision Log 鈹佲攣鈹?*/}
+            <div className="card">
+                <h3 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Icon name="activity" size={16} color="#64748b" /> Detailed Decision Log
+                </h3>
+                <div className="grid grid-2" style={{ gap: 12 }}>
+                    <div className="scrollbar-themed" style={{ maxHeight: 320, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        {decisionEntries.map((d) => (
+                            <button
+                                key={d.id}
+                                className="btn btn-secondary"
+                                onClick={() => setSelectedDecisionId(d.id)}
+                                style={{
+                                    width: '100%',
+                                    justifyContent: 'space-between',
+                                    padding: '8px 10px',
+                                    border: selectedDecision?.id === d.id
+                                        ? '1px solid rgba(56,189,248,0.35)'
+                                        : '1px solid rgba(51,65,85,0.5)',
+                                    background: 'rgba(15,23,42,0.45)',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'flex-start',
+                                    gap: 3,
+                                }}
+                            >
+                                <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                                    <span style={{ fontFamily: 'monospace', color: '#475569', fontSize: '0.65rem' }}>
+                                        {new Date(d.timestamp).toLocaleString('en-US', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })}
+                                    </span>
+                                    <StatusBadge status={d.outcome === 'success' ? 'monitoring' : d.outcome === 'partial' ? 'warning' : d.outcome === 'no_action' ? 'low' : 'critical'} label={d.outcome?.replace('_', ' ').toUpperCase()} />
+                                </div>
+                                <span style={{ fontSize: '0.71rem', color: '#e2e8f0', lineHeight: 1.3 }}>{d.threat}</span>
+                                <span style={{ fontSize: '0.63rem', color: '#94a3b8' }}>{d.action}</span>
+                                <span style={{ fontSize: '0.6rem', color: '#64748b' }}>{d.field} | Risk {d.riskScore ?? '--'}/100</span>
+                            </button>
+                        ))}
+                    </div>
+                    {selectedDecision && (
+                        <div style={{ padding: 12, borderRadius: 10, border: '1px solid rgba(51,65,85,0.6)', background: 'rgba(15,23,42,0.45)' }}>
+                            <div style={{ fontSize: '0.72rem', color: '#64748b', fontFamily: 'monospace', marginBottom: 8 }}>
+                                {new Date(selectedDecision.timestamp).toLocaleString('en-US', { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
+                            </div>
+                            <div style={{ marginBottom: 8 }}>
+                                <StatusBadge
+                                    status={selectedDecision.outcome === 'success'
+                                        ? 'monitoring'
+                                        : selectedDecision.outcome === 'partial'
+                                            ? 'warning'
+                                            : selectedDecision.outcome === 'no_action'
+                                                ? 'low'
+                                                : 'critical'}
+                                    label={selectedDecision.outcome?.replace('_', ' ').toUpperCase()}
+                                />
+                            </div>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#e2e8f0', marginBottom: 6 }}>{selectedDecision.threat}</div>
+                            <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginBottom: 4 }}>Action: {selectedDecision.action}</div>
+                            <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginBottom: 4 }}>Field: {selectedDecision.field}</div>
+                            <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginBottom: 4 }}>Risk Score: {selectedDecision.riskScore ?? '--'}/100</div>
+                            <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginBottom: 4 }}>
+                                Approval: {selectedDecision.approvedBy} ({selectedDecision.approvalType})
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginBottom: 4 }}>
+                                Rx/Exec/Audit: {selectedDecision.prescriptionId || '--'} | {selectedDecision.executionId || '--'} | {selectedDecision.auditId || '--'}
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: '#34d399', fontFamily: 'monospace', marginTop: 8 }}>
+                                Savings: CNY {(selectedDecision.savingsYuan || selectedDecision.savings || 0).toLocaleString()}
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: '#f59e0b', fontFamily: 'monospace', marginTop: 4 }}>
+                                Cost: CNY {(selectedDecision.costYuan || 0).toLocaleString()}
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: '#94a3b8', lineHeight: 1.45, marginTop: 8 }}>
+                                {selectedDecision.note}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
     );
 }
+
+
+
+
+

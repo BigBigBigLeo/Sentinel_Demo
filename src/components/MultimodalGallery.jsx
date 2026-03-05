@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import Icon from './Icon';
 import { multimodalImagery } from '../data/mockData';
 
@@ -22,10 +22,14 @@ const typeIcons = {
 
 export default function MultimodalGallery({ compact = false }) {
     const [selected, setSelected] = useState(null);
+    const [failedImages, setFailedImages] = useState({});
 
     const formatTimestamp = (ts) => {
         const d = new Date(ts);
         return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+    };
+    const markImageFailed = (filename) => {
+        setFailedImages(prev => ({ ...prev, [filename]: true }));
     };
 
     if (compact) {
@@ -33,14 +37,21 @@ export default function MultimodalGallery({ compact = false }) {
             <div className="multimodal-strip">
                 {multimodalImagery.slice(0, 4).map(img => (
                     <div key={img.id} className="mm-thumb" onClick={() => setSelected(img)} style={{ cursor: 'pointer' }}>
-                        <img src={`/${img.filename}`} alt={img.source} loading="lazy" />
+                        {failedImages[img.filename] ? (
+                            <div className="mm-fallback">
+                                <Icon name="camera" size={14} color="#94a3b8" />
+                                <span>Feed unavailable</span>
+                            </div>
+                        ) : (
+                            <img src={`/${img.filename}`} alt={img.source} loading="lazy" onError={() => markImageFailed(img.filename)} />
+                        )}
                         <div className="mm-thumb-label">
                             <Icon name={typeIcons[img.type]} size={10} color={typeColors[img.type]} />
                             <span>{img.source}</span>
                         </div>
                     </div>
                 ))}
-                {selected && <ImageModal img={selected} onClose={() => setSelected(null)} />}
+                {selected && <ImageModal img={selected} onClose={() => setSelected(null)} failed={Boolean(failedImages[selected.filename])} onImageError={() => markImageFailed(selected.filename)} />}
             </div>
         );
     }
@@ -54,7 +65,7 @@ export default function MultimodalGallery({ compact = false }) {
                     </div>
                     <div>
                         <div className="mm-title">Multimodal Sensor Feed</div>
-                        <div className="mm-subtitle">{multimodalImagery.length} sources · Latest: {formatTimestamp(multimodalImagery[0].timestamp)}</div>
+                        <div className="mm-subtitle">{multimodalImagery.length} sources  |  Latest: {formatTimestamp(multimodalImagery[0].timestamp)}</div>
                     </div>
                 </div>
             </div>
@@ -62,7 +73,14 @@ export default function MultimodalGallery({ compact = false }) {
                 {multimodalImagery.map(img => (
                     <div key={img.id} className="mm-card" onClick={() => setSelected(img)}>
                         <div className="mm-card-image">
-                            <img src={`/${img.filename}`} alt={img.source} loading="lazy" />
+                            {failedImages[img.filename] ? (
+                                <div className="mm-fallback">
+                                    <Icon name="camera" size={15} color="#94a3b8" />
+                                    <span>Feed unavailable</span>
+                                </div>
+                            ) : (
+                                <img src={`/${img.filename}`} alt={img.source} loading="lazy" onError={() => markImageFailed(img.filename)} />
+                            )}
                             <div className="mm-card-type" style={{ background: typeColors[img.type] }}>
                                 <Icon name={typeIcons[img.type]} size={10} color="#fff" />
                                 {img.source}
@@ -79,20 +97,29 @@ export default function MultimodalGallery({ compact = false }) {
                     </div>
                 ))}
             </div>
-            {selected && <ImageModal img={selected} onClose={() => setSelected(null)} />}
+            {selected && <ImageModal img={selected} onClose={() => setSelected(null)} failed={Boolean(failedImages[selected.filename])} onImageError={() => markImageFailed(selected.filename)} />}
         </div>
     );
 }
 
-function ImageModal({ img, onClose }) {
+function ImageModal({ img, onClose, failed, onImageError }) {
     return (
         <div className="mm-modal-overlay" onClick={onClose}>
             <div className="mm-modal" onClick={e => e.stopPropagation()}>
                 <div className="mm-modal-image">
-                    <img src={`/${img.filename}`} alt={img.source} />
+                    {failed ? (
+                        <div className="mm-fallback">
+                            <Icon name="camera" size={18} color="#94a3b8" />
+                            <span>Feed unavailable</span>
+                        </div>
+                    ) : (
+                        <img src={`/${img.filename}`} alt={img.source} onError={onImageError} />
+                    )}
                 </div>
                 <div className="mm-modal-sidebar">
-                    <div className="mm-modal-close" onClick={onClose}>×</div>
+                    <button type="button" className="mm-modal-close icon-btn" onClick={onClose} aria-label="Close image detail">
+                        <Icon name="x" size={14} color="#94a3b8" />
+                    </button>
                     <div className="mm-modal-source" style={{ color: typeColors[img.type] }}>
                         <Icon name={typeIcons[img.type]} size={16} color={typeColors[img.type]} />
                         {img.source}
@@ -120,3 +147,4 @@ function ImageModal({ img, onClose }) {
         </div>
     );
 }
+

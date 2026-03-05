@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Icon from './Icon';
 import { PHASES } from '../engine/thinkingEngine';
 
@@ -10,7 +10,6 @@ function TypewriterText({ text, speed = 12, onComplete }) {
 
     useEffect(() => {
         idx.current = 0;
-        setDisplayed('');
         const timer = setInterval(() => {
             idx.current++;
             setDisplayed(text.slice(0, idx.current));
@@ -20,7 +19,7 @@ function TypewriterText({ text, speed = 12, onComplete }) {
             }
         }, speed);
         return () => clearInterval(timer);
-    }, [text, speed]);
+    }, [text, speed, onComplete]);
 
     return <span>{displayed}<span className="thinking-cursor">|</span></span>;
 }
@@ -76,23 +75,7 @@ export default function AIThinkingPanel({ chain = [], isThinking = false, onComp
     const scrollRef = useRef(null);
     const timeoutRef = useRef(null);
 
-    useEffect(() => {
-        if (chain.length === 0) {
-            setVisibleSteps([]);
-            setCurrentStep(-1);
-            setTypingDone(false);
-            return;
-        }
-        if (isThinking) {
-            setVisibleSteps([]);
-            setCurrentStep(-1);
-            setTypingDone(false);
-            revealNext(0);
-        }
-        return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
-    }, [chain, isThinking]);
-
-    const revealNext = (index) => {
+    const revealNext = useCallback((index) => {
         if (index >= chain.length) {
             onComplete?.();
             return;
@@ -100,9 +83,40 @@ export default function AIThinkingPanel({ chain = [], isThinking = false, onComp
         setCurrentStep(index);
         setVisibleSteps(prev => [...prev, chain[index]]);
         setTypingDone(false);
-    };
+    }, [chain, onComplete]);
+    const resetSession = useCallback(() => {
+        setVisibleSteps([]);
+        setCurrentStep(-1);
+        setTypingDone(false);
+    }, []);
 
-    const handleTypingComplete = () => {
+    useEffect(() => {
+        let resetTimer = null;
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+        if (chain.length === 0) {
+            resetTimer = setTimeout(() => {
+                resetSession();
+            }, 0);
+            return () => {
+                if (resetTimer) clearTimeout(resetTimer);
+            };
+        }
+
+        if (isThinking) {
+            resetTimer = setTimeout(() => {
+                resetSession();
+                revealNext(0);
+            }, 0);
+        }
+
+        return () => {
+            if (resetTimer) clearTimeout(resetTimer);
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        };
+    }, [chain, isThinking, revealNext, resetSession]);
+
+    const handleTypingComplete = useCallback(() => {
         setTypingDone(true);
         if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         const nextIndex = currentStep + 1;
@@ -111,7 +125,7 @@ export default function AIThinkingPanel({ chain = [], isThinking = false, onComp
         } else {
             onComplete?.();
         }
-    };
+    }, [chain, currentStep, onComplete, revealNext]);
 
     useEffect(() => {
         if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -132,6 +146,13 @@ export default function AIThinkingPanel({ chain = [], isThinking = false, onComp
     const latestConfidence = confidenceSteps.length > 0
         ? parseFloat(Object.values(confidenceSteps[confidenceSteps.length - 1].data).find(v => typeof v === 'number' && v <= 1 && v > 0) || 0.5)
         : 0;
+    const key = chain.map(step => `${step.id}-${step.phase?.id || ''}-${step.round || 0}`).join('|');
+    let hash = 5381;
+    for (let i = 0; i < key.length; i++) {
+        hash = ((hash << 5) + hash) + key.charCodeAt(i);
+        hash >>>= 0;
+    }
+    const chainFingerprint = hash.toString(36).toUpperCase().padStart(8, '0').slice(-8);
 
     return (
         <div className={`thinking-panel ${isThinking && !isDone ? 'thinking-active' : ''} ${isDone ? 'thinking-done' : ''}`}>
@@ -143,13 +164,13 @@ export default function AIThinkingPanel({ chain = [], isThinking = false, onComp
                     </div>
                     <div>
                         <div className="thinking-title">
-                            {isDone ? 'Analysis Complete — All Rounds' : 'Sentinel AI — Iterative Reasoning'}
+                            {isDone ? 'Analysis Complete  - All Rounds' : 'Sentinel AI  - Iterative Reasoning'}
                         </div>
                         <div className="thinking-subtitle">
                             {isDone
-                                ? `${total} reasoning steps · ${maxRound} rounds · ${chain.filter(s => s.isDataRequest).length} data requests`
+                                ? `${total} reasoning steps  |  ${maxRound} rounds  |  ${chain.filter(s => s.isDataRequest).length} data requests`
                                 : currentPhase
-                                    ? `Phase: ${currentPhase.label} · Round ${currentRound} of ${maxRound}`
+                                    ? `Phase: ${currentPhase.label}  |  Round ${currentRound} of ${maxRound}`
                                     : 'Initializing multimodal reasoning pipeline...'
                             }
                         </div>
@@ -202,7 +223,7 @@ export default function AIThinkingPanel({ chain = [], isThinking = false, onComp
                             {showRoundSeparator && step.round > 1 && (
                                 <div style={{ padding: '12px 0 8px', display: 'flex', alignItems: 'center', gap: 12 }}>
                                     <div style={{ flex: 1, height: 1, background: 'rgba(244,114,182,0.15)' }} />
-                                    <span className="thinking-round-badge">Round {step.round} — {step.round === 2 ? 'New Data Integration' : 'Decision & Verification'}</span>
+                                    <span className="thinking-round-badge">Round {step.round}  - {step.round === 2 ? 'New Data Integration' : 'Decision & Verification'}</span>
                                     <div style={{ flex: 1, height: 1, background: 'rgba(244,114,182,0.15)' }} />
                                 </div>
                             )}
@@ -218,7 +239,7 @@ export default function AIThinkingPanel({ chain = [], isThinking = false, onComp
                                 </div>
                                 <div className="thinking-step-content">
                                     {showTypewriter ? (
-                                        <TypewriterText text={step.content} speed={6} onComplete={handleTypingComplete} />
+                                        <TypewriterText key={step.id} text={step.content} speed={6} onComplete={handleTypingComplete} />
                                     ) : (
                                         <span>{step.content}</span>
                                     )}
@@ -253,13 +274,14 @@ export default function AIThinkingPanel({ chain = [], isThinking = false, onComp
                 <div className="thinking-footer">
                     <div className="thinking-footer-left">
                         <Icon name="check" size={14} color="#34d399" />
-                        <span>Iterative reasoning chain validated — {maxRound} rounds, {total} steps</span>
+                        <span>Iterative reasoning chain validated  - {maxRound} rounds, {total} steps</span>
                     </div>
                     <div className="thinking-footer-right">
-                        <span className="thinking-hash">Chain: {Math.random().toString(36).slice(2, 10).toUpperCase()}</span>
+                        <span className="thinking-hash">Chain: {chainFingerprint}</span>
                     </div>
                 </div>
             )}
         </div>
     );
 }
+

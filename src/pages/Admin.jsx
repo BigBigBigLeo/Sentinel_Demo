@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useMemo, useState } from 'react';
 import useStore from '../engine/store';
 import thresholds from '../data/thresholds';
 import { bannedPesticides, phiConstraints } from '../data/constraints';
@@ -7,26 +7,41 @@ import Icon from '../components/Icon';
 import PipelineBreadcrumb from '../components/PipelineBreadcrumb';
 
 export default function Admin() {
-    const { fields, activeFieldId } = useStore();
+    const {
+        fields,
+        activeFieldId,
+        applyThresholdConfig,
+        resetThresholdConfig,
+    } = useStore();
     const field = fields[activeFieldId];
 
-    // Local threshold state for editing
-    const [localThresholds, setLocalThresholds] = useState({ ...thresholds });
+    const initialThresholds = useMemo(() => JSON.parse(JSON.stringify(thresholds)), []);
+    const [localThresholds, setLocalThresholds] = useState(initialThresholds);
     const [saved, setSaved] = useState(false);
+    const [resetFlash, setResetFlash] = useState(false);
 
     const updateThreshold = (category, key, value) => {
         setLocalThresholds(prev => ({
             ...prev,
-            [category]: { ...prev[category], [key]: parseFloat(value) || value },
+            [category]: { ...prev[category], [key]: Number.parseFloat(value) || value },
         }));
         setSaved(false);
+        setResetFlash(false);
     };
 
     const handleSave = () => {
-        // In a real system, this would persist. Here we just confirm.
-        Object.assign(thresholds, localThresholds);
+        applyThresholdConfig(localThresholds);
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
+    };
+
+    const handleReset = () => {
+        resetThresholdConfig();
+        const defaults = JSON.parse(JSON.stringify(thresholds));
+        setLocalThresholds(defaults);
+        setSaved(false);
+        setResetFlash(true);
+        setTimeout(() => setResetFlash(false), 2000);
     };
 
     return (
@@ -34,17 +49,34 @@ export default function Admin() {
             <PipelineBreadcrumb />
             <div className="page-header">
                 <div>
-                    <h1 className="page-title">Admin & Configuration</h1>
-                    <p className="page-subtitle">System thresholds, constraints, and parameters</p>
+                    <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <Icon name="admin" size={22} color="#38bdf8" />
+                        Admin & Configuration
+                    </h1>
+                    <p className="page-subtitle">System thresholds, constraints, and runtime parameters</p>
                 </div>
-                <button className="btn btn-primary" onClick={handleSave} style={saved ? { display: 'flex', alignItems: 'center', gap: 6 } : {}}>
-                    {saved ? <><Icon name="check" size={14} /> Saved</> : 'Save Configuration'}
-                </button>
+                <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="btn btn-secondary" onClick={handleReset} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <Icon name="refresh" size={14} /> Restore Defaults
+                    </button>
+                    <button className="btn btn-primary" onClick={handleSave} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        {saved ? <><Icon name="check" size={14} /> Saved</> : <><Icon name="save" size={14} /> Save Configuration</>}
+                    </button>
+                </div>
             </div>
 
-            {/* Threshold Editor */}
+            {(saved || resetFlash) && (
+                <div className="card" style={{ marginBottom: 12, padding: 10, borderLeft: `3px solid ${saved ? '#34d399' : '#f59e0b'}` }}>
+                    <div style={{ fontSize: '0.74rem', color: saved ? '#34d399' : '#f59e0b', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <Icon name={saved ? 'check-circle' : 'refresh'} size={14} color={saved ? '#34d399' : '#f59e0b'} />
+                        {saved
+                            ? 'Configuration applied. Runtime thresholds were updated and risk scoring was recalculated.'
+                            : 'Default thresholds restored and active runtime configuration reset.'}
+                    </div>
+                </div>
+            )}
+
             <div className="grid grid-2">
-                {/* Botrytis */}
                 <div className="card">
                     <h3 className="card-title">Gray Mold (Botrytis) Thresholds</h3>
                     <div className="config-grid">
@@ -59,7 +91,6 @@ export default function Admin() {
                     </div>
                 </div>
 
-                {/* Aphids */}
                 <div className="card">
                     <h3 className="card-title">Aphid Thresholds</h3>
                     <div className="config-grid">
@@ -70,24 +101,22 @@ export default function Admin() {
                     </div>
                 </div>
 
-                {/* Spider Mites */}
                 <div className="card">
                     <h3 className="card-title">Spider Mite Thresholds</h3>
                     <div className="config-grid">
                         <label>Mite Density</label>
                         <input type="number" className="config-input" value={localThresholds.spider_mites.mite_density} onChange={e => updateThreshold('spider_mites', 'mite_density', e.target.value)} />
-                        <label>Temp Min (°C)</label>
+                        <label>Temp Min (degC)</label>
                         <input type="number" className="config-input" value={localThresholds.spider_mites.temp_min} onChange={e => updateThreshold('spider_mites', 'temp_min', e.target.value)} />
                     </div>
                 </div>
 
-                {/* Environment */}
                 <div className="card">
                     <h3 className="card-title">Environmental Alerts</h3>
                     <div className="config-grid">
-                        <label>Temp High (°C)</label>
+                        <label>Temp High (degC)</label>
                         <input type="number" className="config-input" value={localThresholds.environment.temp_high} onChange={e => updateThreshold('environment', 'temp_high', e.target.value)} />
-                        <label>Temp Low (°C)</label>
+                        <label>Temp Low (degC)</label>
                         <input type="number" className="config-input" value={localThresholds.environment.temp_low} onChange={e => updateThreshold('environment', 'temp_low', e.target.value)} />
                         <label>Wind Spray Limit (m/s)</label>
                         <input type="number" className="config-input" value={localThresholds.environment.wind_spray_limit} onChange={e => updateThreshold('environment', 'wind_spray_limit', e.target.value)} step="0.1" />
@@ -95,7 +124,6 @@ export default function Admin() {
                 </div>
             </div>
 
-            {/* PHI Constraints Table */}
             <div className="card" style={{ marginTop: 16 }}>
                 <h3 className="card-title">Pre-Harvest Interval (PHI) Constraints</h3>
                 <table className="data-table">
@@ -108,7 +136,6 @@ export default function Admin() {
                 </table>
             </div>
 
-            {/* Banned Pesticides */}
             <div className="card" style={{ marginTop: 16 }}>
                 <h3 className="card-title">Banned / Restricted Pesticides (China)</h3>
                 <table className="data-table">
@@ -121,7 +148,6 @@ export default function Admin() {
                 </table>
             </div>
 
-            {/* System Info */}
             <div className="card" style={{ marginTop: 16 }}>
                 <h3 className="card-title">System Information</h3>
                 <table className="data-table">

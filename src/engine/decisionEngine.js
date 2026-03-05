@@ -1,4 +1,4 @@
-// Sentinel Decision OS — Decision Engine
+// Sentinel Decision OS - Decision Engine
 // Rule-based risk assessment + prescription generation
 
 import { v4 as uuid } from 'uuid';
@@ -6,183 +6,289 @@ import thresholds from '../data/thresholds.js';
 import { phiConstraints, windConstraints, executionMethods, bannedPesticides } from '../data/constraints.js';
 
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-
-// ───────────────────────────────── Risk Rules ─────────────────────────────────
+const num = (v, fallback = 0) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : fallback;
+};
+const getLeafWetnessHours = (sensors) => num(sensors.leaf_wetness_hrs ?? sensors.leaf_wetness_h, 0);
+const riskStatus = (score) => (score >= 70 ? 'critical' : score >= 50 ? 'elevated' : score >= 30 ? 'monitoring' : 'low');
 
 const riskRules = {
     botrytis: (sensors, pests, stage) => {
         const t = thresholds.botrytis;
         if (!t.applicable_stages.includes(stage)) return { score: 5, trend: 'stable', status: 'low', factors: [] };
-        const factors = [];
+
+        const humidity = num(sensors.humidity_pct);
+        const leafWetness = getLeafWetnessHours(sensors);
+        const sporeIndex = num(pests.botrytis_spore_index);
+
         let score = 0;
-        if (sensors.humidity_pct > t.humidity_pct) { score += (sensors.humidity_pct - t.humidity_pct) * 2; factors.push(`Humidity ${sensors.humidity_pct}% > ${t.humidity_pct}%`); }
-        if (sensors.leaf_wetness_hrs > t.leaf_wetness_hrs) { score += (sensors.leaf_wetness_hrs - t.leaf_wetness_hrs) * 6; factors.push(`Leaf wetness ${sensors.leaf_wetness_hrs}h > ${t.leaf_wetness_hrs}h`); }
-        if (pests.botrytis_spore_index > 40) { score += pests.botrytis_spore_index * 0.4; factors.push(`Spore index ${pests.botrytis_spore_index}`); }
-        score = clamp(Math.round(score), 0, 100);
-        const status = score >= 70 ? 'critical' : score >= 50 ? 'elevated' : score >= 30 ? 'monitoring' : 'low';
-        const trend = pests.botrytis_spore_index > 50 ? 'rising' : pests.botrytis_spore_index > 30 ? 'stable' : 'falling';
-        return { score, trend, status, factors, threatId: 'botrytis', name: 'Gray Mold (Botrytis)', nameZh: '灰霉病' };
+        const factors = [];
+
+        if (humidity > t.humidity_pct) {
+            score += (humidity - t.humidity_pct) * 1.6;
+            factors.push(`Humidity ${humidity.toFixed(1)}% > ${t.humidity_pct}%`);
+        }
+        if (leafWetness > t.leaf_wetness_hrs) {
+            score += (leafWetness - t.leaf_wetness_hrs) * 5.5;
+            factors.push(`Leaf wetness ${leafWetness.toFixed(1)}h > ${t.leaf_wetness_hrs}h`);
+        }
+        if (sporeIndex > 35) {
+            score += sporeIndex * 0.42;
+            factors.push(`Spore index ${sporeIndex.toFixed(0)}`);
+        }
+
+        const finalScore = clamp(Math.round(score), 0, 100);
+        return {
+            threatId: 'botrytis',
+            name: 'Gray Mold (Botrytis)',
+            nameZh: '��ù��',
+            score: finalScore,
+            trend: sporeIndex > 50 ? 'rising' : sporeIndex > 30 ? 'stable' : 'falling',
+            status: riskStatus(finalScore),
+            factors,
+        };
     },
 
     aphids: (sensors, pests, stage) => {
         const t = thresholds.aphids;
         if (!t.applicable_stages.includes(stage)) return { score: 5, trend: 'stable', status: 'low', factors: [] };
-        const factors = [];
+
+        const aphids = num(pests.aphids_per_leaf);
+        const trap = num(pests.sticky_trap_whitefly ?? pests.sticky_trap_daily);
+
         let score = 0;
-        if (pests.aphids_per_leaf > t.per_leaf) { score += (pests.aphids_per_leaf - t.per_leaf) * 12; factors.push(`Aphids ${pests.aphids_per_leaf}/leaf > ${t.per_leaf}/leaf`); }
-        if (pests.sticky_trap_whitefly > t.sticky_trap_daily) { score += 15; factors.push(`Trap count ${pests.sticky_trap_whitefly} > ${t.sticky_trap_daily}`); }
-        score = clamp(Math.round(score), 0, 100);
-        const status = score >= 70 ? 'critical' : score >= 50 ? 'elevated' : score >= 30 ? 'monitoring' : 'low';
-        const trend = pests.aphids_per_leaf > t.per_leaf ? 'rising' : 'stable';
-        return { score, trend, status, factors, threatId: 'aphids', name: 'Aphids', nameZh: '蚜虫' };
+        const factors = [];
+
+        if (aphids > t.per_leaf) {
+            score += (aphids - t.per_leaf) * 10;
+            factors.push(`Aphids ${aphids.toFixed(1)}/leaf > ${t.per_leaf}/leaf`);
+        }
+        if (trap > t.sticky_trap_daily) {
+            score += 12;
+            factors.push(`Trap count ${trap.toFixed(0)} > ${t.sticky_trap_daily}`);
+        }
+
+        const finalScore = clamp(Math.round(score), 0, 100);
+        return {
+            threatId: 'aphids',
+            name: 'Aphids',
+            nameZh: '����',
+            score: finalScore,
+            trend: aphids > t.per_leaf ? 'rising' : 'stable',
+            status: riskStatus(finalScore),
+            factors,
+        };
     },
 
     anthracnose: (sensors, pests, stage) => {
         const t = thresholds.anthracnose;
         if (!t.applicable_stages.includes(stage)) return { score: 5, trend: 'stable', status: 'low', factors: [] };
-        const factors = [];
+
+        const temp = num(sensors.temp_C);
+        const humidity = num(sensors.humidity_pct);
+
         let score = 0;
-        if (sensors.temp_C > t.temp_min && sensors.humidity_pct > t.humidity_pct) {
-            score += 30; factors.push(`Warm + humid: ${sensors.temp_C}C, ${sensors.humidity_pct}%`);
+        const factors = [];
+
+        if (temp > t.temp_min && humidity > t.humidity_pct) {
+            score += 35;
+            factors.push(`Warm + humid: ${temp.toFixed(1)}C, ${humidity.toFixed(1)}%`);
         }
-        score = clamp(Math.round(score + Math.random() * 20), 0, 100);
-        const status = score >= 70 ? 'critical' : score >= 50 ? 'elevated' : score >= 30 ? 'monitoring' : 'low';
-        return { score, trend: 'stable', status, factors, threatId: 'anthracnose', name: 'Anthracnose', nameZh: '炭疽病' };
+        if (num(pests.botrytis_spore_index) > 40) {
+            score += 8;
+            factors.push('Moisture pressure supports fungal spread');
+        }
+
+        const finalScore = clamp(Math.round(score), 0, 100);
+        return {
+            threatId: 'anthracnose',
+            name: 'Anthracnose',
+            nameZh: '̿�Ҳ�',
+            score: finalScore,
+            trend: finalScore > 40 ? 'rising' : 'stable',
+            status: riskStatus(finalScore),
+            factors,
+        };
     },
 
     spider_mites: (sensors, pests, stage) => {
         const t = thresholds.spider_mites;
         if (!t.applicable_stages.includes(stage)) return { score: 5, trend: 'stable', status: 'low', factors: [] };
-        const factors = [];
+
+        const mites = num(pests.mite_density);
+        const temp = num(sensors.temp_C);
+        const humidity = num(sensors.humidity_pct);
+
         let score = 0;
-        if (pests.mite_density > t.mite_density) { score += (pests.mite_density - t.mite_density) * 10; factors.push(`Mite density ${pests.mite_density}`); }
-        if (sensors.temp_C > t.temp_min && sensors.humidity_pct < t.humidity_max) { score += 20; factors.push('Hot + dry conditions'); }
-        score = clamp(Math.round(score), 0, 100);
-        const status = score >= 70 ? 'critical' : score >= 50 ? 'elevated' : score >= 30 ? 'monitoring' : 'low';
-        return { score, trend: pests.mite_density > t.mite_density ? 'rising' : 'stable', status, factors, threatId: 'spider_mites', name: 'Spider Mites', nameZh: '红蜘蛛' };
+        const factors = [];
+
+        if (mites > t.mite_density) {
+            score += (mites - t.mite_density) * 10;
+            factors.push(`Mite density ${mites.toFixed(1)} > ${t.mite_density}`);
+        }
+        if (temp > t.temp_min && humidity < t.humidity_max) {
+            score += 20;
+            factors.push('Hot + dry conditions');
+        }
+
+        const finalScore = clamp(Math.round(score), 0, 100);
+        return {
+            threatId: 'spider_mites',
+            name: 'Spider Mites',
+            nameZh: '��֩��',
+            score: finalScore,
+            trend: mites > t.mite_density ? 'rising' : 'stable',
+            status: riskStatus(finalScore),
+            factors,
+        };
     },
 
     root_rot: (sensors, pests, stage) => {
         const t = thresholds.root_rot;
         if (!t.applicable_stages.includes(stage)) return { score: 5, trend: 'stable', status: 'low', factors: [] };
-        const factors = [];
+
+        const soilMoist = num(sensors.soil_moist_pct);
+
         let score = 0;
-        if (sensors.soil_moist_pct > t.soil_moist_pct) { score += (sensors.soil_moist_pct - t.soil_moist_pct) * 3; factors.push(`Soil moisture ${sensors.soil_moist_pct}%`); }
-        score = clamp(Math.round(score), 0, 100);
-        const status = score >= 70 ? 'critical' : score >= 50 ? 'elevated' : score >= 30 ? 'monitoring' : 'low';
-        return { score, trend: 'stable', status, factors, threatId: 'root_rot', name: 'Root Rot', nameZh: '根腐病' };
+        const factors = [];
+
+        if (soilMoist > t.soil_moist_pct) {
+            score += (soilMoist - t.soil_moist_pct) * 3;
+            factors.push(`Soil moisture ${soilMoist.toFixed(1)}% > ${t.soil_moist_pct}%`);
+        }
+
+        const finalScore = clamp(Math.round(score), 0, 100);
+        return {
+            threatId: 'root_rot',
+            name: 'Root Rot',
+            nameZh: '������',
+            score: finalScore,
+            trend: 'stable',
+            status: riskStatus(finalScore),
+            factors,
+        };
     },
 };
 
-// ────────────────────────── Full Risk Assessment ──────────────────────────────
-
 export const assessRisks = (snapshot) => {
     const { sensors, pests, stage } = snapshot;
-    const ruleNames = {
-        botrytis: { name: 'Gray Mold (Botrytis)', nameZh: '灰霉病' },
-        aphids: { name: 'Aphids', nameZh: '蚜虫' },
-        anthracnose: { name: 'Anthracnose', nameZh: '炭疽病' },
-        spider_mites: { name: 'Spider Mites', nameZh: '红蜘蛛' },
-        root_rot: { name: 'Root Rot', nameZh: '根腐病' },
-    };
-    const results = [];
-    for (const [key, ruleFn] of Object.entries(riskRules)) {
-        const result = ruleFn(sensors, pests, stage);
-        // Always ensure threatId and name are set
-        result.threatId = result.threatId || key;
-        result.name = result.name || ruleNames[key]?.name || key;
-        result.nameZh = result.nameZh || ruleNames[key]?.nameZh || '';
-        results.push(result);
-    }
+    const results = Object.values(riskRules).map(fn => fn(sensors, pests, stage));
     return results.sort((a, b) => b.score - a.score);
 };
-
-// ─────────────────────────── Constraint Checking ─────────────────────────────
 
 export const checkConstraints = (action, sensors, daysToHarvest) => {
     const violations = [];
     const warnings = [];
 
-    // PHI check
+    const actionType = action.action || action.method;
+
+    let windRuleKey = null;
+    if (actionType === 'spot_spray' || actionType === 'emergency_spray') windRuleKey = 'drone_spray';
+    if (actionType === 'broadcast_spray') windRuleKey = 'broadcast_spray';
+    if (actionType === 'biocontrol') windRuleKey = 'biocontrol_release';
+
     if (action.activeIngredient && action.activeIngredient.key) {
         const phi = phiConstraints[action.activeIngredient.key];
         if (phi && daysToHarvest < phi.days) {
-            violations.push({ type: 'PHI', message: `${phi.name}: requires ${phi.days}d PHI, only ${daysToHarvest}d to harvest`, severity: 'critical' });
+            violations.push({
+                type: 'PHI',
+                message: `${phi.name}: requires ${phi.days}d PHI, only ${daysToHarvest}d to harvest`,
+                severity: 'critical',
+            });
         }
     }
 
-    // Wind check
-    if (action.method && windConstraints[action.method]) {
-        const wc = windConstraints[action.method];
-        if (sensors.wind_speed_ms > wc.maxWindMs) {
-            violations.push({ type: 'WIND', message: `${wc.description}: current ${sensors.wind_speed_ms} m/s`, severity: 'warning' });
+    if (windRuleKey && windConstraints[windRuleKey]) {
+        const wc = windConstraints[windRuleKey];
+        if (num(sensors.wind_speed_ms) > wc.maxWindMs) {
+            violations.push({
+                type: 'WIND',
+                message: `${wc.description}: current ${num(sensors.wind_speed_ms).toFixed(1)} m/s`,
+                severity: 'warning',
+            });
         }
     }
 
-    // Banned substance check
     if (action.activeIngredient) {
-        const banned = bannedPesticides.find(b => b.name.toLowerCase().includes(action.activeIngredient.name?.toLowerCase()));
+        const ingredientName = action.activeIngredient.name?.toLowerCase() || '';
+        const banned = bannedPesticides.find(b => ingredientName.includes(b.name.toLowerCase()));
         if (banned) {
             violations.push({ type: 'BANNED', message: `${banned.name}: ${banned.reason}`, severity: 'critical' });
         }
     }
 
-    // Rain check
-    if (sensors.rainfall_mm > thresholds.environment.rainfall_spray_limit && (action.method === 'spot_spray' || action.method === 'broadcast_spray')) {
-        warnings.push({ type: 'RAIN', message: `Rainfall ${sensors.rainfall_mm}mm — spray effectiveness reduced`, severity: 'warning' });
+    if (
+        num(sensors.rainfall_mm) > thresholds.environment.rainfall_spray_limit
+        && ['spot_spray', 'broadcast_spray', 'emergency_spray'].includes(actionType)
+    ) {
+        warnings.push({
+            type: 'RAIN',
+            message: `Rainfall ${num(sensors.rainfall_mm).toFixed(1)}mm - spray effectiveness reduced`,
+            severity: 'warning',
+        });
     }
 
     return { violations, warnings, canProceed: violations.filter(v => v.severity === 'critical').length === 0 };
 };
 
-// ─────────────────────────── Prescription Generator ──────────────────────────
-
 const prescriptionTemplates = {
     botrytis: {
-        primary: { action: 'spot_spray', activeIngredient: { key: 'mancozeb', name: 'Mancozeb (代森锰锌)', moaGroup: 'M03' }, dosageRatio: 0.7 },
-        fallback: { action: 'biocontrol', activeIngredient: { key: null, name: 'Trichoderma harzianum (木霉菌)', moaGroup: 'BCA' }, dosageRatio: 1.0 },
+        primary: { action: 'spot_spray', activeIngredient: { key: 'mancozeb', name: 'Mancozeb', moaGroup: 'M03' }, dosageRatio: 0.7 },
+        fallback: { action: 'biocontrol', activeIngredient: { key: null, name: 'Trichoderma harzianum', moaGroup: 'BCA' }, dosageRatio: 1.0 },
         ventilation: { action: 'ventilation', activeIngredient: null, dosageRatio: 0 },
     },
     aphids: {
-        primary: { action: 'broadcast_spray', activeIngredient: { key: 'imidacloprid', name: 'Imidacloprid 2000x (吡虫啉)', moaGroup: '4A' }, dosageRatio: 0.8 },
-        fallback: { action: 'biocontrol', activeIngredient: { key: null, name: 'Coccinellidae release (瓢虫释放)', moaGroup: 'BCA' }, dosageRatio: 1.0 },
+        primary: { action: 'broadcast_spray', activeIngredient: { key: 'imidacloprid', name: 'Imidacloprid', moaGroup: '4A' }, dosageRatio: 0.8 },
+        fallback: { action: 'biocontrol', activeIngredient: { key: null, name: 'Ladybug release', moaGroup: 'BCA' }, dosageRatio: 1.0 },
     },
     anthracnose: {
-        primary: { action: 'spot_spray', activeIngredient: { key: 'chlorothalonil', name: 'Chlorothalonil (百菌清)', moaGroup: 'M05' }, dosageRatio: 0.7 },
+        primary: { action: 'spot_spray', activeIngredient: { key: 'chlorothalonil', name: 'Chlorothalonil', moaGroup: 'M05' }, dosageRatio: 0.7 },
         fallback: { action: 'manual_removal', activeIngredient: null, dosageRatio: 0 },
     },
     spider_mites: {
-        primary: { action: 'spot_spray', activeIngredient: { key: 'abamectin', name: 'Abamectin (阿维菌素)', moaGroup: '6' }, dosageRatio: 0.6 },
-        fallback: { action: 'biocontrol', activeIngredient: { key: null, name: 'Phytoseiulus persimilis (智利小植绥螨)', moaGroup: 'BCA' }, dosageRatio: 1.0 },
+        primary: { action: 'spot_spray', activeIngredient: { key: 'abamectin', name: 'Abamectin', moaGroup: '6' }, dosageRatio: 0.6 },
+        fallback: { action: 'biocontrol', activeIngredient: { key: null, name: 'Phytoseiulus persimilis', moaGroup: 'BCA' }, dosageRatio: 1.0 },
     },
     root_rot: {
         primary: { action: 'irrigation', activeIngredient: null, dosageRatio: 0 },
     },
+    frost_damage: {
+        primary: { action: 'frost_protection', activeIngredient: null, dosageRatio: 0 },
+    },
+    ventilation_failure: {
+        primary: { action: 'emergency_spray', activeIngredient: { key: 'carbendazim', name: 'Carbendazim', moaGroup: '1' }, dosageRatio: 0.8 },
+        fallback: { action: 'manual_override', activeIngredient: null, dosageRatio: 0 },
+        ventilation: { action: 'dehumidification', activeIngredient: null, dosageRatio: 0 },
+    },
+    compound_pest: {
+        primary: { action: 'compound_sequential', activeIngredient: { key: 'imidacloprid', name: 'Imidacloprid', moaGroup: '4A' }, dosageRatio: 0.8 },
+        fallback: { action: 'biocontrol', activeIngredient: { key: null, name: 'Ladybug release', moaGroup: 'BCA' }, dosageRatio: 1.0 },
+    },
 };
 
 export const generatePrescription = (fieldId, snapshot, riskResults, daysToHarvest = 30) => {
-    // Find highest critical risk
-    const topRisk = riskResults.find(r => r.status === 'critical' || r.status === 'elevated');
+    const topRisk = riskResults.find(r => r.status === 'critical' || r.status === 'elevated') || riskResults[0];
     if (!topRisk) return null;
 
     const template = prescriptionTemplates[topRisk.threatId];
     if (!template) return null;
 
-    // Try primary action first, fall back if constraints violated
-    let chosen = template.primary;
+    const isPreventiveMode = topRisk.score < 30;
+    let chosen = (isPreventiveMode && template.fallback) ? template.fallback : template.primary;
+
     let constraintResult = checkConstraints({ ...chosen, method: chosen.action }, snapshot.sensors, daysToHarvest);
 
-    let usedFallback = false;
+    let usedFallback = isPreventiveMode && !!template.fallback;
     if (!constraintResult.canProceed && template.fallback) {
         chosen = template.fallback;
         constraintResult = checkConstraints({ ...chosen, method: chosen.action }, snapshot.sensors, daysToHarvest);
         usedFallback = true;
     }
 
-    // Also add ventilation if available
     const supportAction = template.ventilation ? 'ventilation_adjust' : null;
 
-    const rxId = 'RX-' + uuid().slice(0, 4).toUpperCase();
+    const rxId = `RX-${uuid().slice(0, 4).toUpperCase()}`;
     const methodInfo = executionMethods[chosen.action] || {};
     const baseCost = (chosen.dosageRatio || 0) * 3000 * (methodInfo.costMultiplier || 1);
 
@@ -190,7 +296,7 @@ export const generatePrescription = (fieldId, snapshot, riskResults, daysToHarve
         id: rxId,
         fieldId,
         timestamp: snapshot.timestamp,
-        target: fieldId === 'BS-B3' ? '棚区B-3 第4号垄' : '温棚A-2 东区',
+        target: fieldId === 'BS-B3' ? '���� B-3 ��4��¢' : '���� A-2 ����',
         threatId: topRisk.threatId,
         threatName: topRisk.name,
         riskScore: topRisk.score,
@@ -199,7 +305,7 @@ export const generatePrescription = (fieldId, snapshot, riskResults, daysToHarve
         activeIngredient: chosen.activeIngredient,
         dosageRatio: chosen.dosageRatio,
         constraints: {
-            wind_max_ms: windConstraints[chosen.action]?.maxWindMs || null,
+            wind_max_ms: windConstraints.drone_spray?.maxWindMs || null,
             phi_days: chosen.activeIngredient?.key ? (phiConstraints[chosen.activeIngredient.key]?.days || 0) : 0,
             soil_moisture_max_pct: 40,
             banned_substances: bannedPesticides.map(b => b.name),
@@ -213,17 +319,16 @@ export const generatePrescription = (fieldId, snapshot, riskResults, daysToHarve
             photoRequired: true,
         },
         expectedOutcome: {
-            riskReduction: Math.round(topRisk.score * 0.55),
+            riskReduction: Math.max(5, Math.round(topRisk.score * (isPreventiveMode ? 0.35 : 0.55))),
             gradeProtection: topRisk.score >= 70 ? 'A' : null,
         },
-        confidence: usedFallback ? 0.65 : 0.82,
+        confidence: usedFallback ? 0.65 : (isPreventiveMode ? 0.74 : 0.82),
+        decisionMode: isPreventiveMode ? 'preventive' : 'reactive',
         responsibilityBoundary: 'system',
         estimatedCost: Math.round(baseCost),
         status: 'pending',
     };
 };
-
-// ─────────────────────────── Revenue at Risk ─────────────────────────────────
 
 export const calculateRevenueAtRisk = (field, riskResults) => {
     const topRisk = riskResults[0];
@@ -239,6 +344,7 @@ export const calculateRevenueAtRisk = (field, riskResults) => {
     const downgradeProbability = Math.min(topRisk.score / 100, 0.95);
 
     const revenueAtRisk = Math.round((currentPrice - downgradePrice) * volume * downgradeProbability);
+    const totalRiskScore = Math.max(1, riskResults.reduce((s, x) => s + (x.score || 0), 0));
 
     return {
         total: revenueAtRisk,
@@ -249,7 +355,7 @@ export const calculateRevenueAtRisk = (field, riskResults) => {
         volume,
         breakdown: riskResults.filter(r => r.score >= 30).map(r => ({
             threat: r.name,
-            contribution: Math.round(revenueAtRisk * (r.score / riskResults.reduce((s, x) => s + x.score, 0))),
+            contribution: Math.round(revenueAtRisk * ((r.score || 0) / totalRiskScore)),
         })),
     };
 };

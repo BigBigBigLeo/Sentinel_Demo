@@ -1,23 +1,22 @@
-// Sentinel Decision OS â€” Regulatory Constraints
-// PHI intervals, banned pesticides, wind limits per Chinese regulations
+// Sentinel Decision OS - Regulatory and execution constraints
 
 export const phiConstraints = {
-    mancozeb: { name: 'Mancozeb (ä»£æ£®é”°é”Œ)', days: 15, moaGroup: 'M03' },
-    chlorothalonil: { name: 'Chlorothalonil (ç™¾èŒæ¸…)', days: 14, moaGroup: 'M05' },
-    carbendazim: { name: 'Carbendazim (å¤šèŒçµ)', days: 7, moaGroup: '1' },
-    procymidone: { name: 'Procymidone (è…éœ‰åˆ©)', days: 7, moaGroup: '2' },
-    prochloraz: { name: 'Prochloraz (å’ªé²œèƒº)', days: 10, moaGroup: '3' },
-    imidacloprid: { name: 'Imidacloprid (å¡è™«å•‰)', days: 7, moaGroup: '4A' },
-    abamectin: { name: 'Abamectin (é˜¿ç»´èŒç´ )', days: 7, moaGroup: '6' },
-    cypermethrin: { name: 'Cypermethrin (é«˜æ•ˆæ°¯æ°°èŠé…¯)', days: 5, moaGroup: '3A' },
+    mancozeb: { name: 'Mancozeb', days: 15, moaGroup: 'M03' },
+    chlorothalonil: { name: 'Chlorothalonil', days: 14, moaGroup: 'M05' },
+    carbendazim: { name: 'Carbendazim', days: 7, moaGroup: '1' },
+    procymidone: { name: 'Procymidone', days: 7, moaGroup: '2' },
+    prochloraz: { name: 'Prochloraz', days: 10, moaGroup: '3' },
+    imidacloprid: { name: 'Imidacloprid', days: 7, moaGroup: '4A' },
+    abamectin: { name: 'Abamectin', days: 7, moaGroup: '6' },
+    cypermethrin: { name: 'Cypermethrin', days: 5, moaGroup: '3A' },
 };
 
 export const bannedPesticides = [
-    { name: 'Methamidophos (ç”²èƒºç£·)', reason: 'Banned in China since 2008' },
-    { name: 'Monocrotophos (ä¹…æ•ˆç£·)', reason: 'Banned for all crops' },
-    { name: 'Parathion (å¯¹ç¡«ç£·)', reason: 'Banned for all crops' },
-    { name: 'Phosphamidon (ç£·èƒº)', reason: 'Banned for all crops' },
-    { name: 'Fipronil (æ°Ÿè™«è…ˆ)', reason: 'Banned for food crops' },
+    { name: 'Methamidophos', reason: 'Banned in China for food crops' },
+    { name: 'Monocrotophos', reason: 'Banned for all crops' },
+    { name: 'Parathion', reason: 'Banned for all crops' },
+    { name: 'Phosphamidon', reason: 'Banned for all crops' },
+    { name: 'Fipronil', reason: 'Banned for many edible crops' },
 ];
 
 export const windConstraints = {
@@ -27,10 +26,15 @@ export const windConstraints = {
 };
 
 export const executionMethods = {
-    spot_spray: { label: 'Spot Spray', labelZh: 'å±€éƒ¨ç‚¹å–·', method: 'drone', costMultiplier: 1.0 },
-    broadcast_spray: { label: 'Broadcast Spray', labelZh: 'å…¨æ ªå–·é›¾', method: 'drone', costMultiplier: 1.5 },
-    biocontrol: { label: 'Biocontrol Release', labelZh: 'ç”Ÿç‰©é˜²æ²»é‡Šæ”¾', method: 'manual', costMultiplier: 2.0 },
-    ventilation: { label: 'Ventilation Adjustment', labelZh: 'é€šé£è°ƒæ§', method: 'iot', costMultiplier: 0.2 },
-    irrigation: { label: 'Irrigation Control', labelZh: 'çŒæº‰æ§åˆ¶', method: 'iot', costMultiplier: 0.3 },
-    manual_removal: { label: 'Manual Removal', labelZh: 'äººå·¥æ‘˜é™¤', method: 'manual', costMultiplier: 3.0 },
+    spot_spray: { label: 'Spot Spray', labelZh: '¾Ö²¿µãÅç', method: 'drone', costMultiplier: 1.0 },
+    broadcast_spray: { label: 'Broadcast Spray', labelZh: 'È«ÖêÅçÎí', method: 'drone', costMultiplier: 1.5 },
+    biocontrol: { label: 'Biocontrol Release', labelZh: 'ÉúÎï·ÀÖÎÊÍ·Å', method: 'manual', costMultiplier: 2.0 },
+    ventilation: { label: 'Ventilation Adjustment', labelZh: 'Í¨·çµ÷¿Ø', method: 'iot', costMultiplier: 0.2 },
+    irrigation: { label: 'Irrigation Control', labelZh: '¹à¸È¿ØÖÆ', method: 'iot', costMultiplier: 0.3 },
+    manual_removal: { label: 'Manual Removal', labelZh: 'ÈË¹¤Õª³ı', method: 'manual', costMultiplier: 3.0 },
+    frost_protection: { label: 'Frost Protection', labelZh: 'Ëª¶³·À»¤', method: 'facility', costMultiplier: 0.6 },
+    emergency_spray: { label: 'Emergency Spray', labelZh: '½ô¼±ÅçÈ÷', method: 'drone', costMultiplier: 1.8 },
+    manual_override: { label: 'Manual Override', labelZh: 'ÈË¹¤²Ù×÷ÇĞ»»', method: 'manual', costMultiplier: 1.2 },
+    dehumidification: { label: 'Dehumidification', labelZh: '³ıÊª´¦Àí', method: 'facility', costMultiplier: 0.4 },
+    compound_sequential: { label: 'Sequential Treatment', labelZh: '½×¶ÎĞÔ¸´ºÏ´¦Àí', method: 'multi', costMultiplier: 1.6 },
 };
