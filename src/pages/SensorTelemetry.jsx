@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+﻿import React, { useEffect, useMemo, useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceArea } from 'recharts';
 import useStore from '../engine/store';
 import StatusBadge from '../components/StatusBadge';
@@ -13,22 +13,23 @@ import {
     zoneIntervals,
     perUnitTimeSeries,
 } from '../data/mockData';
+import { pick, localeTag } from '../i18n/locale.js';
 
 const SENSOR_TYPE_META = {
-    temperature: { label: 'Temperature', labelZh: '�¶�', icon: 'thermostat', color: '#38bdf8', unit: '��C' },
-    humidity: { label: 'Humidity', labelZh: 'ʪ��', icon: 'water-drop', color: '#f59e0b', unit: '%' },
-    soilMoisture: { label: 'Soil Moisture', labelZh: '������ˮ��', icon: 'leaf', color: '#34d399', unit: '%' },
-    leafWetness: { label: 'Leaf Wetness', labelZh: 'Ҷ��ʪ��ʱ��', icon: 'leaf', color: '#a78bfa', unit: 'h' },
-    wind: { label: 'Wind Speed', labelZh: '����', icon: 'wind', color: '#60a5fa', unit: 'm/s' },
-    light: { label: 'Light Intensity', labelZh: '����', icon: 'sun', color: '#fbbf24', unit: 'Lux' },
-    soilPh: { label: 'Soil pH', labelZh: '���� pH', icon: 'activity', color: '#fb923c', unit: 'pH' },
-    rainfall: { label: 'Rainfall', labelZh: '������', icon: 'cloud-rain', color: '#06b6d4', unit: 'mm' },
-    pestTrap: { label: 'Pest Trap', labelZh: '������', icon: 'search', color: '#f472b6', unit: 'count/day' },
-    camera: { label: 'Camera', labelZh: '����ͷ', icon: 'camera', color: '#818cf8', unit: '' },
-    co2: { label: 'CO2 Level', labelZh: '������̼', icon: 'wind', color: '#22d3ee', unit: 'ppm' },
-    uvIndex: { label: 'UV Index', labelZh: '����ָ��', icon: 'sun', color: '#e879f9', unit: 'UV' },
-    irrigationFlow: { label: 'Irrigation Flow', labelZh: '�������', icon: 'water-drop', color: '#2dd4bf', unit: 'L/min' },
-    sporeCount: { label: 'Spore Counter', labelZh: '���Ӽ���', icon: 'perception', color: '#fb7185', unit: 'spores/m3' },
+    temperature: { label: 'Temperature', labelZh: '温度', icon: 'thermostat', color: '#38bdf8', unit: '°C' },
+    humidity: { label: 'Humidity', labelZh: '湿度', icon: 'water-drop', color: '#f59e0b', unit: '%' },
+    soilMoisture: { label: 'Soil Moisture', labelZh: '土壤含水率', icon: 'leaf', color: '#34d399', unit: '%' },
+    leafWetness: { label: 'Leaf Wetness', labelZh: '叶面湿润时长', icon: 'leaf', color: '#a78bfa', unit: 'h' },
+    wind: { label: 'Wind Speed', labelZh: '风速', icon: 'wind', color: '#60a5fa', unit: 'm/s' },
+    light: { label: 'Light Intensity', labelZh: '光照强度', icon: 'sun', color: '#fbbf24', unit: 'Lux' },
+    soilPh: { label: 'Soil pH', labelZh: '土壤 pH', icon: 'activity', color: '#fb923c', unit: 'pH' },
+    rainfall: { label: 'Rainfall', labelZh: '降雨量', icon: 'cloud-rain', color: '#06b6d4', unit: 'mm' },
+    pestTrap: { label: 'Pest Trap', labelZh: '虫情监测', icon: 'search', color: '#f472b6', unit: 'count/day' },
+    camera: { label: 'Camera', labelZh: '摄像头', icon: 'camera', color: '#818cf8', unit: '' },
+    co2: { label: 'CO2 Level', labelZh: '二氧化碳', icon: 'wind', color: '#22d3ee', unit: 'ppm' },
+    uvIndex: { label: 'UV Index', labelZh: '紫外指数', icon: 'sun', color: '#e879f9', unit: 'UV' },
+    irrigationFlow: { label: 'Irrigation Flow', labelZh: '灌溉流量', icon: 'water-drop', color: '#2dd4bf', unit: 'L/min' },
+    sporeCount: { label: 'Spore Counter', labelZh: '孢子计数', icon: 'perception', color: '#fb7185', unit: 'spores/m3' },
 };
 
 const TELEMETRY_WINDOWS = [
@@ -82,7 +83,9 @@ const buildScaledSeries = (rawSeries, windowKey) => {
 };
 
 export default function SensorTelemetry() {
-    const { fields, activeFieldId } = useStore();
+    const { fields, activeFieldId, locale } = useStore();
+    const t = (en, zh) => pick(locale, en, zh);
+    const isZh = locale === 'zh';
     const field = fields[activeFieldId];
     const fleet = sensorFleet[activeFieldId] || [];
     const pests = pestMonitoring[activeFieldId] || {};
@@ -126,7 +129,7 @@ export default function SensorTelemetry() {
     const streamFrames = CAMERA_STREAMS[field?.crop] || CAMERA_STREAMS.blueberry;
     const currentCameraFrame = streamFrames[cameraFrame % streamFrames.length];
 
-    const now = new Date().toLocaleString('en-US', {
+    const now = new Date().toLocaleString(localeTag(locale), {
         year: 'numeric',
         month: 'short',
         day: '2-digit',
@@ -136,7 +139,7 @@ export default function SensorTelemetry() {
         hour12: false,
     });
 
-    const fmtTime = (d) => new Date(d).toLocaleString('en-US', {
+    const fmtTime = (d) => new Date(d).toLocaleString(localeTag(locale), {
         year: 'numeric',
         month: 'short',
         day: '2-digit',
@@ -144,6 +147,49 @@ export default function SensorTelemetry() {
         minute: '2-digit',
         hour12: false,
     });
+    const pestLabel = (key) => {
+        const mapZh = {
+            sticky_trap_daily: '粘虫板日计数',
+            aphids_per_leaf: '每叶蚜虫数',
+            thrips_per_sticky: '每板蓟马数',
+            whitefly_per_trap: '每板白粉虱数',
+            spore_index: '孢子指数',
+        };
+        return isZh ? (mapZh[key] || key.replace(/_/g, ' ')) : key.replace(/_/g, ' ');
+    };
+    const zoneLabel = (item) => {
+        if (!item?.zone) return '--';
+        if (!isZh) return item.zone;
+        if (item.zoneZh) return item.zoneZh;
+        const map = {
+            'B3-East': 'B3 东区',
+            'B3-West': 'B3 西区',
+            'B3-South': 'B3 南区',
+            'B3-North': 'B3 北区',
+            'B3-Central': 'B3 中区',
+            'B3-All': 'B3 全区',
+            'A2-Main': 'A2 主区',
+            'A2-North': 'A2 北区',
+        };
+        return map[item.zone] || item.zone;
+    };
+    const unitStatusLabel = (status) => {
+        if (!isZh) return status;
+        const map = { online: '在线', warning: '告警', offline: '离线' };
+        return map[status] || status;
+    };
+    const unitValueText = (unit) => {
+        if (!unit) return '--';
+        if (typeof unit.value === 'number') return unit.value;
+        if (!isZh) return unit.value;
+        const map = {
+            streaming: '实时流',
+            online: '在线',
+            offline: '离线',
+            warning: '告警',
+        };
+        return map[unit.value] || unit.value;
+    };
 
     return (
         <div className="page">
@@ -153,14 +199,14 @@ export default function SensorTelemetry() {
                 <div>
                     <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <Icon name="sensors" size={22} color="#38bdf8" />
-                        Sensor Telemetry
+                        {t('Sensor Telemetry', '传感遥测')}
                     </h1>
-                    <p className="page-subtitle">Stage 2: Data Collection | {field?.name} | {now}</p>
+                    <p className="page-subtitle">{t('Stage 2: Data Collection', '阶段 2：数据采集')} | {locale === 'zh' ? (field?.nameZh || field?.name) : field?.name} | {now}</p>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                    <StatusBadge status="monitoring" label={`${totalOnline} Online`} />
-                    {totalWarning > 0 && <StatusBadge status="warning" label={`${totalWarning} Warning`} />}
-                    <span style={{ fontSize: '0.7rem', color: '#64748b' }}>{fleet.length} sensors | {totalTypes} types</span>
+                    <StatusBadge status="monitoring" label={`${totalOnline} ${t('Online', '在线')}`} />
+                    {totalWarning > 0 && <StatusBadge status="warning" label={`${totalWarning} ${t('Warning', '告警')}`} />}
+                    <span style={{ fontSize: '0.7rem', color: '#64748b' }}>{fleet.length} {t('sensors', '个传感器')} | {totalTypes} {t('types', '类')}</span>
                 </div>
             </div>
 
@@ -169,10 +215,10 @@ export default function SensorTelemetry() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <Icon name="clock" size={14} color="#38bdf8" />
                         <span style={{ fontSize: '0.75rem', color: '#93c5fd', fontWeight: 700 }}>
-                            Unified Telemetry Window
+                            {t('Unified Telemetry Window', '统一遥测时间窗')}
                         </span>
                         <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
-                            All charts synchronized from hours to 2 years
+                            {t('All charts synchronized from hours to 2 years', '所有图表按统一时间轴联动（小时到两年）')}
                         </span>
                     </div>
                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -191,10 +237,10 @@ export default function SensorTelemetry() {
             </div>
 
             <div className="grid grid-4" style={{ marginBottom: 16 }}>
-                <MetricCard label="Total Sensors" value={fleet.length} status="monitoring" subtitle={`${totalTypes} sensor types`} />
-                <MetricCard label="Online" value={totalOnline} status="monitoring" subtitle={`${fleet.length ? ((totalOnline / fleet.length) * 100).toFixed(0) : 0}% uptime`} />
-                <MetricCard label="Warnings" value={totalWarning} status={totalWarning > 0 ? 'warning' : 'monitoring'} subtitle="threshold alerts active" />
-                <MetricCard label="Data Rate" value="288/day" subtitle={`window ${telemetryWindow.toUpperCase()} active`} />
+                <MetricCard label={t('Total Sensors', '传感器总数')} value={fleet.length} status="monitoring" subtitle={`${totalTypes} ${t('sensor types', '类传感器')}`} />
+                <MetricCard label={t('Online', '在线')} value={totalOnline} status="monitoring" subtitle={`${fleet.length ? ((totalOnline / fleet.length) * 100).toFixed(0) : 0}% ${t('uptime', '在线率')}`} />
+                <MetricCard label={t('Warnings', '告警')} value={totalWarning} status={totalWarning > 0 ? 'warning' : 'monitoring'} subtitle={t('threshold alerts active', '存在阈值告警')} />
+                <MetricCard label={t('Data Rate', '数据速率')} value="288/day" subtitle={`${t('window', '窗口')} ${telemetryWindow.toUpperCase()} ${t('active', '生效中')}`} />
             </div>
 
             {Object.entries(groupedFleet).map(([type, units]) => {
@@ -206,9 +252,10 @@ export default function SensorTelemetry() {
                     <div key={type} className="card" style={{ marginBottom: 16 }}>
                         <h3 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             <Icon name={meta.icon} size={18} color={meta.color} />
-                            {meta.label}
-                            <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 400 }}>({meta.labelZh})</span>
-                            <span style={{ marginLeft: 'auto', fontSize: '0.72rem', color: '#94a3b8' }}>{units.length} unit{units.length > 1 ? 's' : ''}</span>
+                            {t(meta.label, meta.labelZh)}
+                            <span style={{ marginLeft: 'auto', fontSize: '0.72rem', color: '#94a3b8' }}>
+                                {units.length} {t(units.length > 1 ? 'units' : 'unit', '台')}
+                            </span>
                         </h3>
 
                         <div className="grid grid-3" style={{ gap: 12 }}>
@@ -235,17 +282,17 @@ export default function SensorTelemetry() {
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                                             <div>
                                                 <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#e2e8f0', fontFamily: 'monospace' }}>{unit.id}</span>
-                                                <span style={{ fontSize: '0.65rem', color: '#64748b', marginLeft: 8 }}>{unit.zone}</span>
+                                                <span style={{ fontSize: '0.65rem', color: '#64748b', marginLeft: 8 }}>{zoneLabel(unit)}</span>
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                                 <div style={{ width: 6, height: 6, borderRadius: '50%', background: statusColor[unit.status] }} />
-                                                <span style={{ fontSize: '0.6rem', color: statusColor[unit.status], textTransform: 'uppercase', fontWeight: 600 }}>{unit.status}</span>
+                                                <span style={{ fontSize: '0.6rem', color: statusColor[unit.status], textTransform: 'uppercase', fontWeight: 600 }}>{unitStatusLabel(unit.status)}</span>
                                             </div>
                                         </div>
 
                                         <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 8 }}>
                                             <span style={{ fontSize: '1.5rem', fontWeight: 700, color: isWarning ? '#f59e0b' : '#e2e8f0' }}>
-                                                {typeof unit.value === 'number' ? unit.value : unit.value}
+                                                {unitValueText(unit)}
                                             </span>
                                             <span style={{ fontSize: '0.7rem', color: '#64748b' }}>{unit.unit || meta.unit}</span>
                                         </div>
@@ -278,7 +325,7 @@ export default function SensorTelemetry() {
                                             <div style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(129,140,248,0.3)' }}>
                                                 <img src={currentCameraFrame} alt={`${field?.crop} stream`} style={{ width: '100%', height: 96, objectFit: 'cover', display: 'block' }} />
                                                 <div style={{ padding: '6px 8px', background: 'rgba(129,140,248,0.1)', fontSize: '0.68rem', color: '#818cf8', textAlign: 'center' }}>
-                                                    Live {field?.crop === 'flower' ? 'greenhouse flower' : 'blueberry'} stream | {unit.zone}
+                                                    {t('Live', '实时')} {field?.crop === 'flower' ? t('greenhouse flower', '温室花卉') : t('blueberry', '蓝莓')} {t('stream', '画面')} | {zoneLabel(unit)}
                                                 </div>
                                             </div>
                                         )}
@@ -286,7 +333,7 @@ export default function SensorTelemetry() {
                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: '0.6rem', color: '#475569' }}>
                                             {unit.battery !== null && <span><Icon name="battery" size={10} color="#64748b" /> {unit.battery}%</span>}
                                             <span>{unit.signalDb}dB</span>
-                                            <span>Cal: {new Date(unit.lastCalibration).toLocaleDateString('en-US', { month: 'short', day: '2-digit' })}</span>
+                                            <span>{t('Cal', '校准')}: {new Date(unit.lastCalibration).toLocaleDateString(localeTag(locale), { month: 'short', day: '2-digit' })}</span>
                                         </div>
                                     </button>
                                 );
@@ -297,20 +344,20 @@ export default function SensorTelemetry() {
             })}
 
             <div className="card" style={{ marginBottom: 16 }}>
-                <h3 className="card-title">Threshold Breach Log | Recent Events</h3>
+                <h3 className="card-title">{t('Threshold Breach Log | Recent Events', '阈值越界日志｜最近事件')}</h3>
                 <table className="data-table">
                     <thead>
-                        <tr><th>Time</th><th>Sensor</th><th>Value</th><th>Threshold</th><th>Zone</th><th>Action</th><th>Status</th></tr>
+                        <tr><th>{t('Time', '时间')}</th><th>{t('Sensor', '传感器')}</th><th>{t('Value', '数值')}</th><th>{t('Threshold', '阈值')}</th><th>{t('Zone', '分区')}</th><th>{t('Action', '动作')}</th><th>{t('Status', '状态')}</th></tr>
                     </thead>
                     <tbody>
                         {(thresholdBreaches || []).map((b, i) => (
                             <tr key={i}>
                                 <td style={{ fontFamily: 'monospace', fontSize: '0.7rem' }}>{fmtTime(b.time)}</td>
-                                <td>{b.sensor}</td>
+                                <td>{isZh ? (b.sensorZh || b.sensor) : b.sensor}</td>
                                 <td style={{ fontWeight: 600, color: '#f59e0b' }}>{b.value}</td>
                                 <td style={{ color: '#64748b' }}>{b.threshold}</td>
-                                <td>{b.zone}</td>
-                                <td style={{ fontSize: '0.72rem' }}>{b.action}</td>
+                                <td>{zoneLabel(b)}</td>
+                                <td style={{ fontSize: '0.72rem' }}>{isZh ? (b.actionZh || b.action) : b.action}</td>
                                 <td><StatusBadge status={b.status} /></td>
                             </tr>
                         ))}
@@ -319,11 +366,11 @@ export default function SensorTelemetry() {
             </div>
 
             <div className="card" style={{ marginBottom: 16 }}>
-                <h3 className="card-title">Pest Monitoring Station</h3>
+                <h3 className="card-title">{t('Pest Monitoring Station', '虫情监测站')}</h3>
                 <div className="grid grid-3" style={{ gap: 10 }}>
                     {Object.entries(pests).map(([key, val]) => (
                         <div key={key} style={{ padding: 12, background: 'rgba(15,23,42,0.4)', borderRadius: 10, border: '1px solid var(--border-subtle)', borderLeft: `3px solid ${val > 10 ? '#ef4444' : val > 5 ? '#f59e0b' : '#34d399'}` }}>
-                            <div style={{ fontSize: '0.68rem', color: '#64748b', marginBottom: 4 }}>{key.replace(/_/g, ' ')}</div>
+                            <div style={{ fontSize: '0.68rem', color: '#64748b', marginBottom: 4 }}>{pestLabel(key)}</div>
                             <div style={{ fontSize: '1.2rem', fontWeight: 700, color: val > 10 ? '#ef4444' : val > 5 ? '#f59e0b' : '#e2e8f0' }}>{val}</div>
                         </div>
                     ))}
@@ -338,7 +385,7 @@ export default function SensorTelemetry() {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                             <h3 className="card-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <Icon name={SENSOR_TYPE_META[selectedUnit.type]?.icon || 'activity'} size={16} color={SENSOR_TYPE_META[selectedUnit.type]?.color || '#38bdf8'} />
-                                Sensor Detail - {selectedUnit.id}
+                                {t('Sensor Detail', '传感器详情')} - {selectedUnit.id}
                             </h3>
                             <button type="button" className="icon-btn" onClick={() => setSelectedUnitId(null)}>
                                 <Icon name="x" size={14} color="#94a3b8" />
@@ -347,13 +394,13 @@ export default function SensorTelemetry() {
 
                         <div className="grid grid-2" style={{ gap: 12 }}>
                             <div>
-                                <div style={{ fontSize: '0.72rem', color: '#64748b', marginBottom: 4 }}>Zone</div>
-                                <div style={{ fontSize: '0.88rem', color: '#e2e8f0', fontWeight: 700 }}>{selectedUnit.zone}</div>
-                                <div style={{ marginTop: 10, fontSize: '0.72rem', color: '#64748b' }}>Current Value</div>
-                                <div style={{ fontSize: '1.6rem', color: '#e2e8f0', fontWeight: 800 }}>{selectedUnit.value} {selectedUnit.unit || SENSOR_TYPE_META[selectedUnit.type]?.unit}</div>
-                                <div style={{ marginTop: 10, fontSize: '0.72rem', color: '#64748b' }}>Signal/Battery</div>
-                                <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>{selectedUnit.signalDb}dB | {selectedUnit.battery ?? 'N/A'}%</div>
-                                <div style={{ marginTop: 10, fontSize: '0.72rem', color: '#64748b' }}>Last Calibration</div>
+                                <div style={{ fontSize: '0.72rem', color: '#64748b', marginBottom: 4 }}>{t('Zone', '分区')}</div>
+                                <div style={{ fontSize: '0.88rem', color: '#e2e8f0', fontWeight: 700 }}>{zoneLabel(selectedUnit)}</div>
+                                <div style={{ marginTop: 10, fontSize: '0.72rem', color: '#64748b' }}>{t('Current Value', '当前值')}</div>
+                                <div style={{ fontSize: '1.6rem', color: '#e2e8f0', fontWeight: 800 }}>{typeof selectedUnit.value === 'number' ? selectedUnit.value.toFixed(1) : unitValueText(selectedUnit)} {selectedUnit.unit || SENSOR_TYPE_META[selectedUnit.type]?.unit}</div>
+                                <div style={{ marginTop: 10, fontSize: '0.72rem', color: '#64748b' }}>{t('Signal/Battery', '信号/电量')}</div>
+                                <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>{selectedUnit.signalDb}dB | {selectedUnit.battery ?? t('N/A', '无')}%</div>
+                                <div style={{ marginTop: 10, fontSize: '0.72rem', color: '#64748b' }}>{t('Last Calibration', '最近校准')}</div>
                                 <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>{selectedUnit.lastCalibration}</div>
                             </div>
                             <div>
@@ -377,7 +424,7 @@ export default function SensorTelemetry() {
                                     <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid rgba(129,140,248,0.3)' }}>
                                         <img src={currentCameraFrame} alt="camera stream" style={{ width: '100%', height: 220, objectFit: 'cover', display: 'block' }} />
                                         <div style={{ padding: '8px 10px', background: 'rgba(129,140,248,0.1)', color: '#818cf8', fontSize: '0.72rem' }}>
-                                            Streaming {field?.crop === 'flower' ? 'greenhouse flowers' : 'blueberry canopy'} | frame {cameraFrame % streamFrames.length + 1}/{streamFrames.length}
+                                            {t('Streaming', '实时流')} {field?.crop === 'flower' ? t('greenhouse flowers', '温室花卉') : t('blueberry canopy', '蓝莓冠层')} | {t('frame', '帧')} {cameraFrame % streamFrames.length + 1}/{streamFrames.length}
                                         </div>
                                     </div>
                                 )}
@@ -389,3 +436,4 @@ export default function SensorTelemetry() {
         </div>
     );
 }
+

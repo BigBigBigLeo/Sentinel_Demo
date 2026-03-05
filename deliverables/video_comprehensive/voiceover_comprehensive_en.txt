@@ -1,0 +1,10 @@
+1. Sentinel is not reporting software. It is a living decision operating system.
+2. We load a real scenario first, then drive the decision loop step by step.
+3. Multi-source sensors stream every second while Sentinel validates risk signals in real time.
+4. Before risk fully materializes, AI has already entered proactive defense.
+5. Sentinel AI reasons iteratively, compares alternatives, and enforces compliance constraints.
+6. Drones, machines, and teams are orchestrated together with a traceable execution fingerprint.
+7. The audit engine compiles evidence chains and marks outcomes with accountability.
+8. Long-term outcomes are measurable: higher ROI, lower chemical use, and better grade mix.
+9. Thresholds, PHI, and restricted-chemical rules are configurable so autonomy stays governed.
+10. Sentinel turns uncertain agriculture into auditable deterministic growth.

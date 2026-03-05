@@ -1,0 +1,142 @@
+[
+  {
+    "kpi_id": "kpi_data_fusion",
+    "label": "Data Fusion Sources",
+    "value": "8-14",
+    "unit": "feeds",
+    "start": 6.0,
+    "end": 14.0,
+    "style": {
+      "format": "range",
+      "color": "#38bdf8",
+      "position": "top-right",
+      "note": "demo_placeholder"
+    }
+  },
+  {
+    "kpi_id": "kpi_proactive_defense",
+    "label": "Proactive Defense Window",
+    "value": "30-120",
+    "unit": "min",
+    "start": 14.0,
+    "end": 24.0,
+    "style": {
+      "format": "range",
+      "color": "#3dabf5",
+      "position": "top-right",
+      "note": "demo_placeholder"
+    }
+  },
+  {
+    "kpi_id": "kpi_response_latency",
+    "label": "Automated Response Latency",
+    "value": "<60",
+    "unit": "sec",
+    "start": 14.0,
+    "end": 24.0,
+    "style": {
+      "format": "threshold",
+      "color": "#22d87a",
+      "position": "top-right",
+      "note": "demo_placeholder"
+    }
+  },
+  {
+    "kpi_id": "kpi_ai_consensus",
+    "label": "AI Consensus Time",
+    "value": "3-8",
+    "unit": "sec",
+    "start": 24.0,
+    "end": 34.0,
+    "style": {
+      "format": "range",
+      "color": "#a78bfa",
+      "position": "top-right",
+      "note": "demo_placeholder"
+    }
+  },
+  {
+    "kpi_id": "kpi_resource_activation",
+    "label": "Resource Activation Coverage",
+    "value": "95-100",
+    "unit": "%",
+    "start": 34.0,
+    "end": 46.0,
+    "style": {
+      "format": "range",
+      "color": "#34d399",
+      "position": "top-right",
+      "note": "demo_placeholder"
+    }
+  },
+  {
+    "kpi_id": "kpi_risk_reduction",
+    "label": "Risk Reduction",
+    "value": "18-35",
+    "unit": "%",
+    "start": 46.0,
+    "end": 56.0,
+    "style": {
+      "format": "range",
+      "color": "#22d87a",
+      "position": "top-right",
+      "note": "demo_placeholder"
+    }
+  },
+  {
+    "kpi_id": "kpi_audit_closure",
+    "label": "Audit Closure",
+    "value": "100",
+    "unit": "%",
+    "start": 46.0,
+    "end": 56.0,
+    "style": {
+      "format": "integer",
+      "color": "#38bdf8",
+      "position": "top-right",
+      "note": "demo_placeholder"
+    }
+  },
+  {
+    "kpi_id": "kpi_grade_a_uplift",
+    "label": "Grade A Uplift",
+    "value": "12-28",
+    "unit": "%",
+    "start": 46.0,
+    "end": 56.0,
+    "style": {
+      "format": "range",
+      "color": "#f59e0b",
+      "position": "top-right",
+      "note": "demo_placeholder"
+    }
+  },
+  {
+    "kpi_id": "kpi_revenue_uplift",
+    "label": "Revenue Uplift",
+    "value": "15-40",
+    "unit": "%",
+    "start": 46.0,
+    "end": 56.0,
+    "style": {
+      "format": "range",
+      "color": "#a78bfa",
+      "position": "top-right",
+      "note": "demo_placeholder"
+    }
+  },
+  {
+    "kpi_id": "kpi_cta_panel",
+    "label": "CTA",
+    "value": "Pilot / Investment / Channel",
+    "unit": "",
+    "start": 56.0,
+    "end": 60.0,
+    "style": {
+      "format": "text",
+      "color": "#e2e8f0",
+      "position": "center-lower",
+      "note": "demo_placeholder"
+    }
+  }
+]

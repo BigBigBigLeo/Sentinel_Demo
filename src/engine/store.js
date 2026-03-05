@@ -9,6 +9,7 @@ import { generateAuditRecord } from './auditEngine.js';
 import { SCENARIOS } from './scenarioEngine.js';
 import { generateRiskThinkingChain, generatePrescriptionThinkingChain, generateExecutionThinkingChain, generateAuditThinkingChain } from './thinkingEngine.js';
 import thresholds from '../data/thresholds.js';
+import { normalizeLocale } from '../i18n/locale.js';
 
 const DEFAULT_THRESHOLDS = JSON.parse(JSON.stringify(thresholds));
 
@@ -35,31 +36,146 @@ const FIELDS = {
 };
 
 const AUTO_AGENT_ROSTER = [
-    { id: 'mgr-01', name: 'Ops Manager', role: 'manager', stream: 'decision', traits: 'SLA control, escalation orchestration' },
-    { id: 'agr-01', name: 'Field Agronomist', role: 'agronomist', stream: 'analysis', traits: 'Disease and crop-stage reasoning' },
-    { id: 'agr-02', name: 'Greenhouse Agronomist', role: 'agronomist', stream: 'analysis', traits: 'Protected-crop microclimate planning' },
-    { id: 'chem-01', name: 'Crop Chemist', role: 'chemist', stream: 'decision', traits: 'MoA rotation and PHI constraints' },
-    { id: 'comp-01', name: 'Compliance Officer', role: 'compliance', stream: 'audit', traits: 'Regulatory and audit policy checks' },
-    { id: 'safe-01', name: 'Safety Officer', role: 'safety', stream: 'watchdog', traits: 'Wind/rain exposure and worker safety gates' },
-    { id: 'fin-01', name: 'Finance Analyst', role: 'finance', stream: 'audit', traits: 'ROI and margin-at-risk scoring' },
-    { id: 'sales-01', name: 'Sales Planner', role: 'sales', stream: 'analysis', traits: 'Demand timing and grade risk estimation' },
-    { id: 'ctrl-01', name: 'Control Engineer', role: 'controller', stream: 'execution', traits: 'Closed-loop IoT control and failover' },
-    { id: 'ops-01', name: 'Drone Operator', role: 'operator', stream: 'execution', traits: 'Precision routes and spray execution' },
-    { id: 'ops-02', name: 'Field Operator', role: 'operator', stream: 'execution', traits: 'Manual intervention and verification' },
-    { id: 'data-01', name: 'Data Retriever', role: 'retriever', stream: 'perception', traits: 'Sensor fusion and retrieval across feeds' },
-    { id: 'data-02', name: 'Remote Sensor Pilot', role: 'retriever', stream: 'perception', traits: 'Remote command for edge sensors/drones' },
-    { id: 'ml-01', name: 'Learning Engineer', role: 'learning', stream: 'analysis', traits: 'Continuous model update and drift checks' },
+    { id: 'mgr-01', name: 'Ops Manager', nameZh: '运营经理', role: 'manager', stream: 'decision', traits: 'SLA control, escalation orchestration', traitsZh: 'SLA 管控与升级协调' },
+    { id: 'agr-01', name: 'Field Agronomist', nameZh: '田间农艺师', role: 'agronomist', stream: 'analysis', traits: 'Disease and crop-stage reasoning', traitsZh: '病害与生育期联合推理' },
+    { id: 'agr-02', name: 'Greenhouse Agronomist', nameZh: '温室农艺师', role: 'agronomist', stream: 'analysis', traits: 'Protected-crop microclimate planning', traitsZh: '设施作物微气候规划' },
+    { id: 'chem-01', name: 'Crop Chemist', nameZh: '植保化学师', role: 'chemist', stream: 'decision', traits: 'MoA rotation and PHI constraints', traitsZh: '作用机制轮换与 PHI 约束' },
+    { id: 'comp-01', name: 'Compliance Officer', nameZh: '合规官', role: 'compliance', stream: 'audit', traits: 'Regulatory and audit policy checks', traitsZh: '法规与审计策略校验' },
+    { id: 'safe-01', name: 'Safety Officer', nameZh: '安全官', role: 'safety', stream: 'watchdog', traits: 'Wind/rain exposure and worker safety gates', traitsZh: '风雨暴露与人员安全闸门' },
+    { id: 'fin-01', name: 'Finance Analyst', nameZh: '财务分析师', role: 'finance', stream: 'audit', traits: 'ROI and margin-at-risk scoring', traitsZh: 'ROI 与利润风险评分' },
+    { id: 'sales-01', name: 'Sales Planner', nameZh: '销售规划师', role: 'sales', stream: 'analysis', traits: 'Demand timing and grade risk estimation', traitsZh: '需求时机与等级风险评估' },
+    { id: 'ctrl-01', name: 'Control Engineer', nameZh: '控制工程师', role: 'controller', stream: 'execution', traits: 'Closed-loop IoT control and failover', traitsZh: 'IoT 闭环控制与故障切换' },
+    { id: 'ops-01', name: 'Drone Operator', nameZh: '无人机作业员', role: 'operator', stream: 'execution', traits: 'Precision routes and spray execution', traitsZh: '精细航线与喷施执行' },
+    { id: 'ops-02', name: 'Field Operator', nameZh: '田间作业员', role: 'operator', stream: 'execution', traits: 'Manual intervention and verification', traitsZh: '人工干预与复核' },
+    { id: 'data-01', name: 'Data Retriever', nameZh: '数据采集员', role: 'retriever', stream: 'perception', traits: 'Sensor fusion and retrieval across feeds', traitsZh: '跨源传感融合与拉取' },
+    { id: 'data-02', name: 'Remote Sensor Pilot', nameZh: '远程传感操控员', role: 'retriever', stream: 'perception', traits: 'Remote command for edge sensors/drones', traitsZh: '边缘传感与无人机远程操控' },
+    { id: 'ml-01', name: 'Learning Engineer', nameZh: '学习工程师', role: 'learning', stream: 'analysis', traits: 'Continuous model update and drift checks', traitsZh: '模型持续更新与漂移校验' },
 ];
 
 const AUTO_TASKS = {
-    ingest: { id: 'ingest', label: 'Data Ingestion', roles: ['retriever', 'controller', 'operator'] },
-    analyze: { id: 'analyze', label: 'Multimodal Risk Reasoning', roles: ['agronomist', 'manager', 'sales', 'learning'] },
-    compliance: { id: 'compliance', label: 'Compliance and Safety Gate', roles: ['compliance', 'safety', 'chemist'] },
-    prescribe: { id: 'prescribe', label: 'Prescription Planning', roles: ['agronomist', 'chemist', 'manager'] },
-    execute: { id: 'execute', label: 'Execution Orchestration', roles: ['controller', 'operator', 'safety'] },
-    audit: { id: 'audit', label: 'Audit and Reporting', roles: ['compliance', 'finance', 'manager'] },
-    learn: { id: 'learn', label: 'Outcome Learning', roles: ['learning', 'agronomist', 'finance'] },
-    escalate: { id: 'escalate', label: 'Operator Escalation', roles: ['manager', 'safety', 'compliance'] },
+    ingest: { id: 'ingest', label: 'Data Ingestion', labelZh: '数据接入', roles: ['retriever', 'controller', 'operator'] },
+    analyze: { id: 'analyze', label: 'Multimodal Risk Reasoning', labelZh: '多模态风险推理', roles: ['agronomist', 'manager', 'sales', 'learning'] },
+    compliance: { id: 'compliance', label: 'Compliance and Safety Gate', labelZh: '合规与安全闸门', roles: ['compliance', 'safety', 'chemist'] },
+    prescribe: { id: 'prescribe', label: 'Prescription Planning', labelZh: '处方规划', roles: ['agronomist', 'chemist', 'manager'] },
+    execute: { id: 'execute', label: 'Execution Orchestration', labelZh: '执行编排', roles: ['controller', 'operator', 'safety'] },
+    audit: { id: 'audit', label: 'Audit and Reporting', labelZh: '审计与报告', roles: ['compliance', 'finance', 'manager'] },
+    learn: { id: 'learn', label: 'Outcome Learning', labelZh: '结果学习', roles: ['learning', 'agronomist', 'finance'] },
+    escalate: { id: 'escalate', label: 'Operator Escalation', labelZh: '人工升级处置', roles: ['manager', 'safety', 'compliance'] },
+};
+
+const ASSIGNMENT_LABEL_ZH = {
+    lead: '主责',
+    reviewer: '复核',
+    executor: '执行',
+};
+
+const SCENARIO_ZH = {
+    A: {
+        descriptionZh: '花期湿度持续偏高触发灰霉病风险，且临近采收导致化学方案受 PHI 限制，系统自动切换生防回退方案。',
+        primaryThreatZh: '灰霉病（Botrytis）',
+    },
+    B: {
+        descriptionZh: '雨季温室湿度突增，人工迟延 6 小时导致部分花枝降级，演示“延迟执行”的真实成本。',
+        primaryThreatZh: '灰霉病（Botrytis）',
+    },
+    C: {
+        descriptionZh: '无人机执行剂量偏离处方，指纹不匹配触发审计追责，展示“可审计执行链路”。',
+        primaryThreatZh: '炭疽病',
+    },
+    D: {
+        descriptionZh: '先虫后病的级联风险叠加，系统采用阶段化复合策略进行跨主体协同处置。',
+        primaryThreatZh: '多虫害级联风险',
+    },
+    E: {
+        descriptionZh: '寒潮来袭前触发非化学三层防护，验证 Sentinel 的主动防御与应急协同能力。',
+        primaryThreatZh: '霜冻风险',
+    },
+    F: {
+        descriptionZh: '温室主风机故障叠加高湿，系统启动硬件故障应急协议并联动维修与作业资源。',
+        primaryThreatZh: '硬件故障衍生病害风险',
+    },
+};
+
+const localizeScenarioTextZh = (value) => {
+    if (!value) return value;
+    let text = String(value);
+    const phraseMap = [
+        ['Humidity Spike Detected', '检测到湿度突升'],
+        ['Botrytis Risk Critical', '灰霉病风险升至高危'],
+        ['Prescription Generated', '处方已生成'],
+        ['Prescription Generated  - PHI Constraint Fires', '处方已生成｜触发 PHI 约束'],
+        ['Biocontrol Execution', '生防执行'],
+        ['48h Progress Check', '48 小时进展复核'],
+        ['72h Verification  - Risk Drops', '72 小时验证｜风险回落'],
+        ['Execution', '执行'],
+        ['Verification', '验证'],
+        ['Risk Assessment', '风险评估'],
+        ['Decision Delay', '决策延迟'],
+        ['No Action', '未执行动作'],
+        ['Emergency', '应急'],
+        ['Grade Downgrade', '等级降级'],
+        ['Revenue impact', '营收影响'],
+        ['Response time', '响应时长'],
+        ['Relative humidity rises to', '相对湿度升至'],
+        ['Leaf wetness duration reaches', '叶面湿润时长达到'],
+        ['Overcast for 3 consecutive days', '连续阴天 3 天'],
+        ['Spore index climbs to', '孢子指数升至'],
+        ['System triggers risk assessment', '系统触发风险评估'],
+        ['System generates fungicide Rx', '系统生成杀菌处方'],
+        ['only 4d to harvest', '距采收仅 4 天'],
+        ['System auto-falls back to biological control', '系统自动切换到生物防治回退方案'],
+        ['Trichoderma harzianum released in target zone', '目标区域已释放哈茨木霉'],
+        ['Ventilation increased to 85%', '通风已提升至 85%'],
+        ['Execution fingerprint generated and matched', '执行指纹已生成并匹配'],
+        ['Spore index declining', '孢子指数持续下降'],
+        ['Humidity stabilized at', '湿度稳定在'],
+        ['Risk score', '风险分值'],
+        ['Grade A protected', 'A级品质已保护'],
+        ['Revenue saved', '已保护收益'],
+        ['lead action by', '主责动作｜'],
+        ['reviewer action by', '复核动作｜'],
+        ['executor action by', '执行动作｜'],
+    ];
+    phraseMap.forEach(([en, zh]) => {
+        text = text.split(en).join(zh);
+    });
+    const tokenMap = [
+        ['Humidity', '湿度'],
+        ['Temperature', '温度'],
+        ['Leaf Wetness', '叶面湿润'],
+        ['Gray Mold', '灰霉病'],
+        ['Botrytis', '灰霉病原'],
+        ['Drone', '无人机'],
+        ['Field Team', '田间团队'],
+        ['IoT', 'IoT'],
+        ['Mancozeb', '代森锰锌'],
+        ['Trichoderma harzianum', '哈茨木霉'],
+        ['PHI', 'PHI'],
+        ['analysis', '分析'],
+        ['decision', '决策'],
+        ['execution', '执行'],
+        ['audit', '审计'],
+        ['watchdog', '看门狗'],
+        ['Safety Officer', '安全官'],
+        ['Control Engineer', '控制工程师'],
+        ['Field Operator', '田间作业员'],
+        ['Data Retriever', '数据采集员'],
+        ['Remote Sensor Pilot', '远程传感操控员'],
+        ['Drone Operator', '无人机作业员'],
+        ['Ops Manager', '运营经理'],
+        ['Learning Engineer', '学习工程师'],
+        ['Compliance Officer', '合规官'],
+        ['Crop Chemist', '植保化学师'],
+        ['Field Agronomist', '田间农艺师'],
+        ['Greenhouse Agronomist', '温室农艺师'],
+        ['Finance Analyst', '财务分析师'],
+        ['Sales Planner', '销售规划师'],
+    ];
+    tokenMap.forEach(([en, zh]) => {
+        text = text.replace(new RegExp(en, 'gi'), zh);
+    });
+    text = text.replace(/->/g, '→');
+    return text;
 };
 
 const AUTO_MAX = {
@@ -148,7 +264,7 @@ const useStore = create((set, get) => ({
     agentAssignments: [],
     operatorAlerts: [],
     autonomousMode: true,
-    autonomousTickMs: 9000,
+    autonomousTickMs: 5000,
     autonomousState: {
         status: 'idle',
         cycleCount: 0,
@@ -164,17 +280,28 @@ const useStore = create((set, get) => ({
 
     // 閳光偓閳光偓閳光偓 Pipeline & Approval 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
     pipelineStage: 1,          // 1=Dashboard, 2=Sensors, 3=Risk, 4=Rx, 5=Exec, 6=Audit, 7=History
+
+    // 閳光偓閳光偓閳光偓 Pipeline & Approval 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
+    pipelineStage: 1,          // 1=Dashboard, 2=Sensors, 3=Risk, 4=Rx, 5=Exec, 6=Audit, 7=History
     approvalQueue: [],         // critical decisions pending human sign-off
 
-    // 閳光偓閳光偓閳光偓 UI State 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
+    // 閳光偓閳光偓閳光偓 UI State 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
     sidebarCollapsed: false,
+    locale: 'en',
 
     // 閳光偓閳光偓閳光偓 AI Thinking State 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
     thinkingChain: [],
     isThinking: false,
     thinkingContext: null,     // 'risk' | 'prescription' | 'execution' | 'audit'
 
-    // 閳光偓閳光偓閳光偓 Actions 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
+    // Iterative Reasoning State (for Video)
+    iterationRound: 0,
+    iterationStage: null,      // 'perceiving' | 'analyzing' | 'reasoning' | 'deciding' | 'verifying'
+    iterationLog: [],
+    isIterating: false,
+
+
+    // 閳光偓閳光偓閳光偓 Actions 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
 
     // Initialize simulation data for all fields
     initSimulation: () => {
@@ -192,7 +319,14 @@ const useStore = create((set, get) => ({
         for (const [fieldId, field] of Object.entries(FIELDS)) {
             simData[fieldId] = generate60DayData(fieldId, field.crop);
         }
-        set({ simulationData: simData });
+        let savedLocale = 'en';
+        try {
+            savedLocale = normalizeLocale(globalThis?.localStorage?.getItem('sentinel_locale_v1'));
+        } catch {
+            savedLocale = 'en';
+        }
+
+        set({ simulationData: simData, locale: savedLocale });
 
         // Run initial assessment
         get().updateSnapshot();
@@ -293,7 +427,7 @@ const useStore = create((set, get) => ({
             const state = get();
             const topRisk = (state.riskResults || []).reduce(
                 (max, r) => ((r.score || 0) > (max.score || 0) ? r : max),
-                { score: 0, name: 'No active threat', status: 'low' },
+                { score: 0, name: 'No active threat', nameZh: '当前无高危威胁', status: 'low' },
             );
             const highRisk = (topRisk.score || 0) >= 70;
             const cycleAt = new Date().toISOString();
@@ -309,13 +443,17 @@ const useStore = create((set, get) => ({
                     cycleId,
                     taskId: task.id,
                     taskLabel: task.label,
+                    taskLabelZh: task.labelZh,
                     members: members.map((m, idx) => ({
                         id: m.id,
                         name: m.name,
+                        nameZh: m.nameZh,
                         role: m.role,
                         stream: m.stream,
                         traits: m.traits,
+                        traitsZh: m.traitsZh,
                         assignment: idx === 0 ? 'lead' : idx === 1 ? 'reviewer' : 'executor',
+                        assignmentZh: idx === 0 ? ASSIGNMENT_LABEL_ZH.lead : idx === 1 ? ASSIGNMENT_LABEL_ZH.reviewer : ASSIGNMENT_LABEL_ZH.executor,
                     })),
                     status: highRisk && task.id === 'escalate' ? 'operator_gate' : 'completed',
                     timestamp: cycleAt,
@@ -327,7 +465,9 @@ const useStore = create((set, get) => ({
                 agent: member.stream,
                 agentId: member.id,
                 action: `${asg.taskLabel}: ${member.assignment} action by ${member.name}`,
+                actionZh: `${asg.taskLabelZh || asg.taskLabel}：${member.assignmentZh || member.assignment}动作｜${member.nameZh || member.name}`,
                 context: `Autonomous cycle ${cycleId}`,
+                contextZh: `自治循环 ${cycleId}`,
                 scenarioStep: state.scenarioStep,
                 cycleId,
                 agentRole: member.role,
@@ -369,6 +509,7 @@ const useStore = create((set, get) => ({
                 timestamp: cycleAt,
                 severity: 'critical',
                 message: `Risk ${topRisk.name} at ${topRisk.score}/100 requires operator confirmation.`,
+                messageZh: `风险项「${topRisk.nameZh || topRisk.name}」达到 ${topRisk.score}/100，需要人工确认。`,
                 prescriptionId: latestRx.id,
             } : null;
 
@@ -378,6 +519,9 @@ const useStore = create((set, get) => ({
                 message: highRisk
                     ? `Autonomous cycle ${cycleId}: high-risk gate activated for ${topRisk.name} (${topRisk.score}/100), waiting for operator approval.`
                     : `Autonomous cycle ${cycleId}: end-to-end loop completed for ${topRisk.name} (${topRisk.score}/100).`,
+                messageZh: highRisk
+                    ? `自治循环 ${cycleId}：已触发高风险闸门（${topRisk.nameZh || topRisk.name}，${topRisk.score}/100），等待人工审批。`
+                    : `自治循环 ${cycleId}：已完成端到端闭环（${topRisk.nameZh || topRisk.name}，${topRisk.score}/100）。`,
             };
 
             set(prev => ({
@@ -420,7 +564,13 @@ const useStore = create((set, get) => ({
             return;
         }
 
-        const scenario = SCENARIOS[scenarioId];
+        const baseScenario = SCENARIOS[scenarioId];
+        const zhOverrides = SCENARIO_ZH[scenarioId] || {};
+        const scenario = baseScenario ? {
+            ...baseScenario,
+            descriptionZh: baseScenario.descriptionZh || zhOverrides.descriptionZh || baseScenario.description,
+            primaryThreatZh: baseScenario.primaryThreatZh || zhOverrides.primaryThreatZh || baseScenario.primaryThreat,
+        } : null;
         if (!scenario) return;
 
         // Reset state
@@ -452,6 +602,7 @@ const useStore = create((set, get) => ({
                 timestamp: new Date().toISOString(),
                 type: 'scenario',
                 message: `Scenario ${scenario.id} loaded: ${scenario.name}`,
+                messageZh: `已加载场景 ${scenario.id}：${scenario.nameZh || scenario.name}`,
             }],
         });
 
@@ -478,7 +629,9 @@ const useStore = create((set, get) => ({
             step: nextStep,
             type: event.expectedAction || 'observation',
             title: event.title,
+            titleZh: event.titleZh || localizeScenarioTextZh(event.title),
             message: event.description,
+            messageZh: event.descriptionZh || localizeScenarioTextZh(event.description),
             day: event.day,
         };
 
@@ -488,7 +641,9 @@ const useStore = create((set, get) => ({
             timestamp: new Date().toISOString(),
             agent: a.agent,
             action: a.action,
+            actionZh: a.actionZh || localizeScenarioTextZh(a.action),
             context: event.title,
+            contextZh: event.titleZh || localizeScenarioTextZh(event.title),
             scenarioStep: nextStep,
         }));
 
@@ -503,7 +658,7 @@ const useStore = create((set, get) => ({
         get().updateSnapshot();
 
         // Auto-trigger appropriate actions based on event type
-        if (event.expectedAction === 'prescription_with_fallback' || event.expectedAction === 'prescription_normal') {
+        if (['prescription_with_fallback', 'prescription_normal', 'prescription_emergency'].includes(event.expectedAction)) {
             get().generateRx();
         }
         if (event.expectedAction === 'execution') {
@@ -557,6 +712,7 @@ const useStore = create((set, get) => ({
                 prescription: rx,
                 riskScore: topRisk.score,
                 threat: topRisk.name,
+                threatZh: topRisk.nameZh || topRisk.name,
                 evidence: (topRisk.factors || []).map(f => ({
                     description: f,
                     points: Math.round((topRisk.score / (topRisk.factors?.length || 1))),
@@ -572,6 +728,7 @@ const useStore = create((set, get) => ({
                     timestamp: new Date().toISOString(),
                     type: 'prescription',
                     message: `Rx ${rx.id} generated: ${rx.actionLabel} for ${rx.threatName} - CRITICAL: routed to human approval queue`,
+                    messageZh: `处方 ${rx.id} 已生成：${rx.actionLabelZh || rx.actionLabel}｜威胁 ${rx.threatNameZh || rx.threatName}｜高风险，已进入人工审批队列`,
                 }],
             }));
             return;
@@ -584,6 +741,7 @@ const useStore = create((set, get) => ({
                 timestamp: new Date().toISOString(),
                 type: 'prescription',
                 message: `Rx ${rx.id} generated: ${rx.actionLabel} for ${rx.threatName}${rx.usedFallback ? ' (fallback - PHI constraint)' : ''} - auto-approved (low risk)`,
+                messageZh: `处方 ${rx.id} 已生成：${rx.actionLabelZh || rx.actionLabel}｜威胁 ${rx.threatNameZh || rx.threatName}${rx.usedFallback ? '（PHI 约束触发回退）' : ''}｜低风险自动通过`,
             }],
         }));
 
@@ -597,6 +755,7 @@ const useStore = create((set, get) => ({
                         timestamp: new Date().toISOString(),
                         type: 'execution',
                         message: `Rx ${rx.id} low-impact auto execution completed with report.`,
+                        messageZh: `处方 ${rx.id} 低影响任务已自动执行并生成报告。`,
                     }],
                 }));
             }
@@ -615,6 +774,7 @@ const useStore = create((set, get) => ({
                     timestamp: new Date().toISOString(),
                     type: 'modification',
                     message: `Rx ${rxId} modified by operator. Responsibility shifted to operator.`,
+                    messageZh: `处方 ${rxId} 已由人工修改，责任边界已切换为人工。`,
                 }],
             };
         });
@@ -643,6 +803,9 @@ const useStore = create((set, get) => ({
                 message: execution.executionFingerprint.match
                     ? `Execution ${execution.id} completed. Fingerprint: MATCH.`
                     : `Execution ${execution.id} - FINGERPRINT MISMATCH. Deviations: ${execution.deviations.map(d => `${d.parameter} ${d.delta}`).join(', ')}`,
+                messageZh: execution.executionFingerprint.match
+                    ? `执行 ${execution.id} 已完成。执行指纹：匹配。`
+                    : `执行 ${execution.id} 指纹不匹配。偏差：${execution.deviations.map(d => `${d.parameterZh || d.parameter} ${d.deltaZh || d.delta}`).join('，')}`,
             }],
         }));
         return execution;
@@ -702,6 +865,7 @@ const useStore = create((set, get) => ({
                 timestamp: new Date().toISOString(),
                 type: 'execution_complete',
                 message: `Execution ${exec.id} completed. Grade: ${grade} (${overallScore.toFixed(1)}%). Dosage accuracy: ${dosageAccuracy.toFixed(1)}%.`,
+                messageZh: `执行 ${exec.id} 已完成。等级：${grade}（${overallScore.toFixed(1)}%）；剂量准确率 ${dosageAccuracy.toFixed(1)}%。`,
             }],
         }));
     },
@@ -720,12 +884,13 @@ const useStore = create((set, get) => ({
 
         set(state => ({
             auditRecords: [...state.auditRecords, audit],
-                eventLog: [...state.eventLog, {
-                    timestamp: new Date().toISOString(),
-                    type: 'audit',
-                    message: `Audit ${audit.id} generated. Responsibility: ${audit.responsibilityAssignment}. Revenue protected: CNY ${audit.economicImpact.revenueProtected.toLocaleString()}.`,
-                }],
-            }));
+            eventLog: [...state.eventLog, {
+                timestamp: new Date().toISOString(),
+                type: 'audit',
+                message: `Audit ${audit.id} generated. Responsibility: ${audit.responsibilityAssignment}. Revenue protected: CNY ${audit.economicImpact.revenueProtected.toLocaleString()}.`,
+                messageZh: `审计 ${audit.id} 已生成。责任归属：${audit.responsibilityAssignmentZh || audit.responsibilityAssignment}；已保护收益 CNY ${audit.economicImpact.revenueProtected.toLocaleString()}。`,
+            }],
+        }));
     },
 
     // 閳光偓閳光偓閳光偓 Approval Actions 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
@@ -742,6 +907,7 @@ const useStore = create((set, get) => ({
                     timestamp: new Date().toISOString(),
                     type: 'approval',
                     message: `Decision ${approvalId} APPROVED by operator. Rx ${item.prescription?.id} cleared for execution.`,
+                    messageZh: `决策 ${approvalId} 已人工通过。处方 ${item.prescription?.id} 已放行执行。`,
                 }],
             };
         });
@@ -766,6 +932,7 @@ const useStore = create((set, get) => ({
                     timestamp: new Date().toISOString(),
                     type: 'rejection',
                     message: `Decision ${approvalId} REJECTED by operator. Rx ${item.prescription?.id} cancelled.`,
+                    messageZh: `决策 ${approvalId} 已人工驳回。处方 ${item.prescription?.id} 已取消。`,
                 }],
             };
         });
@@ -781,6 +948,7 @@ const useStore = create((set, get) => ({
                 timestamp: new Date().toISOString(),
                 type: 'autonomy',
                 message: `ACTION REQUIRED acknowledged by operator for ${topRisk.name} (${topRisk.score}/100).`,
+                messageZh: `已由人工确认“需要处理”：${topRisk.nameZh || topRisk.name}（${topRisk.score}/100）。`,
             }],
         }));
 
@@ -798,6 +966,13 @@ const useStore = create((set, get) => ({
         }, 900);
     },
 
+    // Iterative Actions
+    setIterationRound: (round) => set({ iterationRound: round }),
+    setIterationStage: (stage) => set({ iterationStage: stage }),
+    setIterating: (isIterating) => set({ isIterating }),
+    addIterationLog: (entry) => set(prev => ({ iterationLog: [...prev.iterationLog, entry] })),
+    clearIteration: () => set({ iterationRound: 0, iterationStage: null, iterationLog: [], isIterating: false }),
+
     setPipelineStage: (stage) => set({ pipelineStage: stage }),
 
     applyThresholdConfig: (nextThresholds) => {
@@ -814,6 +989,7 @@ const useStore = create((set, get) => ({
                 timestamp: new Date().toISOString(),
                 type: 'scenario_event',
                 message: 'Admin updated threshold configuration and re-ran risk assessment.',
+                messageZh: '管理员已更新阈值配置并重新计算风险评估。',
             }],
         }));
     },
@@ -831,6 +1007,7 @@ const useStore = create((set, get) => ({
                 timestamp: new Date().toISOString(),
                 type: 'scenario_event',
                 message: 'Admin reset thresholds to default values.',
+                messageZh: '管理员已将阈值恢复为默认值。',
             }],
         }));
     },
@@ -838,6 +1015,15 @@ const useStore = create((set, get) => ({
     // 閳光偓閳光偓閳光偓 UI Actions 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
 
     toggleSidebar: () => set(state => ({ sidebarCollapsed: !state.sidebarCollapsed })),
+    setLocale: (nextLocale) => {
+        const locale = normalizeLocale(nextLocale);
+        try {
+            globalThis?.localStorage?.setItem('sentinel_locale_v1', locale);
+        } catch {
+            // Ignore storage failures.
+        }
+        set({ locale });
+    },
 
     // 閳光偓閳光偓閳光偓 AI Thinking Actions 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
 
@@ -879,7 +1065,3 @@ const useStore = create((set, get) => ({
 }));
 
 export default useStore;
-
-
-
-

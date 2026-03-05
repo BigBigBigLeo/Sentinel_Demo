@@ -24,7 +24,8 @@ export default function SensorData() {
     const forecasts = sensorForecasts[fieldId] || {};
     const pest = pestMonitoring[fieldId] || {};
     const alerts = trendAlerts[fieldId] || [];
-    const breaches = thresholdBreaches.filter(b => b.zone === fieldId?.split('-')[1] || true);
+    const fieldZonePrefix = fieldId?.split('-')[1] || '';
+    const breaches = thresholdBreaches.filter(b => b.zone?.includes(fieldZonePrefix) || b.zone === 'All');
 
     const formatNow = () => new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
 
@@ -58,7 +59,7 @@ export default function SensorData() {
                                     <div className="sensor-card-name">{s.label}</div>
                                     <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
                                         <span className="sensor-card-reading" style={{ color: isAbove ? '#ef4444' : s.color }}>
-                                            {s.key === 'light' ? `${(value / 1000).toFixed(1)}k` : value}
+                                            {s.key === 'light' ? `${(value / 1000).toFixed(1)}k` : (typeof value === 'number' ? value.toFixed(1) : value)}
                                         </span>
                                         <span className="sensor-card-unit">{s.unit}</span>
                                     </div>

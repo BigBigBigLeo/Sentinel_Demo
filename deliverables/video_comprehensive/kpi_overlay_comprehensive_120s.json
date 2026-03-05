@@ -1,0 +1,92 @@
+[
+  {
+    "kpi_id": "kpi_live_cycles",
+    "label": "Live Autonomous Cycles",
+    "value": "24/7",
+    "unit": "continuous",
+    "start": 0,
+    "end": 10,
+    "style": "cyan_glow"
+  },
+  {
+    "kpi_id": "kpi_scenario_steps",
+    "label": "Scenario Steps Tracked",
+    "value": "5",
+    "unit": "stages",
+    "start": 10,
+    "end": 22,
+    "style": "violet_link"
+  },
+  {
+    "kpi_id": "kpi_sensor_fusion",
+    "label": "Sensor Fusion Throughput",
+    "value": "6,912",
+    "unit": "points/day",
+    "start": 22,
+    "end": 34,
+    "style": "blue_stream"
+  },
+  {
+    "kpi_id": "kpi_proactive_window",
+    "label": "Response Window",
+    "value": "0-6",
+    "unit": "hours",
+    "start": 34,
+    "end": 48,
+    "style": "amber_alert"
+  },
+  {
+    "kpi_id": "kpi_iterative_reasoning",
+    "label": "Alternatives Evaluated",
+    "value": "4+",
+    "unit": "options",
+    "start": 48,
+    "end": 62,
+    "style": "indigo_logic"
+  },
+  {
+    "kpi_id": "kpi_execution_fingerprint",
+    "label": "Execution Traceability",
+    "value": "100%",
+    "unit": "fingerprinted",
+    "start": 62,
+    "end": 76,
+    "style": "teal_exec"
+  },
+  {
+    "kpi_id": "kpi_audit_closure",
+    "label": "Audit Chain",
+    "value": "Closed Loop",
+    "unit": "verified",
+    "start": 76,
+    "end": 88,
+    "style": "green_compliance"
+  },
+  {
+    "kpi_id": "kpi_roi_gradeA",
+    "label": "Season ROI",
+    "value": "10.5",
+    "unit": "x",
+    "start": 88,
+    "end": 98,
+    "style": "emerald_growth"
+  },
+  {
+    "kpi_id": "kpi_governance",
+    "label": "Governance Controls",
+    "value": "Policy Active",
+    "unit": "always-on",
+    "start": 98,
+    "end": 108,
+    "style": "slate_guard"
+  },
+  {
+    "kpi_id": "kpi_final_cta",
+    "label": "Deterministic Growth",
+    "value": "Grade A Uplift",
+    "unit": "auditable",
+    "start": 108,
+    "end": 120,
+    "style": "brand_lock"
+  }
+]

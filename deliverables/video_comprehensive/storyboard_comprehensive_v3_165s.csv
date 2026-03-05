@@ -1,0 +1,10 @@
+time_in,time_out,visual,subtitle_cn,core_message
+00:00:00.000,00:00:18.000,"Dashboard intro with SRL + Agent Mesh + Live Stream","痛点先讲清：高不确定性、短窗口、责任不清。","Sentinel is a decision OS, not static reporting software."
+00:00:18.000,00:00:30.000,"Sensor telemetry with threshold/pest deep scroll","多源感知先于事故，主动发现风险。","Proactive sensing before failure."
+00:00:30.000,00:00:52.000,"Risk engine report generation and evidence board","AI推理前半段：异常定位、证据聚合、风险假设。","Iterative reasoning part 1."
+00:00:52.000,00:01:16.000,"Prescription builder with factors/constraints/alternatives","AI推理后半段：方案比较、约束校验、处方输出。","Iterative reasoning part 2."
+00:01:16.000,00:01:36.000,"Dashboard agent mesh + live stream","多智能体协作组织化运行。","Multiple agents collaborate continuously."
+00:01:36.000,00:01:54.000,"Scenario control autoplay and agent activity","跨角色接力决策，分钟级闭环。","Agents handoff in real time."
+00:01:54.000,00:02:10.000,"Execution center fingerprint + progress + activity feed","执行与处方实时对齐，控制偏差。","Execution fingerprint enforces delivery quality."
+00:02:10.000,00:02:30.000,"Audit report generation then jump to history ROI","审计链闭环并展示客户收益。","Accountability + measurable ROI."
+00:02:30.000,00:02:45.000,"Brand close on dashboard","投资可复制，客户可增收。","Deterministic growth for investors and clients."

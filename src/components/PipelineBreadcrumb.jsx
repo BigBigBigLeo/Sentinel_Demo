@@ -1,20 +1,23 @@
-import React from 'react';
+﻿import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import Icon from './Icon';
+import useStore from '../engine/store';
+import { pick } from '../i18n/locale.js';
 
 const STAGES = [
-    { id: 1, path: '/', label: 'Dashboard', labelZh: '总览', icon: 'home' },
-    { id: 2, path: '/sensors', label: 'Sensors', labelZh: '传感器', icon: 'perception' },
-    { id: 3, path: '/risk', label: 'Risk Analysis', labelZh: '风险评估', icon: 'alert-triangle' },
-    { id: 4, path: '/prescription', label: 'Prescription', labelZh: '处方', icon: 'prescription' },
-    { id: 5, path: '/execution', label: 'Execution', labelZh: '执行', icon: 'play' },
-    { id: 6, path: '/audit', label: 'Audit', labelZh: '审计', icon: 'lock' },
-    { id: 7, path: '/history', label: 'History', labelZh: '历史', icon: 'box' },
+    { id: 1, path: '/', label: 'Dashboard', labelZh: '总览' },
+    { id: 2, path: '/sensors', label: 'Sensors', labelZh: '传感' },
+    { id: 3, path: '/risk', label: 'Risk Analysis', labelZh: '风险分析' },
+    { id: 4, path: '/prescription', label: 'Prescription', labelZh: '处方' },
+    { id: 5, path: '/execution', label: 'Execution', labelZh: '执行' },
+    { id: 6, path: '/audit', label: 'Audit', labelZh: '审计' },
+    { id: 7, path: '/history', label: 'History', labelZh: '历史' },
 ];
 
 export default function PipelineBreadcrumb() {
     const navigate = useNavigate();
     const location = useLocation();
+    const locale = useStore(state => state.locale);
+    const t = (en, zh) => pick(locale, en, zh);
 
     const currentStageIndex = STAGES.findIndex(s => s.path === location.pathname);
     const activeStage = currentStageIndex >= 0 ? currentStageIndex : 0;
@@ -34,9 +37,9 @@ export default function PipelineBreadcrumb() {
                                 </svg>
                             </div>
                         )}
-                        <div className={cls} onClick={() => navigate(stage.path)} title={stage.label}>
+                        <div className={cls} onClick={() => navigate(stage.path)} title={t(stage.label, stage.labelZh)}>
                             <div className="pipeline-stage-number">{stage.id}</div>
-                            <span className="pipeline-stage-label">{stage.label}</span>
+                            <span className="pipeline-stage-label">{t(stage.label, stage.labelZh)}</span>
                         </div>
                     </React.Fragment>
                 );

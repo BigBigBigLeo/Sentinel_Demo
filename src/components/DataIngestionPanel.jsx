@@ -1,5 +1,7 @@
 ﻿import React, { useState, useEffect } from 'react';
 import Icon from './Icon';
+import useStore from '../engine/store';
+import { pick } from '../i18n/locale.js';
 
 const DATA_SOURCES = [
     { id: 'iot_mesh', name: 'IoT Sensor Mesh', nameZh: '物联网传感器', type: 'realtime', icon: 'perception', color: '#38bdf8', channels: 32, freq: '5-min', format: 'MQTT JSON', volume: 384, unit: 'readings/hr', latency: 180 },
@@ -16,9 +18,16 @@ const DATA_SOURCES = [
     { id: 'regulatory', name: 'Regulatory Compliance', nameZh: '法规合规数据', type: 'reference', icon: 'lock', color: '#f87171', channels: 3, freq: 'On-update', format: 'Government API', volume: 3, unit: 'feeds', latency: 86400000 },
 ];
 
-function formatFreshness(ms) {
+function formatFreshness(ms, locale) {
     const jitter = Math.random() * ms * 0.3;
     const actual = ms + jitter;
+    if (locale === 'zh') {
+        if (actual < 1000) return '刚刚';
+        if (actual < 60000) return `${Math.round(actual / 1000)}秒前`;
+        if (actual < 3600000) return `${Math.round(actual / 60000)}分钟前`;
+        if (actual < 86400000) return `${Math.round(actual / 3600000)}小时前`;
+        return `${Math.round(actual / 86400000)}天前`;
+    }
     if (actual < 1000) return 'just now';
     if (actual < 60000) return `${Math.round(actual / 1000)}s ago`;
     if (actual < 3600000) return `${Math.round(actual / 60000)}min ago`;
@@ -36,8 +45,9 @@ function SignalBars({ strength }) {
     );
 }
 
-function StreamRow({ source, isAnimating, delay }) {
+function StreamRow({ source, isAnimating, delay, locale }) {
     const [pulseKey, setPulseKey] = useState(0);
+    const t = (en, zh) => pick(locale, en, zh);
 
     useEffect(() => {
         if (!isAnimating) return;
@@ -54,17 +64,26 @@ function StreamRow({ source, isAnimating, delay }) {
                     <Icon name={source.icon} size={16} color={source.color} />
                 </div>
                 <div className="ingestion-source-info">
-                    <div className="ingestion-source-name">{source.name}</div>
-                    <div className="ingestion-source-zh">{source.nameZh}</div>
+                    <div className="ingestion-source-name">{t(source.name, source.nameZh)}</div>
                 </div>
             </div>
             <div className="ingestion-meta">
                 <span className="ingestion-type-badge" style={{ background: `${source.color}15`, color: source.color, borderColor: `${source.color}30` }}>
-                    {source.type}
+                    {source.type === 'realtime'
+                        ? t('realtime', '实时')
+                        : source.type === 'batch'
+                            ? t('batch', '批处理')
+                            : source.type === 'manual'
+                                ? t('manual', '人工')
+                                : source.type === 'computed'
+                                    ? t('computed', '计算')
+                                    : source.type === 'reference'
+                                        ? t('reference', '参考')
+                                        : source.type}
                 </span>
             </div>
             <div className="ingestion-detail">
-                <span className="ingestion-channels">{source.channels} ch</span>
+                <span className="ingestion-channels">{source.channels} {t('ch', '通道')}</span>
                 <span className="ingestion-sep">|</span>
                 <span className="ingestion-format">{source.format}</span>
             </div>
@@ -74,7 +93,7 @@ function StreamRow({ source, isAnimating, delay }) {
             </div>
             <div className="ingestion-status">
                 <div className={`ingestion-pulse ${isAnimating ? 'active' : ''}`} key={pulseKey} style={{ background: source.color, boxShadow: `0 0 6px ${source.color}40` }} />
-                <span className="ingestion-freshness">{formatFreshness(source.latency)}</span>
+                <span className="ingestion-freshness">{formatFreshness(source.latency, locale)}</span>
             </div>
             <div className="ingestion-signal">
                 <SignalBars strength={strength} />
@@ -84,14 +103,16 @@ function StreamRow({ source, isAnimating, delay }) {
 }
 
 export default function DataIngestionPanel({ isActive = true }) {
+    const locale = useStore(state => state.locale);
+    const t = (en, zh) => pick(locale, en, zh);
     const [animating, setAnimating] = useState(false);
     const totalVolume = DATA_SOURCES.reduce((sum, s) => sum + (typeof s.volume === 'number' ? s.volume : 0), 0);
     const totalChannels = DATA_SOURCES.reduce((sum, s) => sum + s.channels, 0);
 
     useEffect(() => {
         if (isActive) {
-            const t = setTimeout(() => setAnimating(true), 300);
-            return () => clearTimeout(t);
+            const timer = setTimeout(() => setAnimating(true), 300);
+            return () => clearTimeout(timer);
         }
     }, [isActive]);
 
@@ -104,32 +125,32 @@ export default function DataIngestionPanel({ isActive = true }) {
                         <Icon name="perception" size={18} />
                     </div>
                     <div>
-                        <div className="ingestion-title">Multimodal Data Ingestion</div>
-                        <div className="ingestion-subtitle">{DATA_SOURCES.length} sources | {totalChannels} channels | Processing in real-time</div>
+                        <div className="ingestion-title">{t('Multimodal Data Ingestion', '多模态数据接入')}</div>
+                        <div className="ingestion-subtitle">{DATA_SOURCES.length} {t('sources', '个来源')} | {totalChannels} {t('channels', '条通道')} | {t('Processing in real-time', '实时处理中')}</div>
                     </div>
                 </div>
                 <div className="ingestion-header-right">
                     <div className="ingestion-total-badge">
-                        <span className="ingestion-total-label">Total Volume</span>
-                        <span className="ingestion-total-value">{totalVolume.toLocaleString()}+ data points</span>
+                        <span className="ingestion-total-label">{t('Total Volume', '总数据量')}</span>
+                        <span className="ingestion-total-value">{totalVolume.toLocaleString()}+ {t('data points', '数据点')}</span>
                     </div>
                 </div>
             </div>
 
             {/* Column Headers */}
             <div className="ingestion-columns">
-                <span>Source</span>
-                <span>Type</span>
-                <span>Format</span>
-                <span>Volume</span>
-                <span>Status</span>
-                <span>Signal</span>
+                <span>{t('Source', '来源')}</span>
+                <span>{t('Type', '类型')}</span>
+                <span>{t('Format', '格式')}</span>
+                <span>{t('Volume', '体量')}</span>
+                <span>{t('Status', '状态')}</span>
+                <span>{t('Signal', '信号')}</span>
             </div>
 
             {/* Stream Rows */}
             <div className="ingestion-streams">
                 {DATA_SOURCES.map((source, i) => (
-                    <StreamRow key={source.id} source={source} isAnimating={animating} delay={i * 80} />
+                    <StreamRow key={source.id} source={source} isAnimating={animating} delay={i * 80} locale={locale} />
                 ))}
             </div>
         </div>

@@ -1,0 +1,92 @@
+[
+  {
+    "kpi_id": "kpi_painpoint_to_os",
+    "label": "Decision Window Loss",
+    "value": "SRL Visible",
+    "unit": "risk mapped",
+    "start": 0,
+    "end": 22,
+    "style": "red_to_blue"
+  },
+  {
+    "kpi_id": "kpi_closed_loop",
+    "label": "Decision Loop",
+    "value": "5",
+    "unit": "stages",
+    "start": 22,
+    "end": 38,
+    "style": "violet_pipeline"
+  },
+  {
+    "kpi_id": "kpi_data_fusion",
+    "label": "Telemetry Throughput",
+    "value": "6,912",
+    "unit": "points/day",
+    "start": 38,
+    "end": 52,
+    "style": "cyan_stream"
+  },
+  {
+    "kpi_id": "kpi_reasoning_part1",
+    "label": "Reasoning Stage",
+    "value": "1-3",
+    "unit": "analysis steps",
+    "start": 52,
+    "end": 68,
+    "style": "amber_logic"
+  },
+  {
+    "kpi_id": "kpi_reasoning_part2",
+    "label": "Reasoning Stage",
+    "value": "4-5",
+    "unit": "decision steps",
+    "start": 68,
+    "end": 86,
+    "style": "indigo_constraints"
+  },
+  {
+    "kpi_id": "kpi_multi_agent_mesh",
+    "label": "Active Agent Types",
+    "value": "6+",
+    "unit": "roles",
+    "start": 86,
+    "end": 106,
+    "style": "mesh_green"
+  },
+  {
+    "kpi_id": "kpi_execution_fingerprint",
+    "label": "Execution Match",
+    "value": "Fingerprint",
+    "unit": "traceable",
+    "start": 106,
+    "end": 120,
+    "style": "teal_execution"
+  },
+  {
+    "kpi_id": "kpi_audit_accountability",
+    "label": "Audit Closure",
+    "value": "Responsibility Tagged",
+    "unit": "evidence chain",
+    "start": 120,
+    "end": 134,
+    "style": "emerald_audit"
+  },
+  {
+    "kpi_id": "kpi_client_benefit",
+    "label": "Season ROI",
+    "value": "10.5",
+    "unit": "x",
+    "start": 134,
+    "end": 144,
+    "style": "gold_growth"
+  },
+  {
+    "kpi_id": "kpi_deterministic_growth",
+    "label": "Grade A Uplift",
+    "value": "Deterministic Growth",
+    "unit": "auditable",
+    "start": 144,
+    "end": 150,
+    "style": "brand_lock"
+  }
+]

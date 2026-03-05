@@ -4,6 +4,9 @@ import useStore from '../engine/store';
 import { aiWatchdog } from '../data/mockData';
 import PageClock from './PageClock';
 import Icon from './Icon';
+import SubtitleOverlay from './SubtitleOverlay';
+import IterativeReasoningOverlay from './IterativeReasoningOverlay';
+import { pick, formatLocaleTime } from '../i18n/locale.js';
 
 const navItems = [
     { path: '/', label: 'Dashboard', labelZh: '指挥中心', iconName: 'dashboard' },
@@ -36,8 +39,11 @@ export default function Layout() {
         riskResults,
         operatorAlerts,
         activeExecution,
+        locale,
+        setLocale,
     } = useStore();
     const navigate = useNavigate();
+    const t = (en, zh) => pick(locale, en, zh);
 
     useEffect(() => {
         initSimulation();
@@ -57,7 +63,7 @@ export default function Layout() {
                     <img src="/sentinel_logo.png" alt="Sentinel" className="sidebar-logo" style={{ width: 52, height: 52, filter: 'drop-shadow(0 0 8px rgba(52,211,153,0.3))' }} />
                     <div>
                         <div className="sidebar-title" style={{ fontSize: '1.4rem', letterSpacing: 4, fontWeight: 800 }}>SENTINEL</div>
-                        <div className="sidebar-subtitle" style={{ letterSpacing: 2, fontSize: '0.6rem', color: '#64748b' }}>Decision OS</div>
+                        <div className="sidebar-subtitle" style={{ letterSpacing: 2, fontSize: '0.6rem', color: '#64748b' }}>{t('Decision OS', '决策操作系统')}</div>
                     </div>
                 </div>
 
@@ -75,7 +81,7 @@ export default function Layout() {
                                     <span className="sidebar-icon">
                                         <Icon name={item.iconName} size={16} className="nav-icon" color={isActive ? '#38bdf8' : '#64748b'} />
                                     </span>
-                                    <span className="sidebar-label">{item.label}</span>
+                                    <span className="sidebar-label">{t(item.label, item.labelZh)}</span>
                                     {item.alertKey === 'risk' && showRiskBadge && <span className="nav-badge" />}
                                     {item.path === '/prescription' && approvalQueue.length > 0 && (
                                         <span className="nav-approval-badge">{approvalQueue.length}</span>
@@ -88,13 +94,17 @@ export default function Layout() {
 
                 <div className="sidebar-footer">
                     <div style={{ fontSize: '0.6rem', color: '#475569', marginBottom: 4 }}>
-                        Season: Flowering {'->'} Harvest
+                        {t('Season', '季节阶段')}: {t('Flowering', '开花期')} {'->'} {t('Harvest', '采收期')}
                     </div>
                     <div style={{ fontSize: '0.6rem', color: '#475569' }}>
-                        Day {currentDay || 18} / 120
+                        {t('Day', '第')} {currentDay || 18} / 120
                     </div>
-                    <div style={{ fontSize: '0.65rem', color: '#64748b', marginTop: 6 }}>Sentinel Engine v4.2</div>
-                    <div style={{ fontSize: '0.65rem', color: '#64748b' }}>Build 2026.03</div>
+                    <div style={{ fontSize: '0.65rem', color: '#64748b', marginTop: 6 }}>
+                        {t('Sentinel Engine v4.2', 'Sentinel 引擎 v4.2')}
+                    </div>
+                    <div style={{ fontSize: '0.65rem', color: '#64748b' }}>
+                        {t('Build 2026.03', '构建 2026.03')}
+                    </div>
                 </div>
             </aside>
 
@@ -107,7 +117,7 @@ export default function Layout() {
                             onChange={e => setActiveField(e.target.value)}
                         >
                             {Object.values(fields).map(f => (
-                                <option key={f.id} value={f.id}>{f.name} ({f.nameZh})</option>
+                                <option key={f.id} value={f.id}>{locale === 'zh' ? (f.nameZh || f.name) : f.name}</option>
                             ))}
                         </select>
 
@@ -115,8 +125,8 @@ export default function Layout() {
                             <>
                                 <div className="scenario-indicator">
                                     <span className="scenario-dot" style={{ background: activeScenario.riskLevel === 'critical' ? '#ef4444' : activeScenario.riskLevel === 'high' ? '#f59e0b' : '#3dabf5' }} />
-                                    <span>Scenario {activeScenario.id}: {activeScenario.name}</span>
-                                    <span className="scenario-progress">Step {scenarioStep}/{activeScenario.events.length}</span>
+                                    <span>{t('Scenario', '场景')} {activeScenario.id}: {locale === 'zh' ? (activeScenario.nameZh || activeScenario.name) : activeScenario.name}</span>
+                                    <span className="scenario-progress">{t('Step', '步骤')} {scenarioStep}/{activeScenario.events.length}</span>
                                 </div>
                                 <button
                                     className="btn-return-scenarios"
@@ -134,45 +144,74 @@ export default function Layout() {
                                     onMouseLeave={e => { e.currentTarget.style.background = 'rgba(30,41,59,0.7)'; e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.borderColor = 'rgba(100,116,139,0.25)'; }}
                                 >
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
-                                    Return to Scenarios
+                                    {t('Return to Scenarios', '返回场景中心')}
                                 </button>
                             </>
                         )}
                     </div>
 
                     <div className="topbar-right">
+                        <div style={{ display: 'flex', alignItems: 'center', marginRight: 8 }}>
+                            <button
+                                type="button"
+                                className={`btn ${locale === 'en' ? 'btn-primary' : 'btn-secondary'}`}
+                                style={{ minWidth: 54, padding: '5px 10px', fontSize: '0.68rem' }}
+                                onClick={() => setLocale('en')}
+                            >
+                                EN
+                            </button>
+                            <button
+                                type="button"
+                                className={`btn ${locale === 'zh' ? 'btn-primary' : 'btn-secondary'}`}
+                                style={{ minWidth: 54, padding: '5px 10px', fontSize: '0.68rem', marginLeft: 6 }}
+                                onClick={() => setLocale('zh')}
+                            >
+                                {t('Chinese', '中文')}
+                            </button>
+                        </div>
                         <button
                             className={`btn ${autonomousMode ? 'btn-success' : 'btn-secondary'}`}
                             onClick={() => setAutonomousMode(!autonomousMode)}
                             style={{ marginRight: 8, display: 'flex', alignItems: 'center', gap: 6 }}
                         >
                             <Icon name={autonomousMode ? 'play' : 'pause'} size={12} />
-                            Auto Loop {autonomousMode ? 'On' : 'Off'}
+                            {t('Auto Loop', '自动循环')} {autonomousMode ? t('On', '开') : t('Off', '关')}
                         </button>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: 'rgba(56,189,248,0.08)', borderRadius: 8, marginRight: 8, border: '1px solid rgba(56,189,248,0.2)' }}>
                             <Icon name="activity" size={12} color="#38bdf8" />
-                            <span style={{ fontSize: '0.68rem', color: '#38bdf8', fontWeight: 700 }}>Cycle {autonomousState.cycleCount}</span>
-                            <span style={{ fontSize: '0.6rem', color: '#94a3b8' }}>{autonomousState.status}</span>
+                            <span style={{ fontSize: '0.68rem', color: '#38bdf8', fontWeight: 700 }}>{t('Cycle', '轮次')} {autonomousState.cycleCount}</span>
+                            <span style={{ fontSize: '0.6rem', color: '#94a3b8' }}>
+                                {autonomousState.status === 'running'
+                                    ? t('running', '运行中')
+                                    : autonomousState.status === 'paused'
+                                        ? t('paused', '已暂停')
+                                        : autonomousState.status === 'stopped'
+                                            ? t('stopped', '已停止')
+                                            : autonomousState.status}
+                            </span>
                         </div>
 
                         {approvalQueue.length > 0 && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: 'rgba(245,158,11,0.08)', borderRadius: 8, marginRight: 8, border: '1px solid rgba(245,158,11,0.2)' }}>
-                                <span style={{ fontSize: '0.68rem', color: '#f59e0b', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}><Icon name="warning" size={12} color="#f59e0b" /> {approvalQueue.length} Pending Approval{approvalQueue.length > 1 ? 's' : ''}</span>
+                                <span style={{ fontSize: '0.68rem', color: '#f59e0b', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}><Icon name="warning" size={12} color="#f59e0b" /> {approvalQueue.length} {t('Pending Approval', '待人工审批')}</span>
                             </div>
                         )}
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: 'rgba(52,211,153,0.06)', borderRadius: 8, marginRight: 8 }}>
                             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', animation: 'watchdog-pulse 2s infinite' }} />
-                            <span style={{ fontSize: '0.68rem', color: '#34d399', fontWeight: 600 }}>AI Active</span>
-                            <span style={{ fontSize: '0.6rem', color: '#64748b' }}>Last scan {new Date(aiWatchdog.lastScan).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
+                            <span style={{ fontSize: '0.68rem', color: '#34d399', fontWeight: 600 }}>{t('AI Active', 'AI 在线')}</span>
+                            <span style={{ fontSize: '0.6rem', color: '#64748b' }}>
+                                {t('Last scan', '最近扫描')}{' '}
+                                {formatLocaleTime(locale, aiWatchdog.lastScan, { hour: '2-digit', minute: '2-digit', hour12: false })}
+                            </span>
                         </div>
 
                         <PageClock />
 
                         <div className="topbar-status">
                             <span className="status-light" />
-                            <span>System Online</span>
+                            <span>{t('System Online', '系统在线')}</span>
                         </div>
                     </div>
                 </header>
@@ -180,8 +219,9 @@ export default function Layout() {
                 <main className="main-content">
                     <Outlet />
                 </main>
+                <SubtitleOverlay />
             </div>
+            <IterativeReasoningOverlay />
         </div>
     );
 }
-
