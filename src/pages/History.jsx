@@ -2,11 +2,13 @@
 import Icon from '../components/Icon';
 import StatusBadge from '../components/StatusBadge';
 import PipelineBreadcrumb from '../components/PipelineBreadcrumb';
+import useStore from '../engine/store';
 import { historicalDecisions } from '../data/mockData';
 import {
     AreaChart, Area, BarChart, Bar, LineChart, Line,
     XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell, PieChart, Pie, Legend,
 } from 'recharts';
+import { pick, localeTag } from '../i18n/locale.js';
 
 // Expanded historical records for all 6 scenarios
 const scenarioOutcomes = [
@@ -54,6 +56,50 @@ const responseTimeData = [
 ];
 
 export default function History() {
+    const locale = useStore(state => state.locale);
+    const t = (en, zh) => pick(locale, en, zh);
+    const isZh = locale === 'zh';
+    const scenarioName = (item) => {
+        const mapZh = {
+            'Blueberry PHI Constraint': '蓝莓 PHI 约束',
+            'Monsoon Rose Gray Mold': '雨季玫瑰灰霉病',
+            'Execution Deviation': '执行偏差',
+            'Multi-Pest Cascade': '多虫害级联',
+            'Frost Emergency': '霜冻应急',
+            'Ventilation Failure': '通风故障',
+        };
+        return isZh ? (mapZh[item.name] || item.name) : item.name;
+    };
+    const cropLabel = (value) => {
+        const mapZh = { Blueberry: '蓝莓', Rose: '玫瑰' };
+        return isZh ? (mapZh[value] || value) : value;
+    };
+    const gradeLabel = (value) => {
+        if (!isZh) return value;
+        if (value === 'A+') return 'A+';
+        if (value === 'B (30% downgraded)') return 'B（30% 降级）';
+        return value;
+    };
+    const chemicalLabel = (value) => {
+        if (!isZh) return value;
+        const mapZh = {
+            'Trichoderma (Bio)': 'Trichoderma（生防）',
+            Carbendazim: '多菌灵',
+            Chlorothalonil: '百菌清',
+            Sequential: '阶段化复合方案',
+            'None (Non-chemical)': '无（非化学方案）',
+            'Carbendazim (Emergency)': '多菌灵（应急）',
+        };
+        return mapZh[value] || value;
+    };
+    const decisionThreat = (item) => (isZh ? (item.threatZh || item.threat) : item.threat);
+    const decisionAction = (item) => (isZh ? (item.actionZh || item.action) : item.action);
+    const decisionNote = (item) => (isZh ? (item.noteZh || item.note) : item.note);
+    const decisionApprover = (item) => (isZh ? (item.approvedByZh || item.approvedBy) : item.approvedBy);
+    const decisionApprovalType = (item) => {
+        if (!isZh) return item.approvalType;
+        return item.approvalType === 'critical' ? '人工审批' : item.approvalType === 'auto' ? '系统自动' : item.approvalType;
+    };
     const [filter, setFilter] = useState('all');
     const [expandedScenario, setExpandedScenario] = useState(null);
     const [selectedDecisionId, setSelectedDecisionId] = useState(null);
@@ -81,15 +127,15 @@ export default function History() {
             <div className="page-header">
                 <div>
                     <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <Icon name="history" size={20} color="#38bdf8" /> Analytics & History
+                        <Icon name="history" size={20} color="#38bdf8" /> {t('Analytics & History', '分析与历史')}
                     </h1>
-                    <p className="page-subtitle">Season Performance Dashboard  - {scenarioOutcomes.length} Interventions Tracked</p>
+                    <p className="page-subtitle">{t('Season Performance Dashboard', '季度表现看板')} - {scenarioOutcomes.length} {t('Interventions Tracked', '次干预记录')}</p>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
                     {['all', 'success', 'issues'].map(f => (
                         <button key={f} className={`btn ${filter === f ? 'btn-primary' : 'btn-secondary'}`}
                             onClick={() => setFilter(f)} style={{ textTransform: 'capitalize', fontSize: '0.75rem' }}>
-                            {f === 'all' ? 'All' : f === 'success' ? 'Success' : 'Issues'}
+                            {f === 'all' ? t('All', '全部') : f === 'success' ? t('Success', '成功') : t('Issues', '问题')}
                         </button>
                     ))}
                 </div>
@@ -98,10 +144,10 @@ export default function History() {
             {/* 鈹佲攣鈹?Summary KPI Cards 鈹佲攣鈹?*/}
             <div className="grid grid-4" style={{ gap: 12, marginBottom: 20 }}>
                 {[
-                    { label: 'Revenue Protected', value: `CNY ${(totalProtected / 1000).toFixed(0)}K`, sub: `from ${scenarioOutcomes.length} interventions`, color: '#34d399', icon: 'money' },
-                    { label: 'Total Cost', value: `CNY ${(totalCost / 1000).toFixed(1)}K`, sub: `ROI: ${(totalProtected / totalCost).toFixed(1)}x`, color: '#f59e0b', icon: 'clipboard' },
-                    { label: 'AI Accuracy', value: `${avgAccuracy}%`, sub: 'avg decision quality', color: '#38bdf8', icon: 'robot' },
-                    { label: 'Avg Response', value: `${avgResponse} min`, sub: 'detection to execution', color: '#a78bfa', icon: 'bolt' },
+                    { label: t('Revenue Protected', '已保护收益'), value: `CNY ${(totalProtected / 1000).toFixed(0)}K`, sub: t(`from ${scenarioOutcomes.length} interventions`, `来自 ${scenarioOutcomes.length} 次干预`), color: '#34d399', icon: 'money' },
+                    { label: t('Total Cost', '总成本'), value: `CNY ${(totalCost / 1000).toFixed(1)}K`, sub: `ROI: ${(totalProtected / totalCost).toFixed(1)}x`, color: '#f59e0b', icon: 'clipboard' },
+                    { label: t('AI Accuracy', 'AI 准确率'), value: `${avgAccuracy}%`, sub: t('avg decision quality', '平均决策质量'), color: '#38bdf8', icon: 'robot' },
+                    { label: t('Avg Response', '平均响应'), value: `${avgResponse} ${t('min', '分钟')}`, sub: t('detection to execution', '从检测到执行'), color: '#a78bfa', icon: 'bolt' },
                 ].map((kpi, i) => (
                     <div key={i} className="card" style={{
                         background: `linear-gradient(135deg, ${kpi.color}08 0%, transparent 100%)`,
@@ -119,7 +165,7 @@ export default function History() {
             {/* 鈹佲攣鈹?Scenario Replay Cards 鈹佲攣鈹?*/}
             <div style={{ marginBottom: 20 }}>
                 <h3 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span><Icon name="folder" size={16} color="#38bdf8" /></span> Intervention Record  - Scenario Replay
+                    <span><Icon name="folder" size={16} color="#38bdf8" /></span> {t('Intervention Record - Scenario Replay', '干预记录｜场景回放')}
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {filteredOutcomes.map(outcome => (
@@ -137,20 +183,20 @@ export default function History() {
                                         fontWeight: 800, fontSize: '0.9rem', color: outcome.grade.includes('+') ? '#34d399' : '#f59e0b',
                                     }}>{outcome.id}</div>
                                     <div>
-                                        <div style={{ fontWeight: 700, color: '#e2e8f0', fontSize: '0.85rem' }}>{outcome.name}</div>
+                                        <div style={{ fontWeight: 700, color: '#e2e8f0', fontSize: '0.85rem' }}>{scenarioName(outcome)}</div>
                                         <div style={{ fontSize: '0.65rem', color: '#64748b', display: 'flex', gap: 12, marginTop: 2 }}>
                                             <span>{outcome.date}</span>
-                                            <span>{outcome.crop}</span>
-                                            <span>Treatment: {outcome.chemical}</span>
+                                            <span>{cropLabel(outcome.crop)}</span>
+                                            <span>{t('Treatment', '处理方案')}: {chemicalLabel(outcome.chemical)}</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
                                     <div style={{ textAlign: 'right' }}>
                                         <div style={{ fontWeight: 700, color: '#34d399', fontFamily: 'monospace', fontSize: '0.9rem' }}>CNY {outcome.revenueProtected.toLocaleString()}</div>
-                                        <div style={{ fontSize: '0.6rem', color: '#64748b' }}>protected</div>
+                                        <div style={{ fontSize: '0.6rem', color: '#64748b' }}>{t('protected', '已保护')}</div>
                                     </div>
-                                    <StatusBadge status={outcome.grade.includes('+') ? 'monitoring' : 'warning'} label={outcome.grade} />
+                                    <StatusBadge status={outcome.grade.includes('+') ? 'monitoring' : 'warning'} label={gradeLabel(outcome.grade)} />
                                     <Icon name="chevron-right" size={14} color="#475569" />
                                 </div>
                             </div>
@@ -160,10 +206,10 @@ export default function History() {
                                 <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(30,41,59,0.5)' }}>
                                     <div className="grid grid-4" style={{ gap: 8, marginBottom: 12 }}>
                                         {[
-                                            { label: 'Risk Peak', value: `${outcome.riskPeak}/100`, color: '#ef4444' },
-                                            { label: 'Risk Final', value: `${outcome.riskFinal}/100`, color: '#34d399' },
-                                            { label: 'Response', value: `${outcome.responseMin} min`, color: '#38bdf8' },
-                                            { label: 'AI Accuracy', value: `${outcome.aiAccuracy}%`, color: '#a78bfa' },
+                                            { label: t('Risk Peak', '风险峰值'), value: `${outcome.riskPeak}/100`, color: '#ef4444' },
+                                            { label: t('Risk Final', '最终风险'), value: `${outcome.riskFinal}/100`, color: '#34d399' },
+                                            { label: t('Response', '响应时长'), value: `${outcome.responseMin} ${t('min', '分钟')}`, color: '#38bdf8' },
+                                            { label: t('AI Accuracy', 'AI 准确率'), value: `${outcome.aiAccuracy}%`, color: '#a78bfa' },
                                         ].map((m, i) => (
                                             <div key={i} style={{ padding: '8px 10px', background: 'rgba(15,23,42,0.4)', borderRadius: 6, textAlign: 'center' }}>
                                                 <div style={{ fontSize: '1rem', fontWeight: 700, color: m.color, fontFamily: 'monospace' }}>{m.value}</div>
@@ -173,7 +219,7 @@ export default function History() {
                                     </div>
                                     {/* Risk journey bar */}
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'rgba(15,23,42,0.3)', borderRadius: 8 }}>
-                                        <span style={{ fontSize: '0.65rem', color: '#64748b', width: 50 }}>Risk:</span>
+                                        <span style={{ fontSize: '0.65rem', color: '#64748b', width: 50 }}>{t('Risk', '风险')}:</span>
                                         <div style={{ flex: 1, height: 8, borderRadius: 4, background: 'rgba(15,23,42,0.5)', position: 'relative', overflow: 'hidden' }}>
                                             <div style={{
                                                 position: 'absolute', left: 0, top: 0, height: '100%',
@@ -191,12 +237,12 @@ export default function History() {
                                     </div>
                                     {outcome.loss && (
                                         <div style={{ marginTop: 8, padding: '6px 10px', background: 'rgba(239,68,68,0.06)', borderRadius: 6, fontSize: '0.7rem', color: '#f87171' }}>
-                                            <Icon name="warning" size={10} color="#f59e0b" /> Revenue loss: CNY {outcome.loss.toLocaleString()}  - {outcome.id === 'B' ? 'due to 6h operator delay' : 'execution deviation'}
+                                            <Icon name="warning" size={10} color="#f59e0b" /> {t('Revenue loss', '收益损失')}: CNY {outcome.loss.toLocaleString()}  - {outcome.id === 'B' ? t('due to 6h operator delay', '因人工延迟 6 小时') : t('execution deviation', '执行偏差')}
                                         </div>
                                     )}
                                     {outcome.excessCost && (
                                         <div style={{ marginTop: 8, padding: '6px 10px', background: 'rgba(245,158,11,0.06)', borderRadius: 6, fontSize: '0.7rem', color: '#f59e0b' }}>
-                                            <Icon name="warning" size={10} color="#f59e0b" /> Excess cost: CNY {outcome.excessCost.toLocaleString()}  - dosage deviation {outcome.id === 'C' ? '(0.7x->1.2x)' : ''}
+                                            <Icon name="warning" size={10} color="#f59e0b" /> {t('Excess cost', '额外成本')}: CNY {outcome.excessCost.toLocaleString()}  - {t('dosage deviation', '剂量偏差')} {outcome.id === 'C' ? '(0.7x->1.2x)' : ''}
                                         </div>
                                     )}
                                 </div>
@@ -211,7 +257,7 @@ export default function History() {
                 {/* AI Accuracy Trend */}
                 <div className="card">
                     <h3 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <Icon name="reasoning" size={16} color="#38bdf8" /> AI Decision Accuracy Over Time
+                        <Icon name="reasoning" size={16} color="#38bdf8" /> {t('AI Decision Accuracy Over Time', 'AI 决策准确率趋势')}
                     </h3>
                     <ResponsiveContainer width="100%" height={200}>
                         <AreaChart data={aiAccuracyTrend}>
@@ -224,37 +270,37 @@ export default function History() {
                             <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                             <XAxis dataKey="month" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} />
                             <YAxis domain={[75, 100]} tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickFormatter={v => `${v}%`} />
-                            <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8 }} formatter={(v) => [`${v}%`, 'Accuracy']} />
+                            <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8 }} formatter={(v) => [`${v}%`, t('Accuracy', '准确率')]} />
                             <Area type="monotone" dataKey="accuracy" stroke="#38bdf8" fill="url(#accGrad)" strokeWidth={2} dot={{ fill: '#38bdf8', r: 4 }} />
                         </AreaChart>
                     </ResponsiveContainer>
                     <div style={{ textAlign: 'center', fontSize: '0.65rem', color: '#34d399', marginTop: 4 }}>
-                        <Icon name="trending-up" size={10} color="#34d399" /> +16% improvement over 6 months - model self-learning active
+                        <Icon name="trending-up" size={10} color="#34d399" /> {t('+16% improvement over 6 months - model self-learning active', '6 个月提升 +16%，模型自学习持续生效')}
                     </div>
                 </div>
 
                 {/* Chemical Usage Trend */}
                 <div className="card">
-                    <h3 className="card-title">Chemical Usage  - Sentinel vs. Traditional (L/month)</h3>
+                    <h3 className="card-title">{t('Chemical Usage - Sentinel vs. Traditional (L/month)', '用药量对比｜Sentinel vs 传统（L/月）')}</h3>
                     <ResponsiveContainer width="100%" height={200}>
                         <BarChart data={chemicalUsageTrend}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                             <XAxis dataKey="month" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} />
                             <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} />
                             <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8 }} />
-                            <Bar dataKey="traditional" fill="#475569" radius={[4, 4, 0, 0]} barSize={16} name="Traditional" />
+                            <Bar dataKey="traditional" fill="#475569" radius={[4, 4, 0, 0]} barSize={16} name={t('Traditional', '传统方案')} />
                             <Bar dataKey="sentinel" fill="#34d399" radius={[4, 4, 0, 0]} barSize={16} name="Sentinel" />
                             <Legend iconType="circle" wrapperStyle={{ fontSize: '0.7rem' }} />
                         </BarChart>
                     </ResponsiveContainer>
                     <div style={{ textAlign: 'center', fontSize: '0.65rem', color: '#34d399', marginTop: 4 }}>
-                        <Icon name="leaf" size={10} color="#34d399" /> Average 68% chemical reduction through precision targeting
+                        <Icon name="leaf" size={10} color="#34d399" /> {t('Average 68% chemical reduction through precision targeting', '通过精准作业平均减少 68% 用药量')}
                     </div>
                 </div>
 
                 {/* Revenue Protected Cumulative */}
                 <div className="card">
-                    <h3 className="card-title">Cumulative Revenue Protected (CNY)</h3>
+                    <h3 className="card-title">{t('Cumulative Revenue Protected (CNY)', '累计保护收入（CNY）')}</h3>
                     <ResponsiveContainer width="100%" height={200}>
                         <AreaChart data={revenueCumulative}>
                             <defs>
@@ -267,8 +313,8 @@ export default function History() {
                             <XAxis dataKey="month" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} />
                             <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickFormatter={v => `CNY ${(v / 1000).toFixed(0)}K`} />
                             <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8 }} formatter={(v) => [`CNY ${v.toLocaleString()}`, '']} />
-                            <Area type="monotone" dataKey="protected" stroke="#34d399" fill="url(#revGrad)" strokeWidth={2} name="Protected" />
-                            <Area type="monotone" dataKey="cost" stroke="#f59e0b" fill="rgba(245,158,11,0.05)" strokeWidth={1.5} strokeDasharray="4 4" name="Cost" />
+                            <Area type="monotone" dataKey="protected" stroke="#34d399" fill="url(#revGrad)" strokeWidth={2} name={t('Protected', '已保护')} />
+                            <Area type="monotone" dataKey="cost" stroke="#f59e0b" fill="rgba(245,158,11,0.05)" strokeWidth={1.5} strokeDasharray="4 4" name={t('Cost', '成本')} />
                             <Legend iconType="circle" wrapperStyle={{ fontSize: '0.7rem' }} />
                         </AreaChart>
                     </ResponsiveContainer>
@@ -276,20 +322,20 @@ export default function History() {
 
                 {/* Response Time Distribution */}
                 <div className="card">
-                    <h3 className="card-title">Response Time Distribution</h3>
+                    <h3 className="card-title">{t('Response Time Distribution', '响应时间分布')}</h3>
                     <ResponsiveContainer width="100%" height={200}>
                         <BarChart data={responseTimeData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                             <XAxis dataKey="range" tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} />
                             <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} />
                             <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8 }} />
-                            <Bar dataKey="count" radius={[6, 6, 0, 0]} barSize={32} name="Interventions">
+                            <Bar dataKey="count" radius={[6, 6, 0, 0]} barSize={32} name={t('Interventions', '干预次数')}>
                                 {responseTimeData.map((d, i) => <Cell key={i} fill={d.fill} />)}
                             </Bar>
                         </BarChart>
                     </ResponsiveContainer>
                     <div style={{ textAlign: 'center', fontSize: '0.65rem', color: '#38bdf8', marginTop: 4 }}>
-                        <Icon name="bolt" size={10} color="#38bdf8" /> 69% of interventions responded to within 30 minutes
+                        <Icon name="bolt" size={10} color="#38bdf8" /> {t('69% of interventions responded to within 30 minutes', '69% 的干预在 30 分钟内响应')}
                     </div>
                 </div>
             </div>
@@ -297,20 +343,20 @@ export default function History() {
             {/* 鈹佲攣鈹?Decision Quality Matrix 鈹佲攣鈹?*/}
             <div className="card" style={{ marginBottom: 20 }}>
                 <h3 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Icon name="activity" size={16} color="#a78bfa" /> Decision Quality Matrix
+                    <Icon name="activity" size={16} color="#a78bfa" /> {t('Decision Quality Matrix', '决策质量矩阵')}
                 </h3>
                 <div style={{ overflowX: 'auto' }}>
                     <table className="data-table" style={{ width: '100%', fontSize: '0.75rem' }}>
                         <thead>
                             <tr>
                                 <th style={{ width: 50 }}>ID</th>
-                                <th>Scenario</th>
-                                <th>Date</th>
-                                <th>Risk Peak</th>
-                                <th>Risk Final</th>
-                                <th>Response</th>
-                                <th>AI Accuracy</th>
-                                <th>Grade</th>
+                                <th>{t('Scenario', '场景')}</th>
+                                <th>{t('Date', '日期')}</th>
+                                <th>{t('Risk Peak', '风险峰值')}</th>
+                                <th>{t('Risk Final', '最终风险')}</th>
+                                <th>{t('Response', '响应')}</th>
+                                <th>{t('AI Accuracy', 'AI 准确率')}</th>
+                                <th>{t('Grade', '等级')}</th>
                                 <th>ROI</th>
                             </tr>
                         </thead>
@@ -318,7 +364,7 @@ export default function History() {
                             {scenarioOutcomes.map(o => (
                                 <tr key={o.id}>
                                     <td style={{ fontWeight: 800, color: '#38bdf8' }}>{o.id}</td>
-                                    <td style={{ fontWeight: 600, color: '#e2e8f0' }}>{o.name}</td>
+                                    <td style={{ fontWeight: 600, color: '#e2e8f0' }}>{scenarioName(o)}</td>
                                     <td style={{ color: '#64748b', fontFamily: 'monospace' }}>{o.date}</td>
                                     <td>
                                         <span style={{ color: o.riskPeak >= 80 ? '#ef4444' : o.riskPeak >= 70 ? '#f59e0b' : '#f97316', fontWeight: 700, fontFamily: 'monospace' }}>{o.riskPeak}</span>
@@ -339,7 +385,7 @@ export default function History() {
                                             <span style={{ fontFamily: 'monospace', color: '#e2e8f0' }}>{o.aiAccuracy}%</span>
                                         </div>
                                     </td>
-                                    <td><StatusBadge status={o.grade.includes('+') ? 'monitoring' : 'warning'} label={o.grade} /></td>
+                                    <td><StatusBadge status={o.grade.includes('+') ? 'monitoring' : 'warning'} label={gradeLabel(o.grade)} /></td>
                                     <td style={{ fontWeight: 700, color: '#34d399', fontFamily: 'monospace' }}>{(o.revenueProtected / o.cost).toFixed(1)}x</td>
                                 </tr>
                             ))}
@@ -351,16 +397,16 @@ export default function History() {
             {/* 鈹佲攣鈹?Compliance Record 鈹佲攣鈹?*/}
             <div className="card" style={{ marginBottom: 20 }}>
                 <h3 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Icon name="audit-alt" size={16} color="#34d399" /> Compliance & Regulatory Record
+                    <Icon name="audit-alt" size={16} color="#34d399" /> {t('Compliance & Regulatory Record', '合规与监管记录')}
                 </h3>
                 <div className="grid grid-3" style={{ gap: 10 }}>
-                    {[
-                        { label: 'PHI Compliance', value: '100%', detail: '6/6 interventions PHI-verified', color: '#34d399', icon: 'check-circle' },
-                        { label: 'Banned Substance', value: 'CLEAR', detail: 'Zero restricted chemicals used', color: '#34d399', icon: 'shield' },
-                        { label: 'Label Rate', value: '92%', detail: '1 deviation (Scenario C: +71%)', color: '#f59e0b', icon: 'clipboard' },
-                        { label: 'Wind Safety', value: '100%', detail: 'All drone ops within 3.0 m/s', color: '#34d399', icon: 'wind' },
-                        { label: 'Audit Coverage', value: '100%', detail: 'All interventions fully audited', color: '#34d399', icon: 'clipboard' },
-                        { label: 'GB 2763-2021', value: 'PASSED', detail: 'MRL testing within limits', color: '#34d399', icon: 'building' },
+                        {[
+                        { label: t('PHI Compliance', 'PHI 合规率'), value: '100%', detail: t('6/6 interventions PHI-verified', '6/6 干预均通过 PHI 校验'), color: '#34d399', icon: 'check-circle' },
+                        { label: t('Banned Substance', '禁限用物质'), value: t('CLEAR', '通过'), detail: t('Zero restricted chemicals used', '禁限用农药使用为 0'), color: '#34d399', icon: 'shield' },
+                        { label: t('Label Rate', '标签剂量符合率'), value: '92%', detail: t('1 deviation (Scenario C: +71%)', '1 次偏差（场景 C：+71%）'), color: '#f59e0b', icon: 'clipboard' },
+                        { label: t('Wind Safety', '风速安全'), value: '100%', detail: t('All drone ops within 3.0 m/s', '所有无人机作业均在 3.0 m/s 内'), color: '#34d399', icon: 'wind' },
+                        { label: t('Audit Coverage', '审计覆盖率'), value: '100%', detail: t('All interventions fully audited', '所有干预均完成审计'), color: '#34d399', icon: 'clipboard' },
+                        { label: 'GB 2763-2021', value: t('PASSED', '通过'), detail: t('MRL testing within limits', 'MRL 检测符合限值'), color: '#34d399', icon: 'building' },
                     ].map((c, i) => (
                         <div key={i} style={{ padding: '12px 14px', background: 'rgba(15,23,42,0.4)', borderRadius: 8, borderLeft: `3px solid ${c.color}` }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
@@ -376,7 +422,7 @@ export default function History() {
             {/* 鈹佲攣鈹?Decision Log 鈹佲攣鈹?*/}
             <div className="card">
                 <h3 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Icon name="activity" size={16} color="#64748b" /> Detailed Decision Log
+                    <Icon name="activity" size={16} color="#64748b" /> {t('Detailed Decision Log', '详细决策日志')}
                 </h3>
                 <div className="grid grid-2" style={{ gap: 12 }}>
                     <div className="scrollbar-themed" style={{ maxHeight: 320, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -401,20 +447,20 @@ export default function History() {
                             >
                                 <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
                                     <span style={{ fontFamily: 'monospace', color: '#475569', fontSize: '0.65rem' }}>
-                                        {new Date(d.timestamp).toLocaleString('en-US', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })}
+                                        {new Date(d.timestamp).toLocaleString(localeTag(locale), { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })}
                                     </span>
-                                    <StatusBadge status={d.outcome === 'success' ? 'monitoring' : d.outcome === 'partial' ? 'warning' : d.outcome === 'no_action' ? 'low' : 'critical'} label={d.outcome?.replace('_', ' ').toUpperCase()} />
+                                    <StatusBadge status={d.outcome === 'success' ? 'monitoring' : d.outcome === 'partial' ? 'warning' : d.outcome === 'no_action' ? 'low' : 'critical'} label={isZh ? (d.outcome === 'success' ? '成功' : d.outcome === 'partial' ? '部分完成' : d.outcome === 'no_action' ? '无需动作' : '失败') : d.outcome?.replace('_', ' ').toUpperCase()} />
                                 </div>
-                                <span style={{ fontSize: '0.71rem', color: '#e2e8f0', lineHeight: 1.3 }}>{d.threat}</span>
-                                <span style={{ fontSize: '0.63rem', color: '#94a3b8' }}>{d.action}</span>
-                                <span style={{ fontSize: '0.6rem', color: '#64748b' }}>{d.field} | Risk {d.riskScore ?? '--'}/100</span>
+                                <span style={{ fontSize: '0.71rem', color: '#e2e8f0', lineHeight: 1.3 }}>{decisionThreat(d)}</span>
+                                <span style={{ fontSize: '0.63rem', color: '#94a3b8' }}>{decisionAction(d)}</span>
+                                <span style={{ fontSize: '0.6rem', color: '#64748b' }}>{d.field} | {t('Risk', '风险')} {d.riskScore ?? '--'}/100</span>
                             </button>
                         ))}
                     </div>
                     {selectedDecision && (
                         <div style={{ padding: 12, borderRadius: 10, border: '1px solid rgba(51,65,85,0.6)', background: 'rgba(15,23,42,0.45)' }}>
                             <div style={{ fontSize: '0.72rem', color: '#64748b', fontFamily: 'monospace', marginBottom: 8 }}>
-                                {new Date(selectedDecision.timestamp).toLocaleString('en-US', { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
+                                {new Date(selectedDecision.timestamp).toLocaleString(localeTag(locale), { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
                             </div>
                             <div style={{ marginBottom: 8 }}>
                                 <StatusBadge
@@ -425,27 +471,27 @@ export default function History() {
                                             : selectedDecision.outcome === 'no_action'
                                                 ? 'low'
                                                 : 'critical'}
-                                    label={selectedDecision.outcome?.replace('_', ' ').toUpperCase()}
+                                    label={isZh ? (selectedDecision.outcome === 'success' ? '成功' : selectedDecision.outcome === 'partial' ? '部分完成' : selectedDecision.outcome === 'no_action' ? '无需动作' : '失败') : selectedDecision.outcome?.replace('_', ' ').toUpperCase()}
                                 />
                             </div>
-                            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#e2e8f0', marginBottom: 6 }}>{selectedDecision.threat}</div>
-                            <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginBottom: 4 }}>Action: {selectedDecision.action}</div>
-                            <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginBottom: 4 }}>Field: {selectedDecision.field}</div>
-                            <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginBottom: 4 }}>Risk Score: {selectedDecision.riskScore ?? '--'}/100</div>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#e2e8f0', marginBottom: 6 }}>{decisionThreat(selectedDecision)}</div>
+                            <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginBottom: 4 }}>{t('Action', '动作')}: {decisionAction(selectedDecision)}</div>
+                            <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginBottom: 4 }}>{t('Field', '地块')}: {selectedDecision.field}</div>
+                            <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginBottom: 4 }}>{t('Risk Score', '风险分值')}: {selectedDecision.riskScore ?? '--'}/100</div>
                             <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginBottom: 4 }}>
-                                Approval: {selectedDecision.approvedBy} ({selectedDecision.approvalType})
+                                {t('Approval', '审批')}: {decisionApprover(selectedDecision)} ({decisionApprovalType(selectedDecision)})
                             </div>
                             <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginBottom: 4 }}>
-                                Rx/Exec/Audit: {selectedDecision.prescriptionId || '--'} | {selectedDecision.executionId || '--'} | {selectedDecision.auditId || '--'}
+                                {t('Prescription/Execution/Audit', '处方/执行/审计')}: {selectedDecision.prescriptionId || '--'} | {selectedDecision.executionId || '--'} | {selectedDecision.auditId || '--'}
                             </div>
                             <div style={{ fontSize: '0.74rem', color: '#34d399', fontFamily: 'monospace', marginTop: 8 }}>
-                                Savings: CNY {(selectedDecision.savingsYuan || selectedDecision.savings || 0).toLocaleString()}
+                                {t('Savings', '节省')}: CNY {(selectedDecision.savingsYuan || selectedDecision.savings || 0).toLocaleString()}
                             </div>
                             <div style={{ fontSize: '0.74rem', color: '#f59e0b', fontFamily: 'monospace', marginTop: 4 }}>
-                                Cost: CNY {(selectedDecision.costYuan || 0).toLocaleString()}
+                                {t('Cost', '成本')}: CNY {(selectedDecision.costYuan || 0).toLocaleString()}
                             </div>
                             <div style={{ fontSize: '0.74rem', color: '#94a3b8', lineHeight: 1.45, marginTop: 8 }}>
-                                {selectedDecision.note}
+                                {decisionNote(selectedDecision)}
                             </div>
                         </div>
                     )}
