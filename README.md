@@ -1,16 +1,53 @@
-# React + Vite
+# Sentinel | The Agentic Decision OS 🛰️
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![Version](https://img.shields.io/badge/Version-V4.1-blue.svg)
+![Status](https://img.shields.io/badge/Status-Prototyping-orange.svg)
+![Aesthetics](https://img.shields.io/badge/Aesthetics-Premium-blueviolet.svg)
 
-Currently, two official plugins are available:
+**Sentinel** is an advanced agricultural decision operating system designed to manage risk and unlock structural revenue (SRL) in high-value crop production (Blueberries, Flowers).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 The Transition to Agentic OS (V5.0)
 
-## React Compiler
+We are currently transitioning from a linear Decision Loop to an **Agentic Swarm Architecture**.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **V1.3.1**: The Strategic White Paper (Linear Logic).
+- **V4.1 (Current)**: Iterative Reasoning UI & Multi-Agent Collaboration.
+- **V5.0 (Vision)**: Fully Autonomous Agentic OS with Input Efficiency Bypass.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 📂 Documentation by Version
+
+| Version | Documentation | Roadmap |
+| :--- | :--- | :--- |
+| **V1.3.1** | [White Paper V1.3.1](./docs/v1.3.1/README.md) | Legacy Foundation |
+| **V4.1** | [Current Feature Set](./docs/v4.1/README.md) | **Active Development** |
+| **V5.0** | [Agentic Vision](./docs/v5.0/README.md) | Strategic Roadmap |
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend**: React + Vite (Vanilla CSS for Premium UI)
+- **Engine**: Rule-Based Decision Logic + Multi-Agent Reasoning Logs
+- **Analytics**: Structural Revenue Leakage (SRL) Quant Model
+
+## 📖 Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/BigBigBigLeo/Sentinel_Demo.git
+
+# Install dependencies
+npm install
+
+# Run the dev server
+npm run dev
+```
+
+## 🧠 Internal Wiki
+For deeper technical details on agent protocols and data schemas, see the [Internal Wiki](./docs/wiki/README.md).
+
+---
+
+© 2026 Sentinel AgriAI. All Rights Reserved. Confidential | Internal Use Only.
