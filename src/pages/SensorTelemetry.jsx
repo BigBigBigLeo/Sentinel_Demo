@@ -87,9 +87,9 @@ export default function SensorTelemetry() {
     const t = (en, zh) => pick(locale, en, zh);
     const isZh = locale === 'zh';
     const field = fields[activeFieldId];
-    const fleet = sensorFleet[activeFieldId] || [];
-    const pests = pestMonitoring[activeFieldId] || {};
-    const unitSeries = perUnitTimeSeries[activeFieldId] || {};
+    const fleet = useMemo(() => sensorFleet[activeFieldId] || [], [activeFieldId]);
+    const pests = useMemo(() => pestMonitoring[activeFieldId] || {}, [activeFieldId]);
+    const unitSeries = useMemo(() => perUnitTimeSeries[activeFieldId] || {}, [activeFieldId]);
 
     const [telemetryWindow, setTelemetryWindow] = useState('24h');
     const [selectedUnitId, setSelectedUnitId] = useState(null);

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import useStore from '../engine/store';
 
@@ -11,18 +11,9 @@ export default function AutomationController() {
     const location = useLocation();
     const {
         setIterationRound, setIterationStage, setIterating, addIterationLog, clearIteration,
-        startRiskThinking, stopThinking,
     } = useStore();
 
-    useEffect(() => {
-        const query = new URLSearchParams(location.search);
-        if (query.get('automate') === 'true') {
-            const startRound = parseInt(query.get('round')) || 1;
-            runVideoSequence(startRound);
-        }
-    }, [location.search]);
-
-    const runVideoSequence = async (startRound = 1) => {
+    const runVideoSequence = useCallback(async (startRound = 1) => {
         console.log(`Starting Sentinel Automation Sequence (Round ${startRound})...`);
 
         const delay = (ms) => new Promise(res => setTimeout(res, ms));
@@ -116,7 +107,15 @@ export default function AutomationController() {
         // Finish Sequence
         setIterating(false);
         console.log("Automation Sequence Complete.");
-    };
+    }, [addIterationLog, clearIteration, setIterating, setIterationRound, setIterationStage]);
+
+    useEffect(() => {
+        const query = new URLSearchParams(location.search);
+        if (query.get('automate') === 'true') {
+            const startRound = Number.parseInt(query.get('round') || '1', 10) || 1;
+            runVideoSequence(startRound);
+        }
+    }, [location.search, runVideoSequence]);
 
     return null; // Side effect component
 }

@@ -20,5 +20,10 @@ V5.0 explicitly targets **cost reduction** alongside revenue unlocking.
 ### 3. Dynamic Audit Assets
 The "Audit" is no longer a static report but a **Decision Trace Asset** that can be live-streamed to insurance and banking partners.
 
+## Evidence Signals
+- Precision agriculture benefits are real but strongly context-dependent; see the [Evidence Base](../wiki/EVIDENCE_BASE.md).
+- EU adoption depends on perceived payback, farm scale, advisory support, training, and demonstration, not just technical availability.
+- This supports Sentinel's current strategy: demo first, pilot validation next, then scale claims only after measured outcomes.
+
 ---
 [Return to Main README](../../README.md)

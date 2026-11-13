@@ -122,15 +122,17 @@ export default function SystemActivityRail() {
 
     const t = (en, zh) => pick(locale, en, zh);
 
-    const [nowTick, setNowTick] = useState(0);
+    const [nowTick, setNowTick] = useState(() => Date.now());
     useEffect(() => {
-        setNowTick(Date.now());
         const timer = setInterval(() => setNowTick(Date.now()), 1000);
         return () => clearInterval(timer);
     }, []);
 
     const latestCycleId = agentAssignments.length ? agentAssignments[agentAssignments.length - 1].cycleId : null;
-    const latestAssignments = latestCycleId ? agentAssignments.filter(a => a.cycleId === latestCycleId) : [];
+    const latestAssignments = useMemo(
+        () => (latestCycleId ? agentAssignments.filter(a => a.cycleId === latestCycleId) : []),
+        [agentAssignments, latestCycleId],
+    );
 
     const streamItems = useMemo(() => {
         const events = (eventLog || []).slice(-150).map(item => {
@@ -169,7 +171,7 @@ export default function SystemActivityRail() {
             tag: locale === 'zh' ? '任务' : 'Task',
             message: locale === 'zh'
                 ? `${item.taskLabelZh || item.taskLabel}：${(item.members || []).map(m => m.nameZh || m.name).join('、')}`
-                : `${item.taskLabel}: ${(item.members || []).map(m => m.name).join(', ')}`,
+                : `${item.taskLabel}: ${item.evidence?.outcome ?? (item.members || []).map(m => m.name).join(', ')}`,
         }));
 
         const thinkingEntries = isThinking

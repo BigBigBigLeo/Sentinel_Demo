@@ -1,0 +1,77 @@
+{
+  "version": "6.1.0",
+  "entries": [
+    {
+      "id": "product-identity",
+      "topic": "product",
+      "text": "Sentinel AI helps an operator interpret crop conditions, market signals, orders, resources, costs and verified outcomes. The assistant identifies evidence and suggests follow-up checks.",
+      "source": "6.1 plan §11",
+      "scope": "product",
+      "version": "6.1.0",
+      "status": "approved"
+    },
+    {
+      "id": "operations-scope",
+      "topic": "operations",
+      "text": "Operations and each scenario have separate run IDs, clocks and evidence cutoffs. A scenario changes the selected view while Operations continues on its own schedule.",
+      "source": "6.1 plan §2",
+      "scope": "workspace",
+      "version": "6.1.0",
+      "status": "draft"
+    },
+    {
+      "id": "local-crop-evidence",
+      "topic": "agronomy",
+      "text": "A regional pest notice can prompt a scouting review. A plot assessment links the notice to local trap counts, images or scouting and records what still needs confirmation.",
+      "source": "6.1 plan §5.2",
+      "scope": "workspace",
+      "version": "6.1.0",
+      "status": "draft"
+    },
+    {
+      "id": "market-comparability",
+      "topic": "market",
+      "text": "Compare prices at a matching fruit, grade, region, channel, package basis, currency and date. A published offer describes its listed terms. The signed contract is the source for that order’s price.",
+      "source": "6.1 plan §5.1",
+      "scope": "workspace",
+      "version": "6.1.0",
+      "status": "draft"
+    },
+    {
+      "id": "release-quantity",
+      "topic": "orders",
+      "text": "Track forecast eligibility, QA clearance, accepted harvest and reservation separately. Full-order release uses the required verified records and available, allocated quantities.",
+      "source": "6.1 plan §7.4",
+      "scope": "workspace",
+      "version": "6.1.0",
+      "status": "draft"
+    },
+    {
+      "id": "time-window-capacity",
+      "topic": "resources",
+      "text": "Compute usable harvest capacity from eligible crew and resource slots within the applicable harvest window. Recheck impacted allocations when a slot changes.",
+      "source": "6.1 plan §7.4",
+      "scope": "workspace",
+      "version": "6.1.0",
+      "status": "draft"
+    },
+    {
+      "id": "contribution-basis",
+      "topic": "finance",
+      "text": "Distinguish gross contract value if fulfilled, modeled contribution and verified settlement. Cite the cost scope and quantity assumptions used in the calculation.",
+      "source": "6.1 plan §5",
+      "scope": "workspace",
+      "version": "6.1.0",
+      "status": "draft"
+    },
+    {
+      "id": "decision-authority",
+      "topic": "governance",
+      "text": "The application records approval against a specific revision and scope. Use the authorized workflow for dispatch and link execution receipts and verification to that revision.",
+      "source": "6.1 plan §7.4",
+      "scope": "workspace",
+      "version": "6.1.0",
+      "status": "draft"
+    }
+  ]
+}

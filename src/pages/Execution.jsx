@@ -11,7 +11,7 @@ import { pick, localeTag } from '../i18n/locale.js';
 
 export default function Execution() {
     const {
-        activeExecution, executions, activePrescription, activeScenario,
+        activeExecution, executions, activeScenario,
         fields, activeFieldId, currentSnapshot, aiAgentLog,
         thinkingChain, isThinking, thinkingContext,
         startExecutionThinking, stopThinking, completeExecution,
@@ -116,7 +116,6 @@ export default function Execution() {
     };
     const field = fields[activeFieldId];
     const execution = activeExecution;
-    const rx = activePrescription;
     const sensors = currentSnapshot?.sensors || {};
 
     // Simulated live progress for actors

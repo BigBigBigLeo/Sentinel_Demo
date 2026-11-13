@@ -6,7 +6,7 @@ import { generate60DayData, getSnapshot } from './simulationEngine.js';
 import { assessRisks, generatePrescription, calculateRevenueAtRisk } from './decisionEngine.js';
 import { executePresciption } from './executionEngine.js';
 import { generateAuditRecord } from './auditEngine.js';
-import { SCENARIOS } from './scenarioEngine.js';
+import { SCENARIOS, ALL_SCENARIOS, FLAGSHIP_SCENARIOS_7 } from './scenarioEngine.js';
 import { generateRiskThinkingChain, generatePrescriptionThinkingChain, generateExecutionThinkingChain, generateAuditThinkingChain } from './thinkingEngine.js';
 import thresholds from '../data/thresholds.js';
 import { normalizeLocale } from '../i18n/locale.js';
@@ -281,8 +281,6 @@ const useStore = create((set, get) => ({
     // 閳光偓閳光偓閳光偓 Pipeline & Approval 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
     pipelineStage: 1,          // 1=Dashboard, 2=Sensors, 3=Risk, 4=Rx, 5=Exec, 6=Audit, 7=History
 
-    // 閳光偓閳光偓閳光偓 Pipeline & Approval 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
-    pipelineStage: 1,          // 1=Dashboard, 2=Sensors, 3=Risk, 4=Rx, 5=Exec, 6=Audit, 7=History
     approvalQueue: [],         // critical decisions pending human sign-off
 
     // 閳光偓閳光偓閳光偓 UI State 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
@@ -464,6 +462,7 @@ const useStore = create((set, get) => ({
                 timestamp: cycleAt,
                 agent: member.stream,
                 agentId: member.id,
+                taskId: asg.taskId,
                 action: `${asg.taskLabel}: ${member.assignment} action by ${member.name}`,
                 actionZh: `${asg.taskLabelZh || asg.taskLabel}：${member.assignmentZh || member.assignment}动作｜${member.nameZh || member.name}`,
                 context: `Autonomous cycle ${cycleId}`,
@@ -486,10 +485,11 @@ const useStore = create((set, get) => ({
                 }
                 escalations = 1;
             } else {
+                const previousRxId = state.activePrescription?.id;
                 get().generateRx();
                 const latest = get();
                 const rx = latest.activePrescription;
-                if (rx) {
+                if (rx && rx.id !== previousRxId) {
                     const execution = get().executeRx(rx.id);
                     if (execution) {
                         executionCreated = true;
@@ -503,6 +503,25 @@ const useStore = create((set, get) => ({
 
             const post = get();
             const latestRx = post.activePrescription;
+            const evidence = {
+                ingest: [`${state.activeFieldId} · day ${clock.day}, hour ${clock.hour}`, `${Object.keys(state.currentSnapshot?.sensors ?? {}).length} sensor channels loaded`],
+                analyze: ['Current sensor snapshot and crop risk rules', `${topRisk.name}: ${topRisk.score}/100`],
+                compliance: [`Escalation threshold: 70/100`, highRisk ? 'Operator approval required' : 'Below operator escalation threshold'],
+                prescribe: ['Ranked threats and current crop constraints', latestRx ? `${latestRx.id} · ${latestRx.actionLabel}` : 'No prescription produced'],
+                execute: [latestRx?.id ?? 'No prescription', executionCreated ? `Execution ${post.activeExecution?.id} recorded` : 'No execution created'],
+                audit: [post.activeExecution?.id ?? 'No execution record', auditCreated ? 'Audit record created' : 'No audit record created'],
+                learn: ['Execution and audit outcome', auditCreated ? 'Outcome available for review' : 'Waiting for audit evidence'],
+                escalate: [`${topRisk.name}: ${topRisk.score}/100`, 'Waiting for operator review'],
+            };
+            for (const assignment of assignments) {
+                const [input, outcome] = evidence[assignment.taskId];
+                assignment.evidence = { input, outcome };
+                if ((assignment.taskId === 'execute' && !executionCreated) ||
+                    (['audit', 'learn'].includes(assignment.taskId) && !auditCreated)) assignment.status = 'waiting';
+            }
+            for (const log of agentLogs) {
+                log.action += ` · ${evidence[log.taskId][1]}`;
+            }
             const operatorAlert = highRisk && latestRx ? {
                 id: `ALT-${Date.now()}`,
                 cycleId,
@@ -512,6 +531,34 @@ const useStore = create((set, get) => ({
                 messageZh: `风险项「${topRisk.nameZh || topRisk.name}」达到 ${topRisk.score}/100，需要人工确认。`,
                 prescriptionId: latestRx.id,
             } : null;
+
+                        const routineMicroEvents = [
+                {
+                    timestamp: cycleAt,
+                    type: 'autonomy',
+                    message: '[AUTO-EXEC] Heat & Humidity Spike (82.5%): Axial fans #3 & #4 activated at 60% power. Relieved to 71.0% in 15 mins.',
+                    messageZh: '[自主闭环] 午后湿热积聚预警 (湿度 82.5%)：3/4 号轴流风机自适应启动排风 20 分钟，湿度平稳回落至 71.0%。',
+                },
+                {
+                    timestamp: cycleAt,
+                    type: 'autonomy',
+                    message: '[AUTO-EXEC] Substrate Moisture Deficit (27.2%): Pulse fertigation line #2 active for 12 mins. Restored to 33.2%.',
+                    messageZh: '[自主闭环] 基质微亏水预警 (含水率 27.2%)：2号压力补偿滴灌电磁阀补水 12 分钟，基质含水率恢复至 33.2%。',
+                },
+                {
+                    timestamp: cycleAt,
+                    type: 'autonomy',
+                    message: '[AUTO-EXEC] Local Wind Gust (4.6 m/s): Multispectral drone inspection flight deferred by 30 mins.',
+                    messageZh: '[自主闭环] 澄江局部短时阵风规避 (4.6 m/s)：多光谱无人机巡检任务自动顺延 30 分钟，风速平稳后自动起飞。',
+                },
+                {
+                    timestamp: cycleAt,
+                    type: 'autonomy',
+                    message: '[AUTO-EXEC] Low Thrip Count (3 thrips on TRAP-S02): Marked for tomorrow ground scouting. Chemical treatment prohibited.',
+                    messageZh: '[自主闭环] 智能诱虫板低密度预警 (捕获3只蓟马)：自动派发明日人工巡检标记，维持零用药绿色标准。',
+                },
+            ];
+            const routineEvent = !highRisk ? routineMicroEvents[state.autonomousState.cycleCount % routineMicroEvents.length] : null;
 
             const cycleEvent = {
                 timestamp: cycleAt,
@@ -528,7 +575,7 @@ const useStore = create((set, get) => ({
                 aiAgentLog: clip([...prev.aiAgentLog, ...agentLogs], AUTO_MAX.logs),
                 agentAssignments: clip([...prev.agentAssignments, ...assignments], AUTO_MAX.assignments),
                 operatorAlerts: clip(operatorAlert ? [...prev.operatorAlerts, operatorAlert] : prev.operatorAlerts, AUTO_MAX.alerts),
-                eventLog: clip([...prev.eventLog, cycleEvent], AUTO_MAX.events),
+                eventLog: clip([...prev.eventLog, cycleEvent, ...(routineEvent ? [routineEvent] : [])], AUTO_MAX.events),
                 autonomousState: {
                     ...prev.autonomousState,
                     status: prev.autonomousMode ? 'running' : 'paused',
@@ -564,7 +611,7 @@ const useStore = create((set, get) => ({
             return;
         }
 
-        const baseScenario = SCENARIOS[scenarioId];
+        const baseScenario = (typeof ALL_SCENARIOS !== 'undefined' && ALL_SCENARIOS[scenarioId]) || SCENARIOS[scenarioId];
         const zhOverrides = SCENARIO_ZH[scenarioId] || {};
         const scenario = baseScenario ? {
             ...baseScenario,

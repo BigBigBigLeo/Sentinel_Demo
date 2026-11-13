@@ -12,3 +12,7 @@ Welcome to the internal engineering and strategy wiki for Sentinel.
 
 ## 🤝 Project Governance
 For GitHub Projects and workflow rules, see [.github/PROJECT_GOVERNANCE.md](../../.github/PROJECT_GOVERNANCE.md).
+
+
+## Research & Evidence
+- [Evidence Base](./EVIDENCE_BASE.md): Research notes for external papers used in product, pilot, and fundraising narratives.

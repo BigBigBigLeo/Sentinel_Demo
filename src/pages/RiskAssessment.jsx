@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
+﻿import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     BarChart,
@@ -42,7 +42,7 @@ export default function RiskAssessment() {
         locale,
     } = useStore();
 
-    const t = (en, zh) => pick(locale, en, zh);
+    const t = useCallback((en, zh) => pick(locale, en, zh), [locale]);
     const isZh = locale === 'zh';
     const field = fields[activeFieldId];
     const sensors = currentSnapshot?.sensors || {};
@@ -142,11 +142,12 @@ export default function RiskAssessment() {
         t,
     ]);
 
-    const fieldData = simulationData[activeFieldId] || [];
     const riskTrend = useMemo(() => {
+        const fieldData = simulationData[activeFieldId] || [];
         const slice = fieldData.slice(Math.max(0, currentDay - 7), currentDay);
         return slice.map((d, i) => {
-            const jitter = (Math.random() * 2 - 1);
+            const daySeed = Number(d?.day ?? i + 1);
+            const jitter = (((daySeed * 13) % 7) - 3) / 3;
             return {
                 day: `D${d?.day || i + 1}`,
                 botrytis: clamp((d?.threats?.grayMold?.score ?? 10) + jitter),
@@ -154,7 +155,7 @@ export default function RiskAssessment() {
                 aphids: clamp((d?.threats?.aphids?.score ?? 6) + jitter),
             };
         });
-    }, [fieldData, currentDay]);
+    }, [simulationData, activeFieldId, currentDay]);
 
     const generateRiskReport = () => {
         const daysToHarvest = activeScenario?.daysToHarvest || 30;
@@ -432,3 +433,4 @@ export default function RiskAssessment() {
         </div>
     );
 }
+

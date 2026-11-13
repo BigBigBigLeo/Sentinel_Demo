@@ -179,7 +179,9 @@ const riskRules = {
         };
     },
 
-    compound_pest: (sensors, pests, stage) => {
+    compound_pest: (_sensors, pests, _stage) => {
+        void _sensors;
+        void _stage;
         const aphids = num(pests.aphids_per_leaf);
         const spores = num(pests.botrytis_spore_index);
         let score = 5;
@@ -200,7 +202,9 @@ const riskRules = {
         };
     },
 
-    frost_damage: (sensors, pests, stage) => {
+    frost_damage: (sensors, _pests, _stage) => {
+        void _pests;
+        void _stage;
         const temp = num(sensors.temp_C, 20); // Default safe temp
         let score = 5;
         const factors = [];
@@ -220,7 +224,9 @@ const riskRules = {
         };
     },
 
-    ventilation_failure: (sensors, pests, stage) => {
+    ventilation_failure: (sensors, _pests, _stage) => {
+        void _pests;
+        void _stage;
         const airFlow = num(sensors.air_flow_ms, 1.0);
         const humidity = num(sensors.humidity_pct);
         const powerDraw = sensors.power_draw_w !== undefined ? num(sensors.power_draw_w) : null;

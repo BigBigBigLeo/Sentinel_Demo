@@ -11,6 +11,15 @@ node_modules
 dist
 dist-ssr
 *.local
+scratch
+output/
+scripts/video_pipeline/output/
+scripts/video_pipeline/output_60s/
+scripts/video_pipeline/output_comprehensive/
+scripts/video_pipeline/output_comprehensive_v2/
+scripts/video_pipeline/output_comprehensive_v3/
+*.mp4
+*.mp3
 
 # Editor directories and files
 .vscode/*

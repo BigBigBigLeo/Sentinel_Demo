@@ -1,0 +1,106 @@
+{
+  "version": "6.1.0",
+  "originalSource": "src/engine/scenarioEngine.js",
+  "original": [
+    {
+      "id": "A",
+      "name": "Blueberry PHI Window Risk"
+    },
+    {
+      "id": "B",
+      "name": "Fresh Cut Flower Gray Mold"
+    },
+    {
+      "id": "C",
+      "name": "Execution Deviation"
+    },
+    {
+      "id": "D",
+      "name": "Multi-Pest Cascade"
+    },
+    {
+      "id": "E",
+      "name": "Frost Emergency Response"
+    },
+    {
+      "id": "F",
+      "name": "Greenhouse Ventilation Failure"
+    }
+  ],
+  "enterprise": {
+    "id": "BB-ORDER-750-001",
+    "fixture": "src/data/sentinel-6.1-fixture.js",
+    "branches": [
+      {
+        "id": "baseline",
+        "overrides": {},
+        "expected": {
+          "grossContractValueCny": 48750,
+          "nominalCapacityKg": 900,
+          "qaClearedKg": 780,
+          "acceptedKg": 760,
+          "reservedKg": 750
+        }
+      },
+      {
+        "id": "one-day",
+        "overrides": {
+          "daysToDelivery": 1
+        },
+        "expected": {
+          "nominalCapacityKg": 300,
+          "minimumGapKg": 450
+        }
+      },
+      {
+        "id": "qa-known",
+        "overrides": {
+          "qaClearedKg": 700,
+          "receiptPhase": "before_planning"
+        },
+        "expected": {
+          "minimumGapKg": 50,
+          "fullReservation": "blocked"
+        }
+      },
+      {
+        "id": "qa-late",
+        "overrides": {
+          "qaClearedKg": 700,
+          "receiptPhase": "after_planning"
+        },
+        "expected": {
+          "minimumGapKg": 50,
+          "fullReservation": "blocked",
+          "decisionReview": "required"
+        }
+      },
+      {
+        "id": "pressure",
+        "overrides": {
+          "confirmedUsableKg": 650
+        },
+        "expected": {
+          "minimumGapKg": 100,
+          "grossExposureCny": 6500
+        }
+      },
+      {
+        "id": "market-advisory",
+        "overrides": {
+          "referencePriceCnyPerKg": 54
+        },
+        "expected": {
+          "marketChangePercent": -10,
+          "contractPriceCnyPerKg": 65,
+          "approvalReview": "unchanged"
+        }
+      },
+      {
+        "id": "extended-window",
+        "overrides": { "daysToDelivery": 7 },
+        "expected": { "eligiblePlans": ["A", "B"], "recommendedPlan": "B" }
+      }
+    ]
+  }
+}

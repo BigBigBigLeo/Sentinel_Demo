@@ -13,6 +13,7 @@ import MultimodalGallery from '../components/MultimodalGallery';
 import PipelineBreadcrumb from '../components/PipelineBreadcrumb';
 import AIAgentPanel from '../components/AIAgentPanel';
 import SystemActivityRail from '../components/SystemActivityRail';
+import { Intelligence, OperationsHeartbeat } from '../demo/Operations.jsx';
 import { sensorTimeSeries, sensorForecasts, trendAlerts, aiWatchdog, seasonFinancials, currentSensors, sensorThresholds, zoneIntervals } from '../data/mockData';
 import { pick, localeTag } from '../i18n/locale.js';
 
@@ -24,7 +25,6 @@ export default function Dashboard() {
         thinkingChain, isThinking, thinkingContext, startRiskThinking, stopThinking,
         autonomousState, agentAssignments, operatorAlerts, approvalQueue, autonomousMode,
         startActionRequiredFlow, activeExecution,
-        isIterating, iterationRound, iterationStage,
         currentDay,
         locale,
     } = useStore();
@@ -82,12 +82,13 @@ export default function Dashboard() {
     const latestCycleId = agentAssignments.length ? agentAssignments[agentAssignments.length - 1].cycleId : null;
     const latestCycleTasks = latestCycleId ? agentAssignments.filter(a => a.cycleId === latestCycleId) : [];
 
-    const fieldData = simulationData[activeFieldId] || [];
     const riskTrend = React.useMemo(() => {
+        const fieldData = simulationData[activeFieldId] || [];
         // Take 30 days up to currentDay
         const slice = fieldData.slice(Math.max(0, currentDay - 30), currentDay);
-        return slice.map((d, i) => {
-            const jitter = (Math.random() * 2 - 1);
+        return slice.map((d) => {
+            const daySeed = Number(d?.day) || 0;
+            const jitter = (((daySeed * 17) % 7) - 3) / 3;
             return {
                 day: d.day,
                 grayMold: Math.max(0, (d.threats?.grayMold?.score || 5) + jitter),
@@ -95,7 +96,7 @@ export default function Dashboard() {
                 aphids: Math.max(0, (d.threats?.aphids?.score || 5) + jitter),
             };
         });
-    }, [fieldData, currentDay]);
+    }, [simulationData, activeFieldId, currentDay]);
 
     const handleRunAnalysis = () => {
         startRiskThinking();
@@ -149,6 +150,7 @@ export default function Dashboard() {
                         </div>
                     </div>
 
+                    {!activeScenario && <OperationsHeartbeat />}
                     {/* AI Watchdog Status Bar */}
                     <div className="ai-watchdog-bar">
                         <div className="watchdog-dot" />
@@ -225,7 +227,7 @@ export default function Dashboard() {
                                 </h3>
                                 <p style={{ fontSize: '0.75rem', color: '#94a3b8', maxWidth: '80%' }}>
                                     {revenueAtRisk?.total > 0
-                                        ? t('High-value crops suffer from \"invisible\" profit loss due to delayed decision cycles. Sentinel AI transforms this uncertainty into deterministic profit.', '高价值作物常因决策滞后产生“隐形利润流失”。Sentinel AI 将这种不确定性转化为可预测利润。')
+                                        ? t('High-value crops suffer from "invisible" profit loss due to delayed decision cycles. Sentinel AI transforms this uncertainty into deterministic profit.', '高价值作物常因决策滞后产生“隐形利润流失”。Sentinel AI 将这种不确定性转化为可预测利润。')
                                         : t(`Sentinel's autonomous reasoning has closed the 12-hour decision gap, protecting CNY ${(field.estimatedVolume * 45).toLocaleString()} in potential premium value.`, `Sentinel 自主推理已闭合 12 小时决策空窗，预计保护溢价价值 CNY ${(field.estimatedVolume * 45).toLocaleString()}。`)
                                     }
                                 </p>
@@ -366,6 +368,7 @@ export default function Dashboard() {
 
                     {/* Multimodal Data Ingestion */}
                     <DataIngestionPanel isActive={true} />
+                    <Intelligence compact />
 
                     {/* Multimodal Sensor Feed  - Compact Strip */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, marginTop: 16 }}>

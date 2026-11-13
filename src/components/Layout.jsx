@@ -1,5 +1,6 @@
 ﻿import React, { useEffect } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Assistant, OperationsHeartbeat, OrderRunPanel } from '../demo/Operations.jsx';
 import useStore from '../engine/store';
 import { aiWatchdog } from '../data/mockData';
 import PageClock from './PageClock';
@@ -16,11 +17,15 @@ const navItems = [
     { path: '/execution', label: 'Execution', labelZh: '执行', iconName: 'execution' },
     { path: '/audit', label: 'Audit Report', labelZh: '审计', iconName: 'audit' },
     { path: '/history', label: 'History', labelZh: '历史', iconName: 'history' },
+    { path: '/intelligence', label: 'Market Intelligence', labelZh: '市场情报', iconName: 'activity' },
+    { path: '/business', label: 'Farm Business', labelZh: '农场经营', iconName: 'layers' },
     { path: '/scenarios', label: 'Scenarios', labelZh: '场景', iconName: 'scenarios' },
     { path: '/admin', label: 'Admin', labelZh: '配置', iconName: 'admin' },
 ];
 
 export default function Layout() {
+    const { pathname } = useLocation();
+    const orderSection = pathname.slice(1);
     const {
         activeFieldId,
         setActiveField,
@@ -217,11 +222,14 @@ export default function Layout() {
                 </header>
 
                 <main className="main-content">
+                    {orderSection === 'risk' && !activeScenario && <OperationsHeartbeat detail />}
+                    {['', 'sensors', 'risk', 'prescription', 'execution', 'audit', 'history', 'business'].includes(orderSection) && <OrderRunPanel key={orderSection} section={orderSection} />}
                     <Outlet />
                 </main>
                 <SubtitleOverlay />
             </div>
             <IterativeReasoningOverlay />
+            <Assistant />
         </div>
     );
 }

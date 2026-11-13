@@ -7,6 +7,7 @@ import Icon from '../components/Icon';
 import AIThinkingPanel from '../components/AIThinkingPanel';
 import PipelineBreadcrumb from '../components/PipelineBreadcrumb';
 import ApprovalModal from '../components/ApprovalModal';
+import DecisionMatrix from '../components/DecisionMatrix';
 import { pick, localeTag } from '../i18n/locale.js';
 
 export default function Prescription() {
@@ -325,6 +326,9 @@ export default function Prescription() {
                     </button>
                 </div>
             </div>
+
+                        {/* ── Sentinel 7.0 Hero Decision Matrix (Specialist Consensus & Interlocked Gates) ── */}
+            <DecisionMatrix />
 
             {/* Scenario Context Badge */}
             {activeScenario && rx && (

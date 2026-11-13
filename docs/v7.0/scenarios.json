@@ -1,0 +1,240 @@
+{
+  "version": "7.0.0",
+  "system": "观衡智序 (Sentinel 7.0 Autonomous Operating Core)",
+  "farm_scale": "云南澄江高科技蓝莓数字化农业工厂 (900-mu Modern Industrial Plant Factory)",
+  "scenarios": [
+    {
+      "id": "SCENARIO-01-PEST-PHI",
+      "name": "智能诱捕器发出虫害预警与 750kg 订单履约 PHI 冲突",
+      "name_en": "Connected Trap Pest Warning vs D+3 750kg Order & PHI Conflict",
+      "badge": "CRITICAL · PEST & PHI",
+      "badge_zh": "重大险情 · 虫害与 PHI 冲突",
+      "key_kpis": {
+        "days_to_delivery": "3 DAYS",
+        "days_to_delivery_zh": "3 天后交付 (D+3)",
+        "order_volume": "750 kg GRADE A BLUEBERRIES",
+        "order_volume_zh": "750 公斤 特级精品蓝莓",
+        "farm_scale": "900 mu (~60 ha) Mega-Facility · South-B3 Block (20 mu, 3,200 plants)",
+        "farm_scale_zh": "900 亩现代超级工厂 · 南区连栋 B3 棚 (20 亩，3,200 株优瑞卡)",
+        "labor_today": "25 pickers today (Crew-25 on duty)",
+        "labor_today_zh": "25 名在岗采工 (CREW-25 专属采收班组)",
+        "event_time": "05:40 AM",
+        "event_time_zh": "清晨 05:40",
+        "trigger": "CONNECTED TRAP #TRAP-S02 FLAGS POSSIBLE PEST SPREAD (Risk 68/100)",
+        "trigger_zh": "智能测报箱 #TRAP-S02 报警：虫害潜伏扩散风险达 68/100"
+      },
+      "conflict": {
+        "agronomy": "Agronomist demands full chemical spraying to protect bush assets; but GB 2763 14-day PHI strictly collides with D+3 harvest window.",
+        "agronomy_zh": "农艺总监主张立即全棚喷施化药保全树体资产，但 GB 2763 规定 14天 PHI 安全期与 3天交付严重冲突",
+        "quality": "QA Director demands immediate physical isolation of LOT-03 (120kg) to prevent infected fruit from contaminating Grade A boxes.",
+        "quality_zh": "质检总监坚决要求将 LOT-03 (120kg) 物理隔离，严禁病果混入特级精品箱",
+        "compliance": "Compliance Officer vetos chemical spraying due to mandatory legal PHI limits; zero chemical residue is non-negotiable for retail export.",
+        "compliance_zh": "合规官一票否决化学全喷，强调 3天内必须采收交付，农残超标属于法律红线",
+        "operations": "Operations Manager notes Plan B has highest execution complexity (Ease 2/5), whereas Plan C allows pickers to harvest directly (Ease 5/5).",
+        "operations_zh": "现场主管指出：方案 B 执行复杂度极高 (Ease 2/5)，而方案 C 工人直接进棚抢收最为简单高效 (Ease 5/5)",
+        "sales": "Sales Director stresses ¥48,750 Hema contract cannot be canceled; delivery reputation and Grade A SLA must be maintained.",
+        "sales_zh": "销售总监强调盒马 ¥48,750 订单不可退单，必须保住优质鲜果供货信誉",
+        "finance": "Finance Analyst models net profit: Plan B achieves highest net ¥32,500; Plan C achieves ¥26,000, serving as a viable second choice.",
+        "finance_zh": "财务分析师测算：方案 B 净利润 ¥32,500 最高；方案 C 净利 ¥26,000 略低，但免除了无人机飞防与药剂成本，是极强竞争力的第二优选"
+      },
+      "plans": {
+        "A": {
+          "title": "A FULL CROP PROTECTION",
+          "title_zh": "方案 A：全区化学植保 (长效资产保全)",
+          "action": "Spray chemical fungicide across entire block. Coordinate with buyer for a 10-day harvest delay or replacement lot.",
+          "action_zh": "全棚喷洒化学药剂 (代森锰锌/咯菌腈) 彻底杀菌保全树体花芽，协调商超延期交货或备选批次调拨",
+          "economics": { "sales": "¥41k~¥46k", "cost": "¥13k~¥18k", "net": "¥23k~¥33k" },
+          "scores": { "crop": "5/5", "compliance": "3/5", "customer": "2/5", "ease": "4/5" },
+          "status": "CONDITIONAL / BLOCKED",
+          "status_zh": "条件受阻 (当期交付违规)",
+          "wins_when": "Infestation is widespread across blocks and buyer approves 10-day delay in writing.",
+          "wins_when_zh": "当病害大范围失控且采购方书面同意延期 10 天交货时翻转为首选",
+          "gates": { "quality": "PASS", "compliance": "FAIL (PHI 14-day breach)", "capacity": "PASS" },
+          "gates_zh": { "quality": "质检通过", "compliance": "拦截 (PHI 14天超标)", "capacity": "产能合格" }
+        },
+        "B": {
+          "title": "B SELECTIVE RELEASE + CONTAINMENT",
+          "title_zh": "方案 B：针对性隔离放行 + 生物控害 (当前综合首选)",
+          "action": "Release cleared LOT-01/02 (780kg). Physically isolate LOT-03 (120kg) and apply targeted 0-day PHI Trichoderma biocontrol.",
+          "action_zh": "质检放行 LOT-01/02 (780kg)，物理隔离 LOT-03 (120kg) 并局部微喷 0天 PHI 哈茨木霉菌剂",
+          "economics": { "sales": "¥42k~¥48.75k", "cost": "¥6.7k~¥11.8k", "net": "¥30k~¥35k (NET HIGHEST)" },
+          "scores": { "crop": "4/5", "compliance": "5/5", "customer": "5/5", "ease": "2/5" },
+          "status": "OPTIMAL / CURRENT LEAD",
+          "status_zh": "当前综合首选 (领跑推荐)",
+          "wins_when": "Farm possesses precise lot isolation, micro-targeted drone spray, and cold room partition capacity.",
+          "wins_when_zh": "当现场具备精细化批次隔离、无人机微量对靶喷雾与冷库分仓能力时综合最优",
+          "gates": { "quality": "VERIFIED (780kg cleared)", "compliance": "CLEARED (0-day PHI valid)", "capacity": "RESERVED (Crew-25 ready)" },
+          "gates_zh": { "quality": "质检通过 (780kg 特级果)", "compliance": "放行 (0天 PHI 生物制剂)", "capacity": "锁定 (25人班组就绪)" }
+        },
+        "C": {
+          "title": "C HARVEST-FIRST & ZERO-SPRAY",
+          "title_zh": "方案 C：抢收优先 + 零喷洒 (强力第二优选)",
+          "action": "Zero chemical/biological spray. 25 pickers harvest immediately. Strict post-harvest optical sorting with 24h reassessment.",
+          "action_zh": "完全不喷洒任何化学/生物药剂，25名工人立即全量抢收，采后严格光电色选剔除次果，24h 动态复测",
+          "economics": { "sales": "¥38k~¥42k", "cost": "¥8k~¥11k", "net": "¥25k~¥28k (Strong Runner-up)" },
+          "scores": { "crop": "3/5", "compliance": "5/5", "customer": "4/5", "ease": "5/5" },
+          "status": "STRONG RUNNER-UP / CONDITIONAL LEAD",
+          "status_zh": "强力第二优选 (条件翻转领跑)",
+          "wins_when": "Drone is down, weather prevents flight, or buyer mandates 100% zero-spray organic eco-certification.",
+          "wins_when_zh": "当无人机设备突发故障、阵风导致无法飞防，或客户要求“100% 纯天然零制剂纯绿色认证”时，方案 C 立即翻转为第一优选！",
+          "gates": { "quality": "VERIFIED (750kg packed)", "compliance": "CLEARED (100% zero-spray)", "capacity": "RESERVED (Half-day pick)" },
+          "gates_zh": { "quality": "质检通过 (色选后 750kg 达标)", "compliance": "放行 (100% 纯天然零喷洒)", "capacity": "锁定 (半天抢收完毕)" }
+        }
+      }
+    },
+    {
+      "id": "SCENARIO-02-HEATWAVE-SUNSCALD",
+      "name": "连续 36.5°C 极端热浪日灼裂果危机与拂晓错峰抢收调度",
+      "name_en": "Heatwave & Sunscald Emergency vs Dawn Harvest Rescheduling",
+      "badge": "CRITICAL · HEATWAVE & QUALITY",
+      "badge_zh": "重大险情 · 热浪与品质危机",
+      "key_kpis": {
+        "days_to_delivery": "5 DAYS",
+        "days_to_delivery_zh": "5 天后交付 (D+5)",
+        "order_volume": "1,200 kg GRADE A BLUEBERRIES",
+        "order_volume_zh": "1,200 公斤 特级精品蓝莓",
+        "farm_scale": "900 mu Mega-Facility · South & East Protected Sectors",
+        "farm_scale_zh": "900 亩现代超级工厂 · 南区与东区保护地连栋区",
+        "labor_today": "28 pickers today (Crew-28 on duty)",
+        "labor_today_zh": "28 名在岗采工 (CREW-28 专属班组)",
+        "event_time": "11:20 AM",
+        "event_time_zh": "上午 11:20",
+        "trigger": "MICROCLIMATE FORECAST: 48h EXTREME HEAT 36.5°C & UV INDEX 11+",
+        "trigger_zh": "微气候气象预警：连续 48 小时 36.5°C 极端高温与 11+ 强紫外线"
+      },
+      "conflict": {
+        "agronomy": "Extreme heat causes fruit softening and sunscald; daytime misting creates droplet lens effect that scorches skin.",
+        "agronomy_zh": "强日晒与高温造成果皮日灼坏死、软化掉粉，若白天喷水降温透镜效应反加剧灼伤",
+        "quality": "Grade A requires intact epicuticular wax (bloom loss >20% causes price drop from ¥65/kg to ¥15/kg processing grade).",
+        "quality_zh": "特级鲜果要求果粉完整（果粉损耗 >20% 即降级为次果，单价从 ¥65 跌至 ¥15）",
+        "compliance": "Labor safety laws prohibit outdoor manual labor during peak heat (≥35°C noon window).",
+        "compliance_zh": "高温劳动保护条例规定日最高气温 ≥35°C 严禁工人午间露天强体力作业",
+        "operations": "Crew must harvest 1,200kg ripe fruit while fully complying with labor health regulations.",
+        "operations_zh": "28 名工人如何在避开高温危险的同时抢收 1,200kg 成熟特级果？",
+        "sales": "Protect ¥78,000 revenue and avoid up to ¥60,000 downgrade loss on supermarket contract.",
+        "sales_zh": "保障 ¥78,000 大单足额履约，避免高达 ¥60,000 的降级损失"
+      },
+      "plans": {
+        "A": {
+          "title": "A CONTINUOUS OVERHEAD MISTING",
+          "title_zh": "方案 A：白天全棚持续弥雾强降温 (传统温控)",
+          "action": "Run overhead misting during daytime to suppress heat. Standard afternoon picking shift.",
+          "action_zh": "白天微喷持续向树冠喷水降温强制压低温度，配合常规下午班采摘",
+          "economics": { "sales": "¥55k~¥62k", "cost": "¥16k~¥20k", "net": "¥38k~¥42k" },
+          "scores": { "crop": "3/5", "compliance": "4/5", "customer": "3/5", "ease": "4/5" },
+          "status": "CONDITIONAL",
+          "status_zh": "条件受阻 (果粉发粘软果率 25%~30%)",
+          "wins_when": "Berries are at early green/unripe stage with no bloom developed.",
+          "wins_when_zh": "当果实成熟度尚低、无成熟果粉（幼果膨大期）时适用",
+          "gates": { "quality": "FAIL (Bloom damage >25%)", "compliance": "PASS", "capacity": "PASS" },
+          "gates_zh": { "quality": "未通过 (果粉损耗超标)", "compliance": "合规", "capacity": "产能合格" }
+        },
+        "B": {
+          "title": "B SHADE CURTAIN + NIGHT COOLING + DAWN HARVEST",
+          "title_zh": "方案 B：双层遮阳 + 夜间微喷 + 拂晓错峰抢收 (当前综合首选)",
+          "action": "Deploy 75% aluminum shade screen at peak sun. Night ground misting for chilled buffering. Reschedule 28 pickers to 05:00-10:00 dawn shift.",
+          "action_zh": "白天智能展开 75% 铝箔内遮阳，夜间地表微喷储冷降温，调度 28 名工人清晨 05:00~10:00 错峰抢收",
+          "economics": { "sales": "¥75k~¥78k", "cost": "¥9.5k~¥14.2k", "net": "¥60k~¥65k (NET HIGHEST)" },
+          "scores": { "crop": "5/5", "compliance": "5/5", "customer": "5/5", "ease": "3/5" },
+          "status": "OPTIMAL / CURRENT LEAD",
+          "status_zh": "当前综合首选 (领跑推荐)",
+          "wins_when": "Automated shade screens and nocturnal micro-misting systems are operational.",
+          "wins_when_zh": "当园区具备自动化双层遮阳网与夜间微喷降温条件时综合最优",
+          "gates": { "quality": "VERIFIED (Bloom retention 94%)", "compliance": "CLEARED (No noon labor)", "capacity": "RESERVED (5h morning shift)" },
+          "gates_zh": { "quality": "质检通过 (果粉保持率 94%)", "compliance": "放行 (避开午间高温用工)", "capacity": "锁定 (清晨5小时高效采收)" }
+        },
+        "C": {
+          "title": "C DAWN-ONLY HIGH-DENSITY HARVEST WITH TEMP CO-OP",
+          "title_zh": "方案 C：纯晨间外包工高密度抢收 (强力第二优选)",
+          "action": "Skip night misting to prevent nocturnal high-humidity Botrytis. Call 20 co-op temp workers (48 total) for intense 05:00-09:30 harvest into cold room before 09:30.",
+          "action_zh": "不做夜间微喷（规避夜间高湿诱发灰霉病隐患），清晨 05:00~09:30 临时增调 20 名合作社外包工（共 48 人）突击抢收，9点半前全部入预冷库",
+          "economics": { "sales": "¥72k~¥75k", "cost": "¥14k~¥17k", "net": "¥55k~¥58k (Strong Runner-up)" },
+          "scores": { "crop": "4/5", "compliance": "5/5", "customer": "5/5", "ease": "4/5" },
+          "status": "STRONG RUNNER-UP / CONDITIONAL LEAD",
+          "status_zh": "强力第二优选 (条件翻转领跑)",
+          "wins_when": "Night relative humidity exceeds 85% (misting triggers mold) or main irrigation pipeline is undergoing maintenance.",
+          "wins_when_zh": "当夜间相对湿度 >85%（夜间微喷易诱发真菌孢子萌发），或水肥管网主管道维保时，方案 C 立即翻转为第一优选！",
+          "gates": { "quality": "VERIFIED (Bloom retention 91%)", "compliance": "CLEARED (No heat overtime)", "capacity": "RESERVED (48 workers on site)" },
+          "gates_zh": { "quality": "质检通过 (果粉保持率 91%)", "compliance": "放行 (无高温超时用工)", "capacity": "锁定 (48人突击队到位)" }
+        }
+      }
+    },
+    {
+      "id": "SCENARIO-03-COLDCHAIN-QA-DEFICIT",
+      "name": "气调保鲜库温控故障与采后质检短缺 50kg 紧急重分配",
+      "name_en": "Cold Chain Fault & Post-Harvest QA 50kg Deficit Reconciliation",
+      "badge": "CRITICAL · COLD CHAIN & QA SHORTFALL",
+      "badge_zh": "重大险情 · 冷链与质检短缺",
+      "key_kpis": {
+        "days_to_delivery": "24 HOURS TO SHIPMENT",
+        "days_to_delivery_zh": "距离发车仅剩 24 小时",
+        "order_volume": "750 kg GRADE A BLUEBERRIES",
+        "order_volume_zh": "750 公斤 特级精品蓝莓",
+        "farm_scale": "900 mu Mega-Facility · Post-Harvest Packhouse",
+        "farm_scale_zh": "900 亩现代超级工厂 · 采后保鲜与分选中心",
+        "labor_today": "8 packing staff",
+        "labor_today_zh": "8 名分选包装技工",
+        "event_time": "02:15 AM",
+        "event_time_zh": "凌晨 02:15",
+        "trigger": "COLD ROOM #1 FAULT: TEMP ROSE TO 7.8°C; QA DETECTS 700kg (50kg SHORTFALL)",
+        "trigger_zh": "1号冷库故障升温至 7.8°C；质检确认仅 700kg 达标，短缺 50kg"
+      },
+      "conflict": {
+        "agronomy": "Cold room held at 7.8°C for 3 hours; minor softening observed in upper crates. Late QA confirms 700kg Grade A.",
+        "agronomy_zh": "气调库温度升至 7.8°C 持续 3 小时，部分箱内蓝莓硬度略降，晚到质检确认仅 700kg 达 A 级标",
+        "quality": "50kg deficit identified; softened berries strictly prohibited from premium Grade A clamshell packaging.",
+        "quality_zh": "出现 50kg 缺口，严禁将软果降级果混入精品箱贴标出库",
+        "compliance": "Cold chain excursion log must be recorded into immutable audit trail to comply with food safety inspection.",
+        "compliance_zh": "冷链温度追溯曲线异常必须生成审计证据，不可篡改",
+        "operations": "Truck departure in 14 hours; evaluate drawing 50kg from Cold Room #2 vs sourcing from neighboring co-op partner.",
+        "operations_zh": "冷链干线发车倒计时 14 小时，是否调用 2 号备用库散果进行二次精选分装？",
+        "sales": "Prevent customer rejection and ¥14,600 SLA penalty; maintain long-term commercial trust.",
+        "sales_zh": "避免全单商超拒收索赔 ¥14,600，保住长期供货信誉"
+      },
+      "plans": {
+        "A": {
+          "title": "A SPLIT SHIPMENT WITH AIR EXPRESS",
+          "title_zh": "方案 A：700kg 现货特级直发 + 50kg 明日清晨空运补发 (稳健透明)",
+          "action": "Ship 700kg certified Grade A immediately with zero cross-lot mixing. Dispatch remaining 50kg tomorrow dawn via cold-chain air express with 5% discount.",
+          "action_zh": "绝不混入任何非本批次果品，立即发出 100% 确认合格的 700kg，剩余 50kg 安排明日清晨第一批鲜采冷链航空快运补发，提供 5% 延期尾批折扣",
+          "economics": { "sales": "¥46.5k", "cost": "¥11.5k", "net": "¥25k~¥28k" },
+          "scores": { "crop": "5/5", "compliance": "5/5", "customer": "4/5", "ease": "5/5" },
+          "status": "CONDITIONAL",
+          "status_zh": "条件受阻 (交付周期拆分)",
+          "wins_when": "Buyer contract enforces single-lot strict traceability and refuses mixed-lot or off-site fruit.",
+          "wins_when_zh": "当采购商合同有严苛的“单一溯源批次”限制，拒绝任何混批或跨库果品时翻转为首选",
+          "gates": { "quality": "VERIFIED (700kg certified)", "compliance": "CLEARED", "capacity": "RESERVED" },
+          "gates_zh": { "quality": "质检通过 (700kg 合格发运)", "compliance": "合规放行", "capacity": "运力已锁定" }
+        },
+        "B": {
+          "title": "B BUFFER STOCK DRAW + REPURPOSE DEFICIT",
+          "title_zh": "方案 B：放行700kg + 备用库调拨50kg + 软果转深加工 (当前综合首选)",
+          "action": "Release 700kg certified stock. Draw 50kg pre-sorted safety buffer from Cold Room #2 to complete 750kg order. Repurpose 50kg soft berries into local frozen craft beer puree.",
+          "action_zh": "放行质检合格 700kg，从 2号备用库调取 50kg 优质预留安全库存精装补齐 750kg 整单；软化 50kg 折价转本地精酿蓝莓果汁/冷冻深加工",
+          "economics": { "sales": "¥48.75k + ¥1k(frozen)", "cost": "¥8.5k", "net": "¥32.5k (NET HIGHEST)" },
+          "scores": { "crop": "4/5", "compliance": "5/5", "customer": "5/5", "ease": "3/5" },
+          "status": "OPTIMAL / CURRENT LEAD",
+          "status_zh": "当前综合首选 (领跑推荐)",
+          "wins_when": "Farm maintains sufficient emergency buffer stock and tomorrow's orders do not lock Room #2 reserves.",
+          "wins_when_zh": "当农场拥有充足预留安全库存且明日无更大单锁定该批次时综合最优",
+          "gates": { "quality": "VERIFIED (750kg Grade A fulfilled)", "compliance": "CLEARED (Audit log sealed)", "capacity": "RESERVED (8 packing staff)" },
+          "gates_zh": { "quality": "质检通过 (750kg 全额达标)", "compliance": "合规放行 (温控异常数据已封存)", "capacity": "锁定 (8人包装队就绪)" }
+        },
+        "C": {
+          "title": "C CO-OP PARTNER LOT SWAP",
+          "title_zh": "方案 C：邻近联营合作基地紧急调剂 50kg (强力第二优选)",
+          "action": "Release 700kg own stock. Sourced 50kg certified Grade A from Chengjiang Partner Co-op (15 min drive) to preserve own Room #2 reserves for tomorrow. Repurpose 50kg soft fruit to puree.",
+          "action_zh": "放行自有合格 700kg，从车程 15 分钟的澄江联营合作社调入同品种 50kg A 级合格鲜果精装补齐，保留自有 2号备用库库存以防明日大单；软化 50kg 同样转深加工",
+          "economics": { "sales": "¥48.75k + ¥1k", "cost": "¥10.2k", "net": "¥29.5k~¥31k (Strong Runner-up)" },
+          "scores": { "crop": "4/5", "compliance": "5/5", "customer": "5/5", "ease": "4/5" },
+          "status": "STRONG RUNNER-UP / CONDITIONAL LEAD",
+          "status_zh": "强力第二优选 (条件翻转领跑)",
+          "wins_when": "Internal Cold Room #2 buffer is already pre-committed to tomorrow's Ole' Supermarket VIP contract.",
+          "wins_when_zh": "当自有 2号备用库库存已被明日华润 Ole' 大单完全预锁定、本厂库存不可动用时，方案 C 立即翻转为第一优选！",
+          "gates": { "quality": "VERIFIED (Co-op QA passed)", "compliance": "CLEARED (Co-op lot verified)", "capacity": "RESERVED" },
+          "gates_zh": { "quality": "质检通过 (联营果质检合格)", "compliance": "合规放行 (合规联营溯源码)", "capacity": "锁定" }
+        }
+      }
+    }
+  ]
+}

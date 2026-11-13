@@ -1,12 +1,16 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import useStore from '../engine/store';
 import StatusBadge from '../components/StatusBadge';
 import Icon from '../components/Icon';
-import { getScenarioList } from '../engine/scenarioEngine';
+import { getScenarioList, getFlagshipScenarioList } from '../engine/scenarioEngine';
 import PipelineBreadcrumb from '../components/PipelineBreadcrumb';
 import { pick } from '../i18n/locale.js';
+import { OrderScenarioPreview } from '../demo/Operations.jsx';
 
 export default function ScenarioControl() {
+    const navigate = useNavigate();
+    const [scenarioTab, setScenarioTab] = useState('flagship');
     const {
         activeScenario, scenarioStep, loadScenario, advanceScenario,
         riskResults, activePrescription, activeExecution, aiAgentLog,
@@ -92,7 +96,9 @@ export default function ScenarioControl() {
     };
     const [autoPlay, setAutoPlay] = useState(false);
     const autoRef = useRef(null);
-    const scenarios = getScenarioList();
+    const flagshipScenarios = getFlagshipScenarioList();
+    const classicScenarios = getScenarioList();
+    const scenarios = scenarioTab === 'flagship' ? flagshipScenarios : classicScenarios;
 
     useEffect(() => {
         if (autoPlay && activeScenario) {
@@ -159,6 +165,7 @@ export default function ScenarioControl() {
     return (
         <div className="page">
             <PipelineBreadcrumb />
+            <OrderScenarioPreview />
 
             <div className="page-header">
                 <div>
@@ -235,7 +242,20 @@ export default function ScenarioControl() {
                                 {isZh ? (activeScenario.descriptionZh || localizeScenarioText(activeScenario.description)) : activeScenario.description}
                             </p>
                         </div>
-                        <div style={{ display: 'flex', gap: 12, flexShrink: 0 }}>
+                        <div style={{ display: 'flex', gap: 12, flexShrink: 0, alignItems: 'center' }}>
+                            <button
+                                type="button"
+                                className="btn btn-primary"
+                                onClick={() => navigate('/prescription')}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: 6,
+                                    background: 'linear-gradient(135deg, #00e5a3 0%, #059669 100%)',
+                                    color: '#090d16', fontWeight: 800, padding: '6px 14px', borderRadius: 6
+                                }}
+                            >
+                                <Icon name="prescription" size={14} color="#090d16" />
+                                {t('Enter Decision Room →', '前往英雄决策室 →')}
+                            </button>
                             <div style={{ textAlign: 'center', padding: '4px 12px' }}>
                                 <div style={{ fontSize: '0.6rem', color: '#64748b' }}>{t('Field', '地块')}</div>
                                 <div style={{ fontWeight: 700, color: '#e2e8f0', fontSize: '0.82rem' }}>{activeScenario.field}</div>

@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "demo": "npm run build && node scripts/sentinel-demo.mjs",
+    "demo:serve": "node scripts/sentinel-demo.mjs",
+    "demo:fixture": "node scripts/sentinel-demo.mjs --fixture",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"

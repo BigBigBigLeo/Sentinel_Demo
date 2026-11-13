@@ -150,12 +150,9 @@ export default function AIThinkingPanel({ chain = [], isThinking = false, onComp
     const scrollRef = useRef(null);
 
     useEffect(() => {
-        if (!isThinking) {
-            setVisibleCount(chain.length);
-            return;
-        }
+        if (!isThinking) return undefined;
 
-        setVisibleCount(0);
+        const resetTimer = setTimeout(() => setVisibleCount(0), 0);
         let idx = 0;
         const timer = setInterval(() => {
             idx += 1;
@@ -166,7 +163,10 @@ export default function AIThinkingPanel({ chain = [], isThinking = false, onComp
             }
         }, 420);
 
-        return () => clearInterval(timer);
+        return () => {
+            clearTimeout(resetTimer);
+            clearInterval(timer);
+        };
     }, [chain, isThinking, onComplete]);
 
     useEffect(() => {
@@ -174,8 +174,6 @@ export default function AIThinkingPanel({ chain = [], isThinking = false, onComp
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
     }, [visibleCount]);
-
-    if (chain.length === 0 && !isThinking) return null;
 
     const visibleSteps = chain.slice(0, Math.max(visibleCount, isThinking ? 0 : chain.length));
     const total = chain.length;
@@ -192,6 +190,8 @@ export default function AIThinkingPanel({ chain = [], isThinking = false, onComp
         const value = Object.values(latest.data || {}).find(v => typeof v === 'number' && v <= 1 && v > 0);
         return value || 0;
     }, [visibleSteps]);
+
+    if (chain.length === 0 && !isThinking) return null;
 
     return (
         <div className={`thinking-panel ${isThinking ? 'thinking-active' : 'thinking-done'}`}>

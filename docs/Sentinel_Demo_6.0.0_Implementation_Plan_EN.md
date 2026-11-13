@@ -1,0 +1,114 @@
+# Sentinel Demo 6.0.0 · Implementation plan
+
+**Release name:** Sentinel Demo 6.0.0 — Farm & Market Watch  
+**Presentation baseline:** Shenzhen International Final — V3.5  
+**Product:** Sentinel, your farm’s 24/7 AI operating manager  
+**Release scope:** English-first website and repeatable operating scenarios, with verified feeds and pinned historical snapshots where available
+
+## 1. Baseline and release identity
+
+This plan combines the uploaded [V3.6 Market-Aware Extension](https://chatgpt.com/library?file_id=libfile_a4a24606ef708191a60de818be58cee2&account_id=personal) and the shared [Market Intelligence and Multi-Agent Decision proposal](https://chatgpt.com/s/t_6af708d09130819186dfc46ef9e0513d). The Shenzhen deck supplies the public narrative and core order scenario. Use the already reviewed Shanghai and Netherlands speaker notes and white paper V1.3.1 for proactive operations, specialist reasoning, governance and verification. The uploaded extension supplies the canonical numerical baseline. The shared proposal supplies the market data catalog, operating views and the separate 650 kg pressure example.
+
+Use **6.0.0** for the software, **V3.5** for the Shenzhen deck and **V3.6 Market-Aware Extension** only when naming the source document. The repository already references older V4.1/V5.0 work. Put the release in one application metadata constant and render it in Settings, the runbook and exports. Reserve `demo-v6.0.0` as the release tag after verification. Keep the order ID `BB-ORDER-750-001` and version the fixture, event schema and rule set independently. Carry existing archives forward through a compatible reader or an explicit read-only import. Keep their original release and schema metadata.
+
+## 2. Pages, navigation and experience
+
+Use a shared public header/footer, a workspace shell with case and run selectors, and one English vocabulary. Keep a live activity rail on desktop and a shared activity drawer on mobile. Preserve deep links from the old application. Within the workspace, the executive overview, operations queue and agronomy detail all use the same case model and event stream.
+
+| Page or route | Page structure and primary behavior |
+| --- | --- |
+| `/` · Home | Authentic Yunnan blueberry photography → 24/7 operating-manager headline → one alert and five business consequences → compact case preview → LOOK / THINK / ACT / PROVE → workspace and architecture links. |
+| `/how-it-works` | Physical operations → production systems → Sentinel decision layer. Explain Ontology, specialist disagreement, hard gates, approvals, adapters and evidence with the same blueberry example. Label capability availability. Link to the exact case. |
+| `/workspace` · Executive Dashboard | Farm & Market Watch → orders at risk and pending decisions → work queue and operating metrics → compact Market Pulse. Show timestamp, signal source and next action. |
+| `/workspace/market` · Market Intelligence | Six tabs: Prices, Supply & Demand, Competition & Trade, Inputs & Costs, Weather & Climate, and Policy & Industry. Shared crop, region, grade, price basis and date filters. Prices shows observed history, forecast intervals and a time-aligned holiday, weather, crop health and news track. **View Source** opens provenance. **Analyze Impact** opens a read-only assessment or starts a governed review if eligible. |
+| `/workspace/cases/:caseId/context` · Farm Context | Business Impact Map → source drawer → lot and crew registers → Farm Telemetry and Risk & Opportunities panels. Click source → plot → batch → harvest → order. Use the same relationship records for calculation. |
+| `/workspace/cases/:caseId/decision` · AI Decision Room | Order goal → A/B/C strategy comparison → hard gates and specialist disagreement → optional Market Impact → assumptions and approval. Show qualified kg, delivery window, labor, cost and contribution separately. |
+| `/workspace/cases/:caseId/execution` · Execution & Approval | Authorized snapshot → task dependencies → receipt ledger → exceptions and escalation. Role, quantities and status stay visible throughout. |
+| `/workspace/cases/:caseId/evidence` · Audit & Outcomes | Order result → plan vs actual → fingerprint → linked source and market snapshots → export. Record confirmed quantities separately from modeled economics. |
+| `/workspace/history`, `/workspace/settings` | Historical case replay, export and read-only snapshots. Scenario presets, simulated clock, QA exception and reset controls. |
+
+Map legacy sensor and risk routes to the relevant Context panels, prescription to Decision Room, execution to Execution, audit to Evidence and history/settings to their respective pages. Keep telemetry, risk, decision, execution and audit available across the existing underlying workflow. Market Intelligence is a cross-cutting context view and stays off the timed presentation path.
+
+## 3. Workflows and operating data
+
+**Farm workflow.** A background service advances the simulation clock and ingests scheduled source records. The 05:40 pest observation resolves through plot, batch, harvest and order relationships. Relevant specialist jobs run against a versioned snapshot. Six perspectives aggregate 14 specialist roles, show their evidence and explain disagreement. The engine checks source quality, safety windows, capacity and Grade A requirements before ranking feasible options. Approval binds the manager, strategy, inputs and rule version. After approval, the worker advances isolation, QA, allocation, dispatch, reservation, ERP acknowledgement and verification through task dependencies. Failed prerequisites stop affected tasks and create an escalation with the reason and owner.
+
+**Market workflow.** Source adapter → normalized observation → comparison eligibility → signal → Ontology relevance → specialist assessment → advisory or review queue. Feed jobs follow publication cadence. Scheduled farm checks continue while approvals are pending. Market collection, normalization, analysis and opportunity scouting are subworkflows assigned to the existing roles. Data & Risk Assurance verifies provenance and freshness. Sales & Orders evaluates commercial terms. Finance & Margin computes contribution. Agronomy and Quality & Compliance own applicable physical gates. The operations manager assembles the review.
+
+| Tier | Use in the product |
+| --- | --- |
+| D1 · Decision input | Current, authorized and applicable contract/quote terms, lot and labor data, costs and governing rules. An executable quote includes buyer, validity, quantity, price basis, currency and terms. |
+| D2 · Analytical signal | Comparable price movements, published weather or supply context, and forecasts. Feed an assessment within the configured rules. A reference-price move opens a watch item. |
+| V · View only | Policy/news, unrelated market observations and contextual indicators. Provide source and coverage; keep them out of plan scoring. |
+| S · Scenario data | Internally tagged synthetic records and deterministic outcomes. An explicit eligibility flag lets the case exercise the same rules and gates. |
+
+Store decision eligibility separately from display mode: simulated, historical, latest published, forecast, live external or stale. Normalize grade, variety/size, region, currency, unit and price basis before comparing records. Preserve observed, published and ingested timestamps and source snapshot ID. Pin market evidence in decision, approval, audit and replay. Material eligible input changes can require a new approval. Reference updates leave the physical authorization intact. Outages retain the last source timestamp and show unavailable or stale, with the pinned rehearsal scenario available.
+
+**Website presentation.** Use ordinary operating language across the public site and workspace. Remove blanket “Simulation” badges, banners and repetitive synthetic-data explanations. Identify the featured walkthrough as the **Yunnan Blueberry Case** and its operational values as case inputs and outcomes. Use **Observed**, **Last updated**, **Forecast**, **Estimated**, or **Case** where the distinction affects interpretation. Reserve **Live** for an active verified feed. Generated records do not carry a real publisher’s attribution, and case receipts do not appear as verified customer deployments or external confirmations. Keep record provenance, generation parameters and mode in the internal data catalog and audit export. Never combine generated values and observed prices in one continuous observed line.
+
+Implement one scheduler, one persistence layer and one ordered event history. Use the existing cursor-based polling and run/snapshot identity. Distinguish simulated farm time from actual service health and feed publication time. Deduplicate source events and task receipts, serialize mutations and persist task checkpoints. Show source → Ontology link → specialist finding → strategy → approval → receipt → verification in the activity rail. Quiet periods show service health and last/next checks. A browser refresh, route change or closure leaves the worker running while the service is up.
+
+## 4. Credible, reproducible simulation
+
+| Fixture | Inputs and expected result |
+| --- | --- |
+| Core blueberry order | 20 mu, two plots, 25 pickers, three days, 750 kg Grade A. LOT-01 420 kg and LOT-02 360 kg eligible under B, LOT-03 120 kg isolated. 900 kg harvest-ready inventory and 900 kg labor capacity are separately derived. A fails the safety window. C forecasts 720 kg, 30 kg short. B clears 780 kg QA, accepts 760 kg at harvest, reserves 750 kg and leaves 10 kg accepted and unreserved. Packing holds the other 20 kg. |
+| Physical exceptions | One day gives 300 kg labor capacity. 15 pickers over three days give 540 kg. A 700 kg QA receipt produces a 50 kg shortage and zero reservation. Include stale input, lot reassignment, duplicate events and restart after dispatch. |
+| Market overlay | Synthetic contract RMB 65/kg, matched market reference RMB 54/kg versus RMB 60/kg seven days earlier. Display **Market watch · −10%** with source context. Contract gross value if fulfilled is RMB 48,750. The market observation leaves the baseline recommendation and authorization intact. |
+| Market pressure example | Separate Q&A scenario from the share: 650 kg forecast, 100 kg gap, RMB 6,500 potential gross contractual exposure before mitigation. Recompute on eligible sourcing or approved terms. Keep the physical and financial assumptions isolated from the core walkthrough. |
+| Market quality and decision tests | Stale or mismatched grade/currency, provider outage, revised source, nonbinding quote and validated quote. Only material decision-grade updates can invalidate approval. Replays reconstruct the pinned source and economics. |
+
+The current implementation uses RMB 45/kg as its demo finance assumption. Migrate 6.0.0’s canonical case to the RMB 65/kg synthetic contract field and update the chart, financial labels, formula and tests together. Preserve original inputs on legacy archived runs. Label gross order value, potential exposure, modeled costs and modeled contribution separately. Show contribution as unavailable where cost assumptions are absent.
+
+Generate baseline, market and exception fixtures from one versioned manifest and generator. Seed variability only where the data dictionary defines realistic ranges, correlations, seasonality and missing observations. Fix business quantities and expected outputs. Keep code, generated records, source snapshots and data dictionary together. Verify quantity conservation and approval invalidation with deterministic tests. Use a verified API for suitably granular feeds with confirmed access and usage terms. Otherwise pin a dated, attributable published extract. For unavailable fields, use plausible generated inputs within the case, or show unavailable when a value cannot be supported. Weather is the first adapter candidate. Use China blueberry price records only where grade, size, channel, geography, period and units are comparable. Keep the deterministic rehearsal usable offline. An observed weather feed can coexist with a pinned price series and generated order records without changing their respective provenance or timestamps.
+
+### 4.1 Price history, forecasts and event overlays
+
+- **Timeline.** Offer 7D, 30D, 90D, 1Y and an available multi-season view, with a brush or date picker for zoom. Share the selected window across chart, event track and detail table. Use daily or weekly aggregation according to the source cadence, disclose it in the chart, and leave gaps for missing observations. Changing zoom never changes the underlying records, approval or price assumption. Show CNY/kg, geography, grade, price basis and local timezone. Draw forecast dates and uncertainty bands separately from observed history. Disable unsupported ranges or forecasting when comparable history is too short.
+- **Event catalog.** Record holiday date and lead/lag window, pest or disease alert, weather anomaly, supply or logistics interruption and relevant news. Each record carries date of occurrence, publication time, source, crop, affected geography, expected mechanism, relevance and confidence. Prefer official calendars, weather observations, agriculture notices and source-linked reports where available. Show the event and its timing on the chart. An event's proximity to a price move does not establish causation. Use clearly scoped case events when no comparable public record is available.
+- **Forecast.** Start with a seasonal or last-observation baseline and test any event-aware model against it on rolling historical cutoffs. Candidate features include comparable price lags, seasonality, days to relevant holidays, growing-region weather anomalies, confirmed crop-health events and supply windows. Only use information available as of the forecast cutoff. Use known calendar dates and published forward forecasts for future inputs. Treat unscheduled future weather or pest shocks as scenarios. Publish horizon, cutoff, units, uncertainty interval and out-of-sample error when sufficient observations exist. Keep the simpler model when added factors do not improve validation. Use an estimated direction or scenario range when precision is unsupported.
+- **Decision linkage.** A verified relevant event can open a watch item. A price forecast informs exposure and sensitivity, and an eligible contract or firm quote supplies executable economics. Forecasts and headlines do not override safety, quality, capacity or approval gates. Pin the observed series, event records, model version and forecast cutoff with the assessment so the historical view can be reconstructed.
+
+### 4.2 Live sources and lightweight AI brief
+
+Keep the current React/Vite frontend and Node service. Add a small source registry to the existing scheduler. Each entry defines the provider, coverage, allowed fields, refresh interval, freshness threshold and cache policy. Store the latest normalized results and a pinned rehearsal snapshot in the existing persistence layer.
+
+| Source | First implementation |
+| --- | --- |
+| Weather and forecasts | Start with the [Open-Meteo forecast API](https://open-meteo.com/en/docs) for relevant Yunnan coordinates, subject to the [applicable usage terms](https://open-meteo.com/en/terms). Keep provider forecasts distinct from observed farm weather and from Sentinel price forecasts. |
+| News and crop-health notices | Start with [GDELT DOC 2.0](https://blog.gdeltproject.org/gdelt-doc-2-0-api-supports-jsonfeed/) for article discovery and source links. Prefer agriculture and meteorological authority notices for specific pest, disease and weather events. Use approved feeds or curated snapshots where coverage is weak. A headline alone supports a headline-level brief. |
+| Holidays, prices and trade | Load an official calendar snapshot and vetted published price or trade extracts. Promote a price source to an automated adapter once access and comparability are confirmed. Keep synthetic case inputs within their own case records. |
+
+Poll weather roughly hourly and news every 30–60 minutes as starting defaults, within provider limits. Follow the publication cadence for slower sources. Deduplicate by canonical URL or source record ID. Filter by crop, geography and relevance before any model call. Group duplicate reports by event. Persist source publication time, last checked time and last successful update. Render the last usable cache on provider failure and use the pinned snapshot in replay.
+
+Generate one short English brief when a relevant source set changes. Use a small model with a structured output containing the event, what changed, possible relevance to Yunnan blueberries or the selected order, uncertainty and source IDs. Provide article titles and permitted excerpts or official notice text. Treat source text as untrusted input. Validate that returned source IDs exist and that dates, numbers and locations match the input. Where evidence is thin, use the source headline and link or a deterministic brief. Store and reuse the result by source-set hash and prompt version, with no model call on page load or timeline zoom. Show the same brief in Market Pulse, Market Intelligence and the case's Market Impact panel. Keep summaries advisory. Existing eligibility checks and approval rules govern all plan changes.
+
+Verify unchanged input makes no model call, duplicated articles produce one event, an API or model timeout leaves the previous brief usable, and any source revision is reflected in the current view while historical runs retain their original version.
+
+## 5. Real photography and design
+
+Use photographs verified as taken in a Yunnan blueberry production setting and cleared for website use. Start with Sentinel or grower originals and audit existing repository and deck imagery for location and usage rights. Source a landscape shot of the production blocks, a harvest or packing shot, and a close view of fruit on the bush or in a tray. Keep photography free of location or shooting-background captions, watermarks and overlaid credits. Choose assets whose permission allows this presentation. Leave a photo slot out until qualifying imagery is available.
+
+| Placement | Visual |
+| --- | --- |
+| Homepage hero | Wide, real blueberry production photograph with a legible crop on desktop and mobile. |
+| Use-case section | Yunnan fruit, harvest or grading photograph beside the featured order story. |
+| Architecture and workspace | Actual screenshots from the built website and rendered charts. Treat editorial photography as visual context. Evidence panels use linked source records. |
+
+Keep an internal asset register with photographer, source, verified location, permission, allowed edits, alt text and placement. Write functional alt text describing the image content. Store approved optimized copies locally with responsive sizes and lazy loading below the fold. Use one cohesive visual pass, with Stitch if available, on Home, Executive Dashboard and Decision Room. Apply the resulting design to all routes through existing React primitives and shared styles. Check 390 px, 1440 px and 1920 × 1080 for layout, readability and meaningful image crops.
+
+## 6. Reuse, cutover and delivery
+
+| Gate | Work and exit condition |
+| --- | --- |
+| 0 · Verify current baseline | Inventory current worktree, user edits, routes and component owners. Build locally and verify browser/API connectivity and the approval-to-evidence flow. The earlier browser attempt timed out, so record actual UI verification before claiming a baseline pass. Freeze the route, event, version and asset contracts. |
+| 1 · Core workflow and visuals | Reuse React/Vite, routes, scenario generator, Node service, task state and charts. Fix differences between the current prototype and the approved fixture. Establish shared UI components and verify both physical paths. Replace unverified hero imagery with an approved photo. |
+| 2 · Market integration | Add Market Pulse and Market Impact on the existing case. Add the six-tab view, source drawer, timeline zoom and event overlays. Connect one weather and one news source where access and relevance checks pass, with pinned data for rehearsal. Add the shared cached English brief. Verify time range, source vintage, forecast cutoff and evidence across pages. |
+| 3 · Cutover and rehearsal | Route legacy entry points to the new shell and verify every path has one runtime and coherent data. Validate settings, reload, browser closure, restart recovery, pinned replay, audit export and a clean build. Rehearse presentation offline. |
+| Follow-up · Additional feeds | Add licensed prices, further official feeds and authorized ERP/quotes where coverage and commercial validation warrant them. |
+
+Build on `src/App.jsx`, `src/demo/scenario.js`, `src/demo/Workspace.jsx`, `src/demo/site.css` and `scripts/sentinel-demo.mjs`. Check existing old pages for reusable presentation and constraints. Keep legacy timers, scripted approvals and randomized business indicators outside the active runtime. Keep one source for navigation, one for dataset generation and one for shared UI states. Review only the active gate and named modules each pass. Use a focused rule/fixture test and a single browser rehearsal suite. Preserve existing workspace changes.
+
+**Presentation timing:** Executive Dashboard 15 s → Business Impact Map 15 s → Decision Room 30 s → Approval & Execution 15 s → Audit & Outcomes 15 s. Surface the market watch briefly in the dashboard or Decision Room. Use the standalone market page, 650 kg scenario and 700 kg QA exception for Q&A. Prepare a labeled replay from the same verified run and show the source, rule version, approval and actual simulated receipts in Evidence.
+
+**Definition of done:** English copy and coherent navigation on all routes, verified Yunnan photography without background captions, continuous activity independent of browser pages, comparable three-plan analysis and six specialist perspectives, enforced and versioned approvals, traceable quantities and financial assumptions, market inputs classified and auditable, accessible mobile and desktop layouts, reproducible fixture export, recorded run replay, browser/API evidence and a concise runbook. Cross-check order, batch and event IDs, local dates, units, grade, price basis, version and displayed values from Overview through Evidence. Test feed outage and stale states, a reference price change without an approval mutation, a changed eligible quote requiring review, and a historical replay unaffected by revised feeds. Verify that timeline zoom preserves prices and aligns event dates, and that forecasting tests enforce the historical cutoff. Software implementation, image sourcing and external adapter activation follow this planning deliverable.

@@ -1,0 +1,80 @@
+{
+  "version": "6.1.0",
+  "records": [
+    {
+      "id": "YN-CHENGJIANG-BLUEBERRY-OFFER-20251230",
+      "kind": "published_offer",
+      "publishedAt": "2025-12-30T14:32:19+08:00",
+      "region": "Chengjiang, Yuxi, Yunnan",
+      "crop": "blueberry",
+      "variety": "Huaxiang",
+      "price": 100,
+      "currency": "CNY",
+      "unit": "kg",
+      "priceBasis": "wholesale offer",
+      "negotiable": true,
+      "grade": null,
+      "decisionEligibility": "reference_only",
+      "source": {
+        "publisher": "Yunnan Department of Agriculture and Rural Affairs",
+        "url": "https://nync.yn.gov.cn/html/2025/nongchanpinxuqiu_1230/1423468.html"
+      }
+    },
+    {
+      "id": "CN-OFFICIAL-CALENDAR-2026",
+      "kind": "official_holiday_calendar",
+      "publishedOn": "2025-11-04",
+      "region": "China",
+      "source": {
+        "publisher": "General Office of the State Council, republished by Beijing Municipal Government",
+        "document": "国办发明电〔2025〕7号",
+        "url": "https://www.beijing.gov.cn/cs/gncs/zcwj/202603/t20260327_4568275.html"
+      },
+      "holidays": [
+        {
+          "name": "New Year",
+          "from": "2026-01-01",
+          "through": "2026-01-03"
+        },
+        {
+          "name": "Spring Festival",
+          "from": "2026-02-15",
+          "through": "2026-02-23"
+        },
+        {
+          "name": "Qingming",
+          "from": "2026-04-04",
+          "through": "2026-04-06"
+        },
+        {
+          "name": "Labour Day",
+          "from": "2026-05-01",
+          "through": "2026-05-05"
+        },
+        {
+          "name": "Dragon Boat Festival",
+          "from": "2026-06-19",
+          "through": "2026-06-21"
+        },
+        {
+          "name": "Mid-Autumn Festival",
+          "from": "2026-09-25",
+          "through": "2026-09-27"
+        },
+        {
+          "name": "National Day",
+          "from": "2026-10-01",
+          "through": "2026-10-07"
+        }
+      ],
+      "makeUpWorkDays": [
+        "2026-01-04",
+        "2026-02-14",
+        "2026-02-28",
+        "2026-05-09",
+        "2026-09-20",
+        "2026-10-10"
+      ]
+    }
+  ]
+}

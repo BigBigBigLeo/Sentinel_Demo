@@ -4889,3 +4889,43 @@ select.field-selector option {
   padding: 8px 12px;
   border-radius: 4px;
 }
+
+
+/* ── Sentinel 7.0 Hero Decision Matrix Responsive Styles ── */
+@media (max-width: 1024px) {
+  .dm-strategy-table {
+    overflow-x: auto;
+  }
+  .dm-strategy-table > div {
+    min-width: 720px;
+  }
+}
+
+@media (max-width: 767px) {
+  .dm-mobile-tabs {
+    display: block !important;
+  }
+  .dm-kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .dm-specialists-row {
+    display: flex !important;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    gap: 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .dm-specialists-row > div {
+    min-width: 140px;
+    flex-shrink: 0;
+  }
+  .dm-gates-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .dm-strategy-table {
+    overflow-x: auto;
+  }
+  .dm-strategy-table > div {
+    min-width: 680px;
+  }
+}
