@@ -376,7 +376,7 @@ export default function DecisionMatrix({ customScenario = null, onAuthorize = nu
             </div>
 
             {/* ── 3. Strategy Comparison Matrix ── */}
-            <div className="dm-table-wrapper" style={{ border: '1px solid #1e293b', borderRadius: 8, overflow: 'hidden', marginBottom: 16 }}>
+            <div className="dm-table-wrapper dm-strategy-table" style={{ border: '1px solid #1e293b', borderRadius: 8, overflowX: 'auto', WebkitOverflowScrolling: 'touch', marginBottom: 16 }}>
                 {/* Header Row */}
                 <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr 1fr 1fr', background: '#0c1220', borderBottom: '1px solid #1e293b', padding: '10px 14px', alignItems: 'center' }}>
                     <span style={{ fontSize: '0.68rem', fontWeight: 800, letterSpacing: 1, color: '#64748b' }}>{t('CRITERIA', '决策维度')}</span>

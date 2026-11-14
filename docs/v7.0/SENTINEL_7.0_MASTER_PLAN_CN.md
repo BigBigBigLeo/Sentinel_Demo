@@ -226,3 +226,19 @@
    - 实现微湿通风、微灌、避风小场景在 Activity Rail 中的自动滚动。
 5. **Step 5: 全站构建与自动化测试回归**
    - 确保 `npm run build` 和 `node --test scripts/sentinel-6.1-data.test.mjs` 持续 100% 绿灯。
+
+---
+
+## 十、 Google Stitch 与 Antigravity Skills 高效能开发规范
+
+为保证 Demo 的视觉质感、响应式能力与快速迭代效率，研发与交付全面规范使用 **Google Stitch** 与 **Antigravity Skills**：
+1. **Google Stitch 工业设计加速：**
+   - 利用 Google Stitch 快速构思与生成工业大屏组件、指标徽章、三列对比布局与状态机配色；
+   - 保证暗曜石黑 (`#090d16`)、科技祖母绿 (`#10b981`)、天蓝高亮 (`#38bdf8`)、琥珀金 (`#f59e0b`)、绯红熔断 (`#ef4444`) 的高对比视觉层级；
+   - 满足多端响应式断点：PC 端 (>1280px) 决策全景、iPad (768px-1024px) 双栏自适应、iPhone (<768px) 分段器切换 (`[方案A] [✔方案B] [方案C]`)。
+2. **Antigravity Skills 组合赋能：**
+   - `frontend-design`: 确保界面拒绝通用 AI 模板感，呈现农业科技工业硬核审美；
+   - `web-artifacts-builder`: 负责微组件沙盒构建与交互逻辑快速试错；
+   - `theme-factory`: 统一调优全局色彩和对比度，满足户外农田日光强反射下的强可读性；
+   - `rdkit-general` / `alphafold`: 为后续农药分子结构解析与病害机理展示提供强大的生物计算扩展储备。
+

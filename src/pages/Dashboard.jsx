@@ -151,6 +151,58 @@ export default function Dashboard() {
                     </div>
 
                     {!activeScenario && <OperationsHeartbeat />}
+
+                    {/* Sentinel 7.0 Hero Decision Matrix Spotlight Banner */}
+                    <div className="hero-decision-spotlight" style={{
+                        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95))',
+                        border: '1px solid #0284c7',
+                        borderRadius: 8,
+                        padding: '14px 18px',
+                        margin: '12px 0',
+                        boxShadow: '0 4px 20px rgba(2, 132, 199, 0.15)'
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+                            <div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    <span style={{ background: '#0284c7', color: '#fff', fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: 4 }}>
+                                        SENTINEL 7.0
+                                    </span>
+                                    <strong style={{ fontSize: '1.05rem', color: '#f8fafc' }}>
+                                        {t('Autonomous Decision Matrix · 900-Mu Blueberry Super-Farm', '旗舰多智能体自治决策矩阵 · 云南澄江 900 亩超级蓝莓工厂')}
+                                    </strong>
+                                </div>
+                                <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#94a3b8' }}>
+                                    {t('6 Specialists Cross-Disciplinary Reasoning | 3 Hard Interlocked Gates | Real-Time Dynamic Strategy Flips', '6 大领域专家博弈推演 · 3 道硬互锁门禁核验 · 极端气象/设备故障自适应策略翻转')}
+                                </p>
+                            </div>
+                            <button className="btn btn-primary" onClick={() => navigate('/prescription')} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                {t('Open Full Decision Matrix →', '打开全屏决策推演矩阵 →')}
+                            </button>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 8, marginTop: 12 }}>
+                            <div style={{ background: 'rgba(2, 6, 23, 0.6)', padding: '6px 10px', borderRadius: 4, borderLeft: '3px solid #10b981' }}>
+                                <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{t('Labor FTE Reduction', '劳动力节省')}</div>
+                                <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#34d399' }}>-85% FTE</div>
+                            </div>
+                            <div style={{ background: 'rgba(2, 6, 23, 0.6)', padding: '6px 10px', borderRadius: 4, borderLeft: '3px solid #38bdf8' }}>
+                                <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{t('Cost Optimization', '综合成本优化')}</div>
+                                <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#38bdf8' }}>-42% / kg</div>
+                            </div>
+                            <div style={{ background: 'rgba(2, 6, 23, 0.6)', padding: '6px 10px', borderRadius: 4, borderLeft: '3px solid #a855f7' }}>
+                                <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{t('Grade A Yield Lift', '特级果率提升')}</div>
+                                <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#c084fc' }}>+9.2%</div>
+                            </div>
+                            <div style={{ background: 'rgba(2, 6, 23, 0.6)', padding: '6px 10px', borderRadius: 4, borderLeft: '3px solid #f59e0b' }}>
+                                <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{t('PHI Compliance Rate', '安全间隔期合规')}</div>
+                                <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fbbf24' }}>100% Pass</div>
+                            </div>
+                            <div style={{ background: 'rgba(2, 6, 23, 0.6)', padding: '6px 10px', borderRadius: 4, borderLeft: '3px solid #06b6d4' }}>
+                                <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{t('Autonomy Level', '自治运行基准')}</div>
+                                <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#22d3ee' }}>Level 3+</div>
+                            </div>
+                        </div>
+                    </div>
                     {/* AI Watchdog Status Bar */}
                     <div className="ai-watchdog-bar">
                         <div className="watchdog-dot" />

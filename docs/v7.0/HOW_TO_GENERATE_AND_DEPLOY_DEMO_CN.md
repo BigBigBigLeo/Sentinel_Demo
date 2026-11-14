@@ -143,3 +143,37 @@ npm.cmd run build
 │  • 平滑跳转至 `/execution`，展现农机、采摘工班与冷库工单全自动下发与执行追踪！        │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## 八、 高效研发利器：利用 Google Stitch 与 Antigravity Skills 进行极致敏捷迭代
+
+为了在最短时间内高质量生成、微调或扩充 Demo 的界面与场景逻辑，项目全面支持并推荐采用 **Google Stitch** 与 **Antigravity Skills** 协同工作流：
+
+### 8.1 借助 Google Stitch (stitch.google.com) 快速生成高保真工业原型
+1. **设计生成理念：**
+   * Google Stitch 支持从自然语言需求直接输出高度规整、色彩克制、符合现代工业人机工程学的 UI 组件。
+   * **Sentinel 7.0 色彩体系规范：**
+     - 底色：深曜石黑背景 (`#090d16` / `#0f172a`)
+     - 首选状态：高科技祖母绿 (`#00e5a3` / `#10b981`)
+     - 重点高亮：科技天蓝 (`#38bdf8`)
+     - 警示备选：琥珀暖金 (`#f59e0b` / `#fbbf24`)
+     - 风险阻断：绯红熔断 (`#ef4444`)
+2. **多终端响应式自适应 Prompt 模板 (Stitch 适用)：**
+   > *"Generate a mission-critical agricultural operating decision matrix for a 900-mu smart blueberry facility. Include 5 gold KPIs at the top, a horizontal row of 6 domain specialists with status pills, a 3-column strategy comparison (Plan A Blocked, Plan B Lead, Plan C Runner-up), and 3 interlocked compliance gates. Must be responsive: 3-column layout on PC (>1280px), swipeable container on iPad (768px-1024px), and segmented plan tabs on iPhone (<768px). Use dark industrial theme with high-contrast status colors."*
+
+### 8.2 协同 Antigravity Skills 模块化高效开发
+在开发环境中，可组合调用内置专业 Skills：
+*   **`frontend-design`**：负责将 Stitch 生成的原型转化为生产级 React 组件，摆脱千篇一律的通用 AI 塑料感，打造沉浸式数字农业指挥舱质感；
+*   **`web-artifacts-builder`**：负责复杂交互组件（如策略动态翻转、密码学签名生成、实时滑动开关）的独立沙盒构建与快速验证；
+*   **`theme-factory`**：统一调优多端暗色/明色对比度，确保在强光户外（农田现场平板）与昏暗监控室均具备出色的可读性；
+*   **`workflow-skill-creator` / `skill-creator`**：将多步骤调试与自动化检测封装为定制化 Skill，实现开发流水线的一键复用。
+
+### 8.3 10x 极速闭环开发工作流
+```
+┌─────────────────┐       ┌─────────────────┐       ┌─────────────────┐       ┌─────────────────┐
+│  业务/农艺需求  │ ────> │  Google Stitch  │ ────> │ Antigravity     │ ────> │ 自动化测试与    │
+│  (900亩蓝莓厂)  │       │  快速视觉原型   │       │ Skills 组装落地 │       │ 100%闭环上线    │
+└─────────────────┘       └─────────────────┘       └─────────────────┘       └─────────────────┘
+```
+遵循此规范，新场景、新农作物（如牛油果、草莓、温室番茄）或新决策矩阵的开发与落地可缩短至数小时内完成！
