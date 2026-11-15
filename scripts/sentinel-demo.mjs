@@ -287,9 +287,32 @@ async function serve() {
           return json(response, 503, { error: 'Gemini is not configured. Please input a valid Gemini API key in settings or run Sentinel with GEMINI_API_KEY.' });
         }
         const prompt = input.prompt || 'Analyze current scenario';
-        const modelsToTry = [input.model || 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash'];
+
+        // 1. Resolve available models dynamically from Google for this specific key
+        let targetModels = [];
+        try {
+          const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${effectiveKey}`);
+          if (listRes.ok) {
+            const listData = await listRes.json();
+            const available = (listData?.models || [])
+              .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+              .map(m => m.name.replace(/^models\//, ''));
+            const priorityList = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash-latest', 'gemini-2.0-flash-exp', 'gemini-1.5-pro'];
+            for (const p of priorityList) {
+              if (available.includes(p)) targetModels.push(p);
+            }
+            for (const m of available) {
+              if (!targetModels.includes(m)) targetModels.push(m);
+            }
+          }
+        } catch (_) {}
+
+        if (!targetModels.length) {
+          targetModels = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash-latest'];
+        }
+
         let lastError = null;
-        for (const model of modelsToTry) {
+        for (const model of targetModels) {
           try {
             const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${effectiveKey}`;
             const gRes = await fetch(endpoint, {
@@ -303,14 +326,18 @@ async function serve() {
             if (gRes.ok) {
               const gData = await gRes.json();
               const reply = gData?.candidates?.[0]?.content?.parts?.[0]?.text;
-              return json(response, 200, { text: reply, source: `Google ${model} (Server Relay)` });
+              return json(response, 200, { text: reply, source: `Google ${model} (在线大模型)` });
             }
             const errBody = await gRes.text();
             let parsed = {};
             try { parsed = JSON.parse(errBody); } catch (_) {}
             lastError = parsed?.error?.message || errBody;
             if (gRes.status === 400 || gRes.status === 403 || gRes.status === 429) {
-              return json(response, gRes.status, { error: lastError });
+              if (lastError.includes('API_KEY_INVALID') || lastError.includes('API key not valid')) {
+                return json(response, 400, { error: lastError });
+              }
+              if (gRes.status === 403) return json(response, 403, { error: lastError });
+              if (gRes.status === 429) return json(response, 429, { error: lastError });
             }
           } catch (err) {
             lastError = err.message;
