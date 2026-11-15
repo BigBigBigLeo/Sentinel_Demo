@@ -988,7 +988,7 @@ export const getScenarioList = () => Object.values(SCENARIOS).map(s => ({
 export const FLAGSHIP_SCENARIOS_7 = {
     'SCENARIO-01-PEST-PHI': {
         id: 'SCENARIO-01-PEST-PHI',
-        aliasId: 'A',
+        aliasId: '01',
         name: 'Connected Trap Pest Warning vs D+3 750kg Order & PHI Conflict',
         nameZh: '智能诱捕器发出虫害预警与 750kg 订单履约 PHI 冲突',
         badge: 'CRITICAL · PEST & PHI',
@@ -1030,7 +1030,7 @@ export const FLAGSHIP_SCENARIOS_7 = {
                 title: 'Plan A Triggers 14-Day PHI Conflict',
                 titleZh: '方案 A 触发 GB 2763 14天 PHI 冲突',
                 description: 'Agronomist proposes Mancozeb spray, but compliance gate trips RED lock: D+3 harvest strictly violates 14-day PHI.',
-                descriptionZh: '农艺总监主张代森锰锌化防，合规门禁亮起红牌：3天后采收交付必将导致农残超标违规。',
+                descriptionZh: 'A02 田间农艺初选代森锰锌化防，A08 法规合规刚性否决：3天后采收交付必将导致农残超标违规。',
                 sensorOverrides: { humidity_pct: 87.5 },
                 pestOverrides: { botrytis_spore_index: 68 },
             },
@@ -1038,9 +1038,9 @@ export const FLAGSHIP_SCENARIOS_7 = {
                 step: 3,
                 day: 43,
                 title: 'Multi-Agent Consensus: Plan B Lead Selected',
-                titleZh: '多智能体专家博弈达成共识：确立方案 B 为综合首选',
+                titleZh: '14 智能体多维博弈达成共识：确立方案 B 为综合首选',
                 description: 'Specialists converge on Plan B: Release LOT-01/02 (780kg), isolate LOT-03 (120kg), and apply 0-day PHI Trichoderma biocontrol.',
-                descriptionZh: '六维专家博弈：放行 LOT-01/02 (780kg)，物理隔离 LOT-03 (120kg) 并局部微喷 0天 PHI 哈茨木霉菌剂，净利 ¥32,500 全场最高。',
+                descriptionZh: '14 智能体协同博弈：放行 LOT-01/02 (780kg)，物理隔离 LOT-03 (120kg) 并局部微喷 0天 PHI 哈茨木霉菌剂，净利 ¥32,500 全场最高。',
                 sensorOverrides: { humidity_pct: 82.0 },
                 pestOverrides: { botrytis_spore_index: 62 },
             },
@@ -1068,6 +1068,7 @@ export const FLAGSHIP_SCENARIOS_7 = {
     },
     'SCENARIO-02-HEATWAVE-SUNSCALD': {
         id: 'SCENARIO-02-HEATWAVE-SUNSCALD',
+        aliasId: '02',
         name: 'Heatwave & Sunscald Emergency vs Dawn Harvest Rescheduling',
         nameZh: '连续 36.5°C 极端热浪日灼裂果危机与拂晓错峰抢收调度',
         badge: 'CRITICAL · HEATWAVE & QUALITY',
@@ -1126,8 +1127,8 @@ export const FLAGSHIP_SCENARIOS_7 = {
                 day: 49,
                 title: 'Dawn Harvest Execution & Labor Law Compliance',
                 titleZh: '拂晓错峰抢收高效执行，避开午间高温劳动法红线',
-                description: '28 pickers harvest 1,200kg at cool fruit temperature (<18°C) before 10:00 AM. 100% labor safety compliance, zero heat exhaustion.',
-                descriptionZh: '28 名采摘工人在上午 10:00 前完成 1,200kg 抢收，果温低于 18°C 进预冷库，果粉保持率 94%，完全避开午间 35°C 劳动安全禁令。',
+                description: '28 harvest crew members harvest 1,200kg at cool fruit temperature (<18°C) before 10:00 AM. 100% labor safety compliance, zero heat exhaustion.',
+                descriptionZh: '28 名专业采收人员在上午 10:00 前完成 1,200kg 抢收，果温低于 18°C 进预冷库，果粉保持率 94%，完全避开午间 35°C 劳动安全禁令。',
                 sensorOverrides: { temp_C: 22.0, humidity_pct: 68 },
             },
             {
@@ -1143,6 +1144,7 @@ export const FLAGSHIP_SCENARIOS_7 = {
     },
     'SCENARIO-03-COLDCHAIN-QA-DEFICIT': {
         id: 'SCENARIO-03-COLDCHAIN-QA-DEFICIT',
+        aliasId: '03',
         name: 'Cold Chain Fault & Post-Harvest QA 50kg Deficit Reconciliation',
         nameZh: '气调保鲜库温控故障与采后质检短缺 50kg 紧急重分配',
         badge: 'CRITICAL · COLD CHAIN & QA SHORTFALL',

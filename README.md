@@ -1,14 +1,14 @@
-# Sentinel 7.0 · 观衡智序 (Autonomous Operating Core)
+# Sentinel 7.10 · 观衡智序 (Autonomous Operating Core)
 
 > **把专业判断汇成经营方案，统筹农艺、合规、运营、销售与财务。**  
 > *一个生产决定，牵动品质、交付与利润。*
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](file:///scripts/sentinel-6.1-data.test.mjs)
-[![Demo Version](https://img.shields.io/badge/version-7.0.0-blue)](file:///docs/v7.0/README.md)
+[![Demo Version](https://img.shields.io/badge/version-7.10.0-blue)](file:///docs/v7.0/README.md)
 [![Scale](https://img.shields.io/badge/scale-900--mu%20Plant%20Factory-emerald)](file:///docs/v7.0/FARM_BLUEPRINT_AND_OPERATOR_PERSONA_CN.md)
 [![Design](https://img.shields.io/badge/design-Stitch%20%2B%20Palantir-cyan)](file:///docs/v7.0/DECISION_MATRIX_AND_INFORMATION_FLOW_SPEC_CN.md)
 
-Sentinel (观衡智序 7.0) 是一套面向现代高价值设施农业超级工厂的自主经营决策操作系统。它基于**农业企业运行本体 (Enterprise Farm Ontology)**，将传感器、环境预测、商超订单、劳动力工班、气调冷库与农药合规规则全面图谱化，实现从**感知 (Perception) ➔ 决策 (Decision) ➔ 执行 (Execution) ➔ 验证 (Verification)** 的端到端工业级闭环。
+Sentinel (观衡智序 7.10) 是一套面向现代高价值设施农业超级工厂的自主经营决策操作系统。它基于**农业企业运行本体 (Enterprise Farm Ontology)**，将传感器、环境预测、商超订单、劳动力工班、气调冷库与农药合规规则全面图谱化，实现从**感知 (Perception) ➔ 决策 (Decision) ➔ 执行 (Execution) ➔ 验证 (Verification)** 的端到端工业级闭环。
 
 ---
 
@@ -20,7 +20,7 @@ Sentinel (观衡智序 7.0) 是一套面向现代高价值设施农业超级工�
 # 1. 安装项目依赖
 npm.cmd install
 
-# 2. 一键启动 7.0 全功能系统 (含前端 Vite + Node 协同服务)
+# 2. 一键启动 7.9 全功能系统 (含前端 Vite + Node 协同服务与 Gemini 中继)
 npm.cmd run demo
 ```
 
@@ -85,7 +85,9 @@ npm.cmd run build
 
 ## 🏛️ 系统演进版本对照 (Version History)
 
-*   **Sentinel 7.0 (Current):** 观衡智序 · 900 亩蓝莓超级工厂 · 双轨 24/7 自主运营与重大危机人机联锁最高决策 · Hero 专家决策大屏 · 双语国际化 · 防盗刷 Serverless 代理。
+*   **Sentinel 7.10 (Current):** 观衡智序 · 首页 8 核心卡片深度遥测穿透下钻（分时出库曲线、EBITDA 成本瀑布、4维系统挽损公式、近红外分选三维直方图、GB 2763 全域门禁流水）· 900 亩地块一张图全动态色谱感知（放行绿/隔离红/生长期蓝/调峰琥珀）· 国际设施农业 (CEA) 专业中英文工业级双语词典校准规范 · 真实 Gemini AI 服务端中继代理与双向在线鉴权。
+*   **Sentinel 7.9:** 观衡智序 · 云南澄江 900 亩蓝莓超级工厂 · 14 业务智能体（A01~A14）协同博弈 · 12 大重点企业直供订单（12,450 kg · ¥898,150）· 全域情报下钻档案 · 纯功能主体标号与零 Emoji 工业级设计 · 7/7 法定安全门禁与 GS1-128 不可篡改数字存证。
+*   **Sentinel 7.0:** 900 亩蓝莓工厂原型 · 双轨自主运营 · 专家决策矩阵 · 双语国际化。
 *   **Sentinel 6.1:** 统一蓝莓工作流，集成本地 Operations 动态时钟与基础事件流。
 *   **Legacy V3.5:** 原始决策演练框架（`/workspace`）。
 

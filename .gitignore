@@ -22,6 +22,8 @@ scripts/video_pipeline/output_comprehensive_v3/
 *.mp3
 
 # Editor directories and files
+.agents/
+.playwright-mcp/
 .vscode/*
 !.vscode/extensions.json
 .idea

@@ -1,6 +1,7 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useStore from '../engine/store';
+import { callGeminiAI } from '../utils/geminiClient';
 import StatusBadge from '../components/StatusBadge';
 import Icon from '../components/Icon';
 import { getScenarioList, getFlagshipScenarioList } from '../engine/scenarioEngine';
@@ -73,20 +74,20 @@ export default function ScenarioControl() {
             ['decision', '决策'],
             ['execution', '执行'],
             ['audit', '审计'],
-            ['Safety Officer', '安全官'],
-            ['Control Engineer', '控制工程师'],
-            ['Field Operator', '田间作业员'],
-            ['Data Retriever', '数据采集员'],
-            ['Remote Sensor Pilot', '远程传感操控员'],
-            ['Drone Operator', '无人机作业员'],
-            ['Ops Manager', '运营经理'],
-            ['Learning Engineer', '学习工程师'],
-            ['Compliance Officer', '合规官'],
-            ['Crop Chemist', '植保化学师'],
-            ['Field Agronomist', '田间农艺师'],
-            ['Greenhouse Agronomist', '温室农艺师'],
-            ['Finance Analyst', '财务分析师'],
-            ['Sales Planner', '销售规划师'],
+            ['Safety Officer', '安全防灾'],
+            ['Control Engineer', '环境自控'],
+            ['Field Operator', '采收调度'],
+            ['Data Retriever', '遥测感知'],
+            ['Remote Sensor Pilot', '遥测感知'],
+            ['Drone Operator', '无人机作业'],
+            ['Ops Manager', '运营管理'],
+            ['Learning Engineer', '算法模型'],
+            ['Compliance Officer', '法规合规'],
+            ['Crop Chemist', '植保病理'],
+            ['Field Agronomist', '田间农艺'],
+            ['Greenhouse Agronomist', '设施温室'],
+            ['Finance Analyst', '财务核算'],
+            ['Sales Planner', '销售履约'],
         ];
         tokenMap.forEach(([en, zh]) => {
             text = text.replace(new RegExp(en, 'gi'), zh);
@@ -96,6 +97,22 @@ export default function ScenarioControl() {
     };
     const [autoPlay, setAutoPlay] = useState(false);
     const autoRef = useRef(null);
+    const [geminiAnalysisLoading, setGeminiAnalysisLoading] = useState(false);
+    const [geminiAnalysisText, setGeminiAnalysisText] = useState(null);
+
+    async function handleRequestGeminiCommentary() {
+        setGeminiAnalysisLoading(true);
+        const promptText = `Please provide a strategic and operational risk evaluation for Scenario: ${activeScenario?.nameZh || activeScenario?.name} (Field: ${activeScenario?.field}, Crop: Blueberry, Risk: ${activeScenario?.riskLevel}, Harvest: ${activeScenario?.daysToHarvest}d). Explain: 1. Core trade-off; 2. PHI / Quality compliance impact; 3. Why Plan B is optimal and under what boundary condition Plan C flips. Answer concisely in ${isZh ? 'Chinese' : 'English'}.`;
+
+        const result = await callGeminiAI({
+            prompt: promptText,
+            model: 'gemini-1.5-flash',
+            context: { scenario: activeScenario?.id }
+        });
+        setGeminiAnalysisText({ text: result.text, source: result.source });
+        setGeminiAnalysisLoading(false);
+    }
+
     const flagshipScenarios = getFlagshipScenarioList();
     const classicScenarios = getScenarioList();
     const scenarios = scenarioTab === 'flagship' ? flagshipScenarios : classicScenarios;
@@ -242,7 +259,22 @@ export default function ScenarioControl() {
                                 {isZh ? (activeScenario.descriptionZh || localizeScenarioText(activeScenario.description)) : activeScenario.description}
                             </p>
                         </div>
-                        <div style={{ display: 'flex', gap: 12, flexShrink: 0, alignItems: 'center' }}>
+                        <div style={{ display: 'flex', gap: 12, flexShrink: 0, alignItems: 'center', flexWrap: 'wrap' }}>
+                            <button
+                                type="button"
+                                className="btn btn-secondary"
+                                onClick={handleRequestGeminiCommentary}
+                                disabled={geminiAnalysisLoading}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: 6,
+                                    background: 'rgba(168, 85, 247, 0.15)',
+                                    border: '1px solid rgba(168, 85, 247, 0.4)',
+                                    color: '#c084fc', fontWeight: 700, padding: '6px 12px', borderRadius: 6
+                                }}
+                            >
+                                <Icon name="brain" size={14} color="#c084fc" />
+                                {geminiAnalysisLoading ? t('Analyzing with Gemini...', 'Gemini 智能解析中...') : t('Live AI Strategy Review', '唤醒 Gemini 战备推演评注')}
+                            </button>
                             <button
                                 type="button"
                                 className="btn btn-primary"
@@ -270,6 +302,30 @@ export default function ScenarioControl() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Live Gemini Strategic Commentary */}
+                    {geminiAnalysisText && (
+                        <div style={{
+                            marginBottom: 16,
+                            padding: '12px 16px', borderRadius: 8,
+                            background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(88, 28, 135, 0.25))',
+                            border: '1px solid rgba(168, 85, 247, 0.4)',
+                            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.4)'
+                        }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                                <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#c084fc', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                    <Icon name="brain" size={15} color="#c084fc" />
+                                    {t('Google Gemini Real-Time Scenario Strategy Review', 'Google Gemini 实时战备推演战略评注')}
+                                </span>
+                                <span style={{ fontSize: '0.65rem', color: '#a855f7', background: 'rgba(168, 85, 247, 0.15)', padding: '2px 8px', borderRadius: 4, border: '1px solid rgba(168, 85, 247, 0.3)' }}>
+                                    {geminiAnalysisText.source}
+                                </span>
+                            </div>
+                            <div style={{ fontSize: '0.78rem', color: '#e2e8f0', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                                {geminiAnalysisText.text}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Event Timeline */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginTop: 8 }}>
@@ -380,19 +436,31 @@ export default function ScenarioControl() {
                                     <Icon name={threatTypeIconName(s.threatType)} size={44} color={riskLevelColor(s.riskLevel)} />
                                 </div>
 
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                        <div style={{
-                                            width: 36, height: 36, borderRadius: 10,
-                                            background: `${riskLevelColor(s.riskLevel)}15`,
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            fontWeight: 800, fontSize: '0.95rem', color: riskLevelColor(s.riskLevel),
-                                        }}>{s.id}</div>
-                                        <div>
-                                            <div style={{ fontWeight: 700, color: '#e2e8f0', fontSize: '0.88rem' }}>{isZh ? (s.nameZh || s.name) : s.name}</div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10, gap: 12 }}>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
+                                            <span style={{
+                                                display: 'inline-flex', alignItems: 'center',
+                                                padding: '2px 8px', borderRadius: 4,
+                                                background: `${riskLevelColor(s.riskLevel)}22`,
+                                                border: `1px solid ${riskLevelColor(s.riskLevel)}44`,
+                                                fontWeight: 800, fontSize: '0.7rem', color: riskLevelColor(s.riskLevel),
+                                                fontFamily: 'monospace', letterSpacing: 0.5,
+                                                whiteSpace: 'nowrap'
+                                            }}>
+                                                {s.aliasId ? `SCENARIO #${s.aliasId}` : s.id}
+                                            </span>
+                                            <span style={{ fontSize: '0.68rem', color: '#64748b', whiteSpace: 'nowrap' }}>
+                                                {t('Field', '地块')} {s.field} · {t('Days to Harvest', '距采收')} {s.daysToHarvest}d
+                                            </span>
                                         </div>
+                                        <h4 style={{ margin: 0, fontWeight: 700, color: '#f8fafc', fontSize: '0.92rem', lineHeight: 1.45, wordBreak: 'break-word' }}>
+                                            {isZh ? (s.nameZh || s.name) : s.name}
+                                        </h4>
                                     </div>
-                                    <StatusBadge status={s.riskLevel === 'critical' ? 'critical' : s.riskLevel === 'high' ? 'elevated' : 'monitoring'} label={t(s.riskLevel.toUpperCase(), s.riskLevel === 'critical' ? '高危' : s.riskLevel === 'high' ? '较高' : s.riskLevel === 'elevated' ? '升高' : '低')} />
+                                    <div style={{ flexShrink: 0 }}>
+                                        <StatusBadge status={s.riskLevel === 'critical' ? 'critical' : s.riskLevel === 'high' ? 'elevated' : 'monitoring'} label={t(s.riskLevel.toUpperCase(), s.riskLevel === 'critical' ? '高危' : s.riskLevel === 'high' ? '较高' : s.riskLevel === 'elevated' ? '升高' : '低')} />
+                                    </div>
                                 </div>
 
                                 <p style={{ fontSize: '0.72rem', color: '#94a3b8', margin: '0 0 10px 0', lineHeight: 1.5 }}>{isZh ? (s.descriptionZh || localizeScenarioText(s.description)) : s.description}</p>

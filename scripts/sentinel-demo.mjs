@@ -244,8 +244,46 @@ async function serve() {
         return json(response, 200, { run: runtime.currentOrder() });
       }
       if (url.pathname === '/api/intelligence' && request.method === 'GET') return json(response, 200, { ...await intelligence(), sourceRecords: runtime.sources });
+      if (url.pathname === '/api/gemini/generate' && request.method === 'POST') {
+        let body = '';
+        for await (const chunk of request) {
+          body += chunk;
+          if (body.length > 32_000) return json(response, 413, { error: 'Request too large.' });
+        }
+        let input = {};
+        try { input = JSON.parse(body); } catch (_) {}
+        const clientKey = request.headers['x-gemini-key'] || input.apiKey;
+        const effectiveKey = (clientKey || analysisKey || '').trim();
+        if (!effectiveKey) {
+          return json(response, 503, { error: 'Gemini is not configured. Please input a valid Gemini API key in settings or run Sentinel with GEMINI_API_KEY.' });
+        }
+        const prompt = input.prompt || 'Analyze current scenario';
+        const model = input.model || 'gemini-1.5-flash';
+        try {
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${effectiveKey}`;
+          const gRes = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ role: 'user', parts: [{ text: prompt }] }],
+              generationConfig: { maxOutputTokens: 1000, temperature: 0.25 }
+            })
+          });
+          if (!gRes.ok) {
+            const errBody = await gRes.text();
+            return json(response, gRes.status, { error: `Gemini upstream error: ${errBody}` });
+          }
+          const gData = await gRes.json();
+          const reply = gData?.candidates?.[0]?.content?.parts?.[0]?.text;
+          return json(response, 200, { text: reply, source: `Google ${model} (Server Relay)` });
+        } catch (err) {
+          return json(response, 502, { error: `Upstream connection failed: ${err.message}` });
+        }
+      }
       if (url.pathname === '/api/assistant' && request.method === 'POST') {
-        if (!analysisKey) return json(response, 503, { error: 'Gemini is not configured. Start Sentinel with GEMINI_API_KEY.' });
+        const clientKey = request.headers['x-gemini-key'];
+        const effectiveKey = (clientKey || analysisKey || '').trim();
+        if (!effectiveKey) return json(response, 503, { error: 'Gemini is not configured. Start Sentinel with GEMINI_API_KEY or input key in Settings.' });
         let body = '';
         for await (const chunk of request) {
           body += chunk;
@@ -270,7 +308,7 @@ async function serve() {
         try {
           const pinned = Boolean(orderRun || input.archive);
           const feeds = pinned ? {} : await intelligence();
-          const answer = await askAssistant(analysisKey, messages, { workspace: context, feeds, sourceRecords: pinned ? [] : runtime.sources, knowledge: runtime.knowledge });
+          const answer = await askAssistant(effectiveKey, messages, { workspace: context, feeds, sourceRecords: pinned ? [] : runtime.sources, knowledge: runtime.knowledge });
           const evidence = orderRun ? { label: `Order evidence · revision ${orderRun.revision}`, href: `/audit?orderRun=${encodeURIComponent(orderRun.id)}` } : undefined;
           return json(response, 200, { answer, evidence });
         } catch (error) {

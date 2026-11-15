@@ -1512,6 +1512,8 @@ select.field-selector option {
   padding: 16px;
   position: relative;
   transition: all var(--transition-normal);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .metric-card:hover {
@@ -1535,9 +1537,11 @@ select.field-selector option {
 }
 
 .metric-value {
+  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
   font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1.2;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
 }
 
 .metric-unit {
@@ -4575,7 +4579,25 @@ select.field-selector option {
   line-height: 1.15;
 }
 
-@media (max-width: 1399px) {
+.agent-mesh-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+@media (max-width: 1440px) {
+  .agent-mesh-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .agent-mesh-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1180px) {
   .dashboard-layout {
     grid-template-columns: 1fr;
   }
@@ -4938,4 +4960,45 @@ select.field-selector option {
   .dm-table-wrapper > div {
     min-width: 660px;
   }
+}
+
+/* ============================================================================
+   Sentinel Custom Industrial Form Controls: Hide Ugly Browser Spinners
+   ============================================================================ */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button,
+.sentinel-stepper-input::-webkit-inner-spin-button,
+.sentinel-stepper-input::-webkit-outer-spin-button {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  margin: 0 !important;
+}
+input[type=number],
+.sentinel-stepper-input {
+  -moz-appearance: textfield !important;
+  appearance: textfield !important;
+}
+
+.config-input {
+  font-family: 'JetBrains Mono', 'SF Mono', monospace !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  color: #38bdf8 !important;
+  background: #020617 !important;
+  border: 1px solid #334155 !important;
+  border-radius: 6px !important;
+  padding: 6px 10px !important;
+  text-align: center !important;
+}
+.config-input:focus {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.25) !important;
+  outline: none !important;
+}
+
+/* Reusable delayed tooltip styles */
+.sentinel-tooltip-trigger {
+  position: relative;
+  display: inline-flex;
+  cursor: help;
 }

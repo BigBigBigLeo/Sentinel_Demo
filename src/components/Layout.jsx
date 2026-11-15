@@ -9,18 +9,53 @@ import SubtitleOverlay from './SubtitleOverlay';
 import IterativeReasoningOverlay from './IterativeReasoningOverlay';
 import { pick, formatLocaleTime } from '../i18n/locale.js';
 
-const navItems = [
-    { path: '/', label: 'Dashboard', labelZh: '指挥中心', iconName: 'dashboard' },
-    { path: '/sensors', label: 'Sensor Telemetry', labelZh: '传感数据', iconName: 'sensors' },
-    { path: '/risk', label: 'Risk Assessment', labelZh: '风险评估', iconName: 'risk', alertKey: 'risk' },
-    { path: '/prescription', label: 'Prescription', labelZh: '处方', iconName: 'prescription' },
-    { path: '/execution', label: 'Execution', labelZh: '执行', iconName: 'execution' },
-    { path: '/audit', label: 'Audit Report', labelZh: '审计', iconName: 'audit' },
-    { path: '/history', label: 'History', labelZh: '历史', iconName: 'history' },
-    { path: '/intelligence', label: 'Market Intelligence', labelZh: '市场情报', iconName: 'activity' },
-    { path: '/business', label: 'Farm Business', labelZh: '农场经营', iconName: 'layers' },
-    { path: '/scenarios', label: 'Scenarios', labelZh: '场景', iconName: 'scenarios' },
-    { path: '/admin', label: 'Admin', labelZh: '配置', iconName: 'admin' },
+const navGroups = [
+    {
+        titleEn: '1. OBSERVE',
+        titleZh: '1. 感知层 OBSERVE',
+        items: [
+            { path: '/sensors', label: 'Sensors Telemetry', labelZh: '传感遥测', iconName: 'sensors' },
+            { path: '/intelligence', label: 'Market Intelligence', labelZh: '全域情报', iconName: 'activity' },
+        ]
+    },
+    {
+        titleEn: '2. ORIENT',
+        titleZh: '2. 认知层 ORIENT',
+        items: [
+            { path: '/business', label: 'Farm Business & KA', labelZh: '业务与订单', iconName: 'layers' },
+            { path: '/risk', label: 'Risk Assessment', labelZh: '风险研判', iconName: 'risk', alertKey: 'risk' },
+        ]
+    },
+    {
+        titleEn: '3. DECIDE',
+        titleZh: '3. 决策层 DECIDE',
+        items: [
+            { path: '/prescription', label: 'Prescription Matrix', labelZh: '处方决策矩阵', iconName: 'prescription' },
+            { path: '/scenarios', label: 'Scenario Sandbox', labelZh: '情景推演沙盒', iconName: 'scenarios' },
+        ]
+    },
+    {
+        titleEn: '4. ACT',
+        titleZh: '4. 执行层 ACT',
+        items: [
+            { path: '/execution', label: 'Autonomous Dispatch', labelZh: '自治派发调度', iconName: 'execution' },
+        ]
+    },
+    {
+        titleEn: '5. PROVE',
+        titleZh: '5. 存证层 PROVE',
+        items: [
+            { path: '/audit', label: 'Audit & Provenance', labelZh: '审计与溯源凭证', iconName: 'audit' },
+            { path: '/history', label: 'Operational History', labelZh: '历史复盘全景', iconName: 'history' },
+        ]
+    },
+    {
+        titleEn: '6. GOVERN',
+        titleZh: '6. 治理层 GOVERN',
+        items: [
+            { path: '/admin', label: 'Policy Sandbox', labelZh: '策略规则沙盘', iconName: 'admin' },
+        ]
+    }
 ];
 
 export default function Layout() {
@@ -46,6 +81,8 @@ export default function Layout() {
         activeExecution,
         locale,
         setLocale,
+        spatialScope,
+        setSpatialScope,
     } = useStore();
     const navigate = useNavigate();
     const t = (en, zh) => pick(locale, en, zh);
@@ -67,33 +104,83 @@ export default function Layout() {
                 <div className="sidebar-brand">
                     <img src="/sentinel_logo.png" alt="Sentinel" className="sidebar-logo" style={{ width: 52, height: 52, filter: 'drop-shadow(0 0 8px rgba(52,211,153,0.3))' }} />
                     <div>
-                        <div className="sidebar-title" style={{ fontSize: '1.4rem', letterSpacing: 4, fontWeight: 800 }}>SENTINEL</div>
-                        <div className="sidebar-subtitle" style={{ letterSpacing: 2, fontSize: '0.6rem', color: '#64748b' }}>{t('Decision OS', '决策操作系统')}</div>
+                        <div className="sidebar-title" style={{ fontSize: '1.25rem', letterSpacing: 3, fontWeight: 800 }}>SENTINEL</div>
+                        <div className="sidebar-subtitle" style={{ letterSpacing: 1, fontSize: '0.62rem', color: '#38bdf8', fontWeight: 600 }}>{t('GuanHeng · Decision OS', '观衡智序 · 战略决策系统')}</div>
                     </div>
                 </div>
 
                 <nav className="sidebar-nav">
-                    {navItems.map(item => (
+                    {/* Level 0: Strategic Mission Control Cockpit (Above OODA Loops) */}
+                    <div style={{ marginBottom: 12, paddingBottom: 10, borderBottom: '1px solid rgba(148,163,184,0.1)' }}>
+                        <div className="sidebar-section-label" style={{ padding: '0 10px 4px', fontSize: '0.62rem', fontWeight: 800, color: '#38bdf8', letterSpacing: '1px' }}>
+                            LEVEL 0 · {t('STRATEGIC FLIGHT DECK', '全域战略座舱')}
+                        </div>
                         <NavLink
-                            key={item.path}
-                            to={item.path}
+                            to="/"
                             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-                            end={item.path === '/'}
-                            style={{ position: 'relative' }}
+                            end
+                            style={({ isActive }) => ({
+                                position: 'relative',
+                                margin: '2px 0',
+                                background: isActive ? 'linear-gradient(90deg, rgba(56, 189, 248, 0.18), rgba(2, 132, 199, 0.05))' : 'rgba(15, 23, 42, 0.4)',
+                                border: isActive ? '1px solid #38bdf8' : '1px solid rgba(51, 65, 85, 0.4)',
+                                borderRadius: 6,
+                                padding: '8px 10px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 10,
+                                textDecoration: 'none',
+                                transition: 'all 0.2s ease',
+                                boxShadow: isActive ? '0 0 16px rgba(56, 189, 248, 0.25)' : 'none',
+                            })}
                         >
                             {({ isActive }) => (
                                 <>
-                                    <span className="sidebar-icon">
-                                        <Icon name={item.iconName} size={16} className="nav-icon" color={isActive ? '#38bdf8' : '#64748b'} />
+                                    <span className="sidebar-icon" style={{ display: 'flex', alignItems: 'center' }}>
+                                        <Icon name="dashboard" size={17} color={isActive ? '#38bdf8' : '#94a3b8'} />
                                     </span>
-                                    <span className="sidebar-label">{t(item.label, item.labelZh)}</span>
-                                    {item.alertKey === 'risk' && showRiskBadge && <span className="nav-badge" />}
-                                    {item.path === '/prescription' && approvalQueue.length > 0 && (
-                                        <span className="nav-approval-badge">{approvalQueue.length}</span>
-                                    )}
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <div style={{ fontSize: '0.82rem', fontWeight: 800, color: isActive ? '#38bdf8' : '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            {t('Mission Control', '全域战备指挥中心')}
+                                        </div>
+                                        <div style={{ fontSize: '0.62rem', color: '#64748b' }}>
+                                            {t('Common Operating Picture', '900亩全景态势一张图')}
+                                        </div>
+                                    </div>
+                                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#00e5a3', boxShadow: '0 0 6px #00e5a3' }} />
                                 </>
                             )}
                         </NavLink>
+                    </div>
+
+                    {navGroups.map(group => (
+                        <div key={group.titleEn} className="sidebar-group" style={{ marginBottom: 10 }}>
+                            <div className="sidebar-section-label" style={{ padding: '4px 10px 2px', fontSize: '0.62rem', fontWeight: 800, color: '#475569', letterSpacing: '1px' }}>
+                                {t(group.titleEn, group.titleZh)}
+                            </div>
+                            {group.items.map(item => (
+                                <NavLink
+                                    key={item.path}
+                                    to={item.path}
+                                    className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                                    end={item.path === '/'}
+                                    style={{ position: 'relative', margin: '1px 0' }}
+                                >
+                                    {({ isActive }) => (
+                                        <>
+                                            <span className="sidebar-icon">
+                                                <Icon name={item.iconName} size={15} className="nav-icon" color={isActive ? '#38bdf8' : '#64748b'} />
+                                            </span>
+                                            <span className="sidebar-label" style={{ fontSize: '0.78rem' }}>{t(item.label, item.labelZh)}</span>
+                                            {item.alertKey === 'risk' && showRiskBadge && <span className="nav-badge" />}
+                                            {item.path === '/prescription' && approvalQueue.length > 0 && (
+                                                <span className="nav-approval-badge">{approvalQueue.length}</span>
+                                            )}
+                                        </>
+                                    )}
+                                </NavLink>
+                            ))}
+                        </div>
                     ))}
                 </nav>
 
@@ -115,11 +202,70 @@ export default function Layout() {
 
             <div className="main-wrapper">
                 <header className="topbar">
-                    <div className="topbar-left">
+                    <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        <div className="spatial-scope-cabin" style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            background: 'rgba(15, 23, 42, 0.75)',
+                            border: '1px solid rgba(56, 189, 248, 0.25)',
+                            borderRadius: 8,
+                            padding: '2px 4px',
+                            gap: 3,
+                            backdropFilter: 'blur(8px)',
+                        }}>
+                            {[
+                                { id: 'all', labelEn: '900-Mu Global', labelZh: '900亩全域', defaultField: 'BS-B3' },
+                                { id: 'zone-a', labelEn: 'Zone A Greenhouse (350μ)', labelZh: 'A区 智能温室 (350亩)', defaultField: 'BS-B3' },
+                                { id: 'zone-b', labelEn: 'Zone B Rain Shelter (400μ)', labelZh: 'B区 避雨大棚 (400亩)', defaultField: 'YN-A2' },
+                                { id: 'zone-c', labelEn: 'Zone C CA Storage (150μ)', labelZh: 'C区 气调中心 (150亩)', defaultField: 'ZONE-C' },
+                            ].map(btn => {
+                                const isActive = (spatialScope || 'all') === btn.id;
+                                return (
+                                    <button
+                                        key={btn.id}
+                                        type="button"
+                                        onClick={() => {
+                                            setSpatialScope(btn.id);
+                                            if (btn.defaultField && fields[btn.defaultField]) {
+                                                setActiveField(btn.defaultField);
+                                            }
+                                        }}
+                                        style={{
+                                            padding: '4px 8px',
+                                            borderRadius: 6,
+                                            border: isActive ? '1px solid rgba(56, 189, 248, 0.6)' : '1px solid transparent',
+                                            background: isActive ? 'linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(14, 165, 233, 0.15))' : 'transparent',
+                                            color: isActive ? '#38bdf8' : '#94a3b8',
+                                            fontSize: '0.68rem',
+                                            fontWeight: isActive ? 700 : 500,
+                                            cursor: 'pointer',
+                                            transition: 'all 0.15s ease',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 4,
+                                            whiteSpace: 'nowrap',
+                                        }}
+                                        title={locale === 'zh' ? `切换至${btn.labelZh}` : `Switch to ${btn.labelEn}`}
+                                    >
+                                        {locale === 'zh' ? btn.labelZh : btn.labelEn}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
                         <select
                             className="field-selector"
                             value={activeFieldId}
                             onChange={e => setActiveField(e.target.value)}
+                            style={{
+                                fontSize: '0.7rem',
+                                padding: '3px 8px',
+                                borderRadius: 6,
+                                background: 'rgba(30, 41, 59, 0.8)',
+                                border: '1px solid rgba(100, 116, 139, 0.3)',
+                                color: '#94a3b8',
+                                height: 28,
+                            }}
                         >
                             {Object.values(fields).map(f => (
                                 <option key={f.id} value={f.id}>{locale === 'zh' ? (f.nameZh || f.name) : f.name}</option>
@@ -223,7 +369,7 @@ export default function Layout() {
 
                 <main className="main-content">
                     {orderSection === 'risk' && !activeScenario && <OperationsHeartbeat detail />}
-                    {['', 'sensors', 'risk', 'prescription', 'execution', 'audit', 'history', 'business'].includes(orderSection) && <OrderRunPanel key={orderSection} section={orderSection} />}
+                    {['', 'sensors', 'risk', 'execution', 'audit', 'history', 'business'].includes(orderSection) && <OrderRunPanel key={orderSection} section={orderSection} />}
                     <Outlet />
                 </main>
                 <SubtitleOverlay />

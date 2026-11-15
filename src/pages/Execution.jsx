@@ -8,6 +8,9 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieCha
 import { executionRecords as historicalExecutionRecords, assetRoster } from '../data/mockData';
 import AssetMonitor from '../components/AssetMonitor';
 import { pick, localeTag } from '../i18n/locale.js';
+import { ENTERPRISE_ORDERS } from '../data/ordersData';
+import OrderDossierModal from '../components/OrderDossierModal';
+import MetricCard from '../components/MetricCard';
 
 export default function Execution() {
     const {
@@ -83,29 +86,27 @@ export default function Execution() {
             ['Temperature', '温度'],
             ['Botrytis', '灰霉病原'],
             ['Gray Mold', '灰霉病'],
-            ['Drone', '无人机'],
-            ['Field Team', '田间团队'],
-            ['Actor', '主体'],
-            ['operator', '人工操作员'],
-            ['Safety Officer', '安全官'],
-            ['Control Engineer', '控制工程师'],
-            ['Field Operator', '田间作业员'],
-            ['Data Retriever', '数据采集员'],
-            ['Remote Sensor Pilot', '远程传感操控员'],
-            ['Drone Operator', '无人机作业员'],
-            ['Ops Manager', '运营经理'],
-            ['Learning Engineer', '学习工程师'],
-            ['Compliance Officer', '合规官'],
-            ['Crop Chemist', '植保化学师'],
-            ['Field Agronomist', '田间农艺师'],
-            ['Greenhouse Agronomist', '温室农艺师'],
-            ['Finance Analyst', '财务分析师'],
-            ['Sales Planner', '销售规划师'],
-            ['Control Engineer', '控制工程师'],
-            ['Field Team', '田间团队'],
-            ['IoT Control', 'IoT 控制系统'],
-            ['Irrigation System', '灌溉系统'],
-            ['Field 人工作业员', '田间作业员'],
+            ['Drone', '无人机作业'],
+            ['Field Team', '采收班组'],
+            ['Actor', '执行主体'],
+            ['operator', '现场作业'],
+            ['Safety Officer', '安全防灾'],
+            ['Control Engineer', '环境自控'],
+            ['Field Operator', '采收调度'],
+            ['Data Retriever', '遥测感知'],
+            ['Remote Sensor Pilot', '遥测感知'],
+            ['Drone Operator', '无人机作业'],
+            ['Ops Manager', '运营管理'],
+            ['Learning Engineer', '算法模型'],
+            ['Compliance Officer', '法规合规'],
+            ['Crop Chemist', '植保病理'],
+            ['Field Agronomist', '田间农艺'],
+            ['Greenhouse Agronomist', '设施温室'],
+            ['Finance Analyst', '财务核算'],
+            ['Sales Planner', '销售履约'],
+            ['IoT Control', '环境自控总线'],
+            ['Irrigation System', '水肥灌溉系统'],
+            ['Field 人工作业员', '采收作业员'],
             ['无人机人工操作员', '无人机作业员'],
         ];
         tokenMap.forEach(([en, zh]) => {
@@ -122,6 +123,8 @@ export default function Execution() {
     const [actorProgress, setActorProgress] = useState({});
     const [elapsedSec, setElapsedSec] = useState(0);
     const [selectedPreviousExecutionId, setSelectedPreviousExecutionId] = useState(null);
+    const [execViewTab, setExecViewTab] = useState('focal');
+    const [selectedOrder, setSelectedOrder] = useState(null);
 
     useEffect(() => {
         if (!execution) return;
@@ -219,23 +222,101 @@ export default function Execution() {
                     </p>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
-                    {execution && (
-                        <button className="btn btn-secondary" onClick={startExecutionThinking} disabled={isThinking}>
-                            <Icon name="reasoning" size={14} /> {t('AI Analysis', 'AI 分析')}
-                        </button>
-                    )}
                     {execution && execution.status !== 'completed' && (
                         <button className="btn btn-primary" onClick={completeExecution} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <Icon name="check" size={14} /> {t('Complete Execution', '完成执行')}
+                            <Icon name="check" size={14} /> {t('Complete Execution', '完成现场执行闭环')}
                         </button>
                     )}
                 </div>
             </div>
 
-            {/* AI Thinking Panel */}
-            {(thinkingChain.length > 0 && thinkingContext === 'execution') && (
-                <AIThinkingPanel chain={thinkingChain} isThinking={isThinking} onComplete={stopThinking} />
-            )}
+            {/* View Mode Toggle: Focal Plan B vs 12 Orders Enterprise Dispatch */}
+            <div style={{ display: 'flex', gap: 10, marginBottom: 16, background: 'rgba(15, 23, 42, 0.6)', padding: 6, borderRadius: 8, border: '1px solid rgba(148, 163, 184, 0.15)' }}>
+                <button
+                    type="button"
+                    onClick={() => setExecViewTab('focal')}
+                    style={{
+                        flex: 1,
+                        padding: '10px 16px',
+                        borderRadius: 6,
+                        border: 'none',
+                        background: execViewTab === 'focal' ? 'rgba(0, 229, 163, 0.15)' : 'transparent',
+                        color: execViewTab === 'focal' ? '#00e5a3' : '#94a3b8',
+                        fontWeight: execViewTab === 'focal' ? 800 : 500,
+                        fontSize: '0.85rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 8,
+                        transition: 'all 0.2s',
+                        boxShadow: execViewTab === 'focal' ? 'inset 0 0 0 1px #00e5a3' : 'none'
+                    }}
+                >
+                    <Icon name="prescription" size={16} color={execViewTab === 'focal' ? '#00e5a3' : '#64748b'} />
+                    {t('Plan B Focal Ticket Orchestration (750 kg Hema · WO-B3)', '决策冲突焦点工单多主体调度 (方案 B · 盒马 750kg 工单)')}
+                </button>
+
+                <button
+                    type="button"
+                    onClick={() => setExecViewTab('enterprise_orders')}
+                    style={{
+                        flex: 1,
+                        padding: '10px 16px',
+                        borderRadius: 6,
+                        border: 'none',
+                        background: execViewTab === 'enterprise_orders' ? 'rgba(56, 189, 248, 0.15)' : 'transparent',
+                        color: execViewTab === 'enterprise_orders' ? '#38bdf8' : '#94a3b8',
+                        fontWeight: execViewTab === 'enterprise_orders' ? 800 : 500,
+                        fontSize: '0.85rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 8,
+                        transition: 'all 0.2s',
+                        boxShadow: execViewTab === 'enterprise_orders' ? 'inset 0 0 0 1px #38bdf8' : 'none'
+                    }}
+                >
+                    <Icon name="layers" size={16} color={execViewTab === 'enterprise_orders' ? '#38bdf8' : '#64748b'} />
+                    {t('900-Mu Facility: 12 Enterprise Orders Live Dispatch Board (12,450 kg · 5 Trucks)', '900 亩全园 12 批企业订单当日履约派发调度总览 (12,450 kg · 5 专车 · 120 技工)')}
+                </button>
+            </div>
+
+            {execViewTab === 'focal' && (
+                <>
+            {/* 处方室批准方案与执行工单承接横幅 */}
+            <div className="card" style={{ marginBottom: 16, background: 'linear-gradient(135deg, rgba(30,58,138,0.25) 0%, rgba(15,23,42,0.65) 100%)', border: '1px solid #1e3a8a', borderLeft: '4px solid #38bdf8', padding: '14px 18px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                        <div style={{ width: 44, height: 44, borderRadius: 8, background: 'rgba(56,189,248,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Icon name="prescription" size={22} color="#38bdf8" />
+                        </div>
+                        <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                                <span style={{ fontSize: '0.92rem', fontWeight: 700, color: '#f1f5f9' }}>
+                                    {t('Execution Source: Prescription Room Approved Plan B (North Greenhouse Dawn Harvest + Plan C CA Buffer)', '现场执行承接：处方决策室批准之【方案 B：北区日光温室拂晓抢收 + 气调库应急缓冲方案 C】')}
+                                </span>
+                                <span style={{ padding: '2px 8px', borderRadius: 4, background: 'rgba(52,211,153,0.15)', color: '#34d399', fontSize: '0.72rem', fontWeight: 700, border: '1px solid rgba(52,211,153,0.3)' }}>
+                                    工单 WO-B3-2026-001
+                                </span>
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: 4, display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+                                <span><strong style={{ color: '#cbd5e1' }}>目标客户：</strong>盒马鲜生 (SLA 交付 750kg 特级果 18mm+)</span>
+                                <span><strong style={{ color: '#cbd5e1' }}>锁定边际贡献：</strong><span style={{ color: '#34d399', fontWeight: 600 }}>+¥45,800</span> (毛利率 93.9%)</span>
+                                <span><strong style={{ color: '#cbd5e1' }}>GS1 存证哈希：</strong><code style={{ color: '#38bdf8' }}>1AAD49H2</code> (7/7 法定安全门禁全票通过)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '0.72rem', color: '#64748b', alignSelf: 'center' }}>协同执行主体：</span>
+                        <span style={{ padding: '3px 8px', borderRadius: 4, background: 'rgba(56,189,248,0.12)', color: '#38bdf8', fontSize: '0.7rem' }}>A12 采收调度</span>
+                        <span style={{ padding: '3px 8px', borderRadius: 4, background: 'rgba(168,85,247,0.12)', color: '#c084fc', fontSize: '0.7rem' }}>A10 环境自控</span>
+                        <span style={{ padding: '3px 8px', borderRadius: 4, background: 'rgba(52,211,153,0.12)', color: '#34d399', fontSize: '0.7rem' }}>A05 品质追溯</span>
+                        <span style={{ padding: '3px 8px', borderRadius: 4, background: 'rgba(244,63,94,0.12)', color: '#fb7185', fontSize: '0.7rem' }}>A11 无人机作业</span>
+                    </div>
+                </div>
+            </div>
 
             {/* 鈹佲攣鈹?Execution Status Banner 鈹佲攣鈹?*/}
             {execution && (
@@ -653,6 +734,203 @@ export default function Execution() {
                 </div>
             )}
 
+                            </>
+            )}
+
+            {/* ════════════════════════════════════════════════════════════════════════════
+                VIEW 2: 900-MU FACILITY 12 ENTERPRISE ORDERS LIVE DISPATCH BOARD
+               ════════════════════════════════════════════════════════════════════════════ */}
+            {execViewTab === 'enterprise_orders' && (
+                <div>
+                    {/* 4 Hero Dispatch KPIs */}
+                    <div className="grid grid-4" style={{ gap: 12, marginBottom: 16 }}>
+                        <MetricCard
+                            label={t('Total Dispatched Volume Today', '全园当日采收出库总量')}
+                            value="12,450 kg"
+                            subtitle={t('12 Orders · Capacity Load 93.6%', '12 批重点订单 · 产能负荷率 93.6%')}
+                            status="low"
+                            icon="box"
+                        />
+                        <MetricCard
+                            label={t('Field Crews & Specialized Staff', '在岗作业班组与技工')}
+                            value="120 人"
+                            subtitle={t('Zone A 38 (Gloves) · Zone B 62 · CA QA 20', 'A区温室38人 · B区大棚62人 · C区质检20人')}
+                            status="low"
+                            icon="users"
+                        />
+                        <MetricCard
+                            label={t('Active Cold-Chain Transits', '在途冷链温控保障车队')}
+                            value="5 辆专车"
+                            subtitle={t('Southwest 4 Trucks + Changshui Air Express', '成渝/贵阳/南宁 4 车 + 长水空港航线 1 车')}
+                            status="low"
+                            icon="refresh"
+                        />
+                        <MetricCard
+                            label={t('Autonomous Machinery Units', '智能农机自动化协同单元')}
+                            value="12 台/组"
+                            subtitle={t('2 DJI T50 Drones · 4 CA Compressors · 6 Traps', '2台大疆T50无人机 · 4组气调机 · 6处诱捕哨兵')}
+                            status="low"
+                            icon="drone"
+                        />
+                    </div>
+
+                    {/* 12 Enterprise Orders Live Dispatch Table */}
+                    <div className="card" style={{ padding: 16, marginBottom: 16 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 10 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <Icon name="layers" size={18} color="#38bdf8" />
+                                <h3 className="card-title" style={{ margin: 0, fontSize: '0.95rem' }}>
+                                    {t('900-Mu Facility: 12 Enterprise Contracts Autonomous Dispatch Ledger', '云南澄江 900 亩基地 12 批重点企业直供订单自治派发调度总台账')}
+                                </h3>
+                            </div>
+                            <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                                {t('Click any order to view full multi-agent fulfillment & audit dossier', '点击任意订单卡片可下钻查阅 5 维度履约与合规审计档案')}
+                            </span>
+                        </div>
+
+                        <div style={{ overflowX: 'auto' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.76rem' }}>
+                                <thead>
+                                    <tr style={{ borderBottom: '1px solid rgba(148,163,184,0.15)', background: 'rgba(15,23,42,0.6)', color: '#94a3b8' }}>
+                                        <th style={{ padding: '10px 12px', textAlign: 'left' }}>{t('Order / Client', '订单编号 / 采购客户')}</th>
+                                        <th style={{ padding: '10px 12px', textAlign: 'left' }}>{t('Category', '业务类型')}</th>
+                                        <th style={{ padding: '10px 12px', textAlign: 'left' }}>{t('Specs & Quantity', '规格 / 签约总量')}</th>
+                                        <th style={{ padding: '10px 12px', textAlign: 'left' }}>{t('Allocated Zone & Labor', '指定采收产区与在岗班组')}</th>
+                                        <th style={{ padding: '10px 12px', textAlign: 'left' }}>{t('Cold Chain Routing', '冷链干线 / 运力承接')}</th>
+                                        <th style={{ padding: '10px 12px', textAlign: 'left' }}>{t('Dispatch Progress', '派发履约执行进度')}</th>
+                                        <th style={{ padding: '10px 12px', textAlign: 'center' }}>{t('SLA & Gate', '法定门禁 / SLA')}</th>
+                                        <th style={{ padding: '10px 12px', textAlign: 'center' }}>{t('Action', '操作')}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {ENTERPRISE_ORDERS.map(order => {
+                                        const isFocal = order.id === 'BB-2026-HM01';
+                                        return (
+                                            <tr
+                                                key={order.id}
+                                                style={{
+                                                    borderBottom: '1px solid rgba(148,163,184,0.08)',
+                                                    background: isFocal ? 'rgba(0, 229, 163, 0.05)' : 'transparent',
+                                                    transition: 'background 0.15s',
+                                                    cursor: 'pointer'
+                                                }}
+                                                onClick={() => setSelectedOrder(order)}
+                                            >
+                                                <td style={{ padding: '12px', color: '#f1f5f9' }}>
+                                                    <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                        {order.id}
+                                                        {isFocal && (
+                                                            <span style={{ fontSize: '0.62rem', background: '#00e5a3', color: '#090d16', padding: '1px 5px', borderRadius: 3, fontWeight: 800 }}>
+                                                                FOCAL
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div style={{ fontSize: '0.7rem', color: '#38bdf8', marginTop: 2 }}>
+                                                        {isZh ? order.clientZh : order.client}
+                                                    </div>
+                                                </td>
+                                                <td style={{ padding: '12px' }}>
+                                                    <span style={{
+                                                        padding: '2px 6px',
+                                                        borderRadius: 4,
+                                                        fontSize: '0.65rem',
+                                                        background: order.category === 't0' ? 'rgba(56,189,248,0.15)' : 'rgba(148,163,184,0.15)',
+                                                        color: order.category === 't0' ? '#38bdf8' : '#94a3b8',
+                                                        fontWeight: 600
+                                                    }}>
+                                                        {isZh ? order.categoryLabelZh : order.categoryLabel}
+                                                    </span>
+                                                </td>
+                                                <td style={{ padding: '12px' }}>
+                                                    <div style={{ fontWeight: 600, color: '#e2e8f0' }}>{order.quantityKg?.toLocaleString()} kg</div>
+                                                    <div style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
+                                                        ¥{order.pricePerKg}/kg · {isZh ? order.gradeZh : order.grade}
+                                                    </div>
+                                                </td>
+                                                <td style={{ padding: '12px', color: '#cbd5e1' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#38bdf8' }}>
+                                                        <Icon name="facility" size={13} />
+                                                        <span>{isZh ? order.assignedZoneZh : order.assignedZone}</span>
+                                                    </div>
+                                                    <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: 2 }}>
+                                                        {isZh ? order.laborDispatchZh : order.laborDispatch}
+                                                    </div>
+                                                </td>
+                                                <td style={{ padding: '12px', color: '#cbd5e1' }}>
+                                                    <div style={{ fontSize: '0.72rem', color: '#f59e0b' }}>
+                                                        {isZh ? order.logisticsRouteZh : order.logisticsRoute}
+                                                    </div>
+                                                    <div style={{ fontSize: '0.65rem', color: '#64748b', marginTop: 2 }}>
+                                                        {isZh ? order.fleetVehicleZh : order.fleetVehicle}
+                                                    </div>
+                                                </td>
+                                                <td style={{ padding: '12px', minWidth: 140 }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', marginBottom: 4 }}>
+                                                        <span style={{ color: order.dispatchProgressPct === 100 ? '#34d399' : '#38bdf8', fontWeight: 600 }}>
+                                                            {isZh ? order.fulfillmentStatusZh : order.fulfillmentStatus}
+                                                        </span>
+                                                        <span style={{ color: '#94a3b8', fontFamily: 'monospace' }}>{order.dispatchProgressPct}%</span>
+                                                    </div>
+                                                    <div style={{ height: 5, borderRadius: 3, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+                                                        <div style={{
+                                                            width: `${order.dispatchProgressPct}%`,
+                                                            height: '100%',
+                                                            background: order.dispatchProgressPct === 100
+                                                                ? 'linear-gradient(90deg, #10b981, #059669)'
+                                                                : 'linear-gradient(90deg, #38bdf8, #0284c7)',
+                                                            borderRadius: 3
+                                                        }} />
+                                                    </div>
+                                                </td>
+                                                <td style={{ padding: '12px', textAlign: 'center' }}>
+                                                    <div style={{
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: 4,
+                                                        background: 'rgba(52,211,153,0.1)',
+                                                        color: '#34d399',
+                                                        padding: '2px 6px',
+                                                        borderRadius: 4,
+                                                        fontSize: '0.65rem',
+                                                        fontWeight: 700
+                                                    }}>
+                                                        <Icon name="check-circle" size={11} color="#34d399" />
+                                                        PASS 7/7
+                                                    </div>
+                                                    <div style={{ fontSize: '0.62rem', color: '#64748b', marginTop: 2 }}>
+                                                        {order.tempTarget || '1.5°C 稳态'}
+                                                    </div>
+                                                </td>
+                                                <td style={{ padding: '12px', textAlign: 'center' }}>
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSelectedOrder(order);
+                                                        }}
+                                                        style={{
+                                                            padding: '4px 8px',
+                                                            borderRadius: 4,
+                                                            border: '1px solid rgba(56,189,248,0.4)',
+                                                            background: 'rgba(56,189,248,0.1)',
+                                                            color: '#38bdf8',
+                                                            fontSize: '0.68rem',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        {t('Dossier', '查阅档案')}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Recent Previous Executions */}
             {previousExecutions.length > 0 && (
                 <div className="card" style={{ marginTop: 20 }}>
@@ -730,9 +1008,15 @@ export default function Execution() {
                     </div>
                 </div>
             )}
+
+
+        
+            {/* Global Order Dossier Modal */}
+            <OrderDossierModal
+                order={selectedOrder}
+                onClose={() => setSelectedOrder(null)}
+                locale={locale}
+            />
         </div>
     );
 }
-
-
-

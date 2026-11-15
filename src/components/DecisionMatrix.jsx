@@ -1,13 +1,15 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useStore from '../engine/store';
+import { callGeminiAI } from '../utils/geminiClient';
 import { pick } from '../i18n/locale.js';
 import Icon from './Icon';
+import Tooltip from './Tooltip';
 import { DECISION_SCENARIOS } from '../data/decisionMatrixScenarios.js';
 
-export default function DecisionMatrix({ customScenario = null, onAuthorize = null }) {
+export default function DecisionMatrix({ customScenario = null, onAuthorize = null, selectedPlan: propSelectedPlan = null, onSelectPlan = null }) {
     const navigate = useNavigate();
-    const { locale, activeScenario } = useStore();
+    const { locale, activeScenario, policyConfig } = useStore();
     const t = (en, zh) => pick(locale, en, zh);
     const isZh = locale === 'zh';
 
@@ -21,8 +23,13 @@ export default function DecisionMatrix({ customScenario = null, onAuthorize = nu
     }
     const config = DECISION_SCENARIOS[scenarioKey] || DECISION_SCENARIOS.PEST_PHI;
 
-    // Selected plan state: 'B' by default, or 'A', 'C'
-    const [selectedPlan, setSelectedPlan] = useState('B');
+    // Selected plan state: controlled by parent if provided, otherwise internal
+    const [internalPlan, setInternalPlan] = useState('B');
+    const selectedPlan = propSelectedPlan !== null ? propSelectedPlan : internalPlan;
+    const setSelectedPlan = (plan) => {
+        setInternalPlan(plan);
+        if (onSelectPlan) onSelectPlan(plan);
+    };
     // Simulated boundary conditions
     const [boundaryConditions, setBoundaryConditions] = useState({
         droneDown: false,
@@ -38,6 +45,26 @@ export default function DecisionMatrix({ customScenario = null, onAuthorize = nu
     const [dispatchReceipt, setDispatchReceipt] = useState(null);
     // Mobile active tab ('A', 'B', 'C') for small screens
     const [mobileTab, setMobileTab] = useState('B');
+    // Live Gemini Debate State
+    const [geminiDebateLoading, setGeminiDebateLoading] = useState(false);
+    const [geminiDebateText, setGeminiDebateText] = useState(null);
+
+    async function handleTriggerGeminiDebate() {
+        setGeminiDebateLoading(true);
+        const promptText = `As the Sentinel 7.9 Strategic Multi-Agent Debate Engine for Yunnan Chengjiang 900-Mu Blueberry Base, analyze the decision between Plan A, Plan B, and Plan C for the 750kg Grade A blueberry order under the current scenario (${config.titleZh || '蓟马虫害与72h PHI冲突'}).
+Selected plan: Plan ${selectedPlan}.
+1. Contrast the three options from the perspectives of Agronomy, Compliance, and Finance.
+2. Clearly explain why Plan A must be vetoed under GB 2763, why Plan B is the optimal lead (+¥48,750 net margin, 96.8% bloom), and under what specific boundary condition Plan C flips to the lead.
+Provide a crisp, multi-agent debate summary in ${isZh ? 'Chinese' : 'English'}.`;
+
+        const result = await callGeminiAI({
+            prompt: promptText,
+            model: 'gemini-1.5-flash',
+            context: { scenarioKey, selectedPlan, order: '750kg Hema' }
+        });
+        setGeminiDebateText({ text: result.text, source: result.source });
+        setGeminiDebateLoading(false);
+    }
 
     // Effective lead plan calculation based on boundary conditions
     const effectiveLead = useMemo(() => {
@@ -73,7 +100,7 @@ export default function DecisionMatrix({ customScenario = null, onAuthorize = nu
             };
             let capacity = {
                 label: t('CAPACITY', '产能门禁'),
-                value: t('28 Pickers Ready', '28人班组锁定'),
+                value: t('28 Crew Members Ready', '28人班组锁定'),
                 status: 'RESERVED',
                 statusZh: '资源锁定',
                 pass: true,
@@ -86,7 +113,7 @@ export default function DecisionMatrix({ customScenario = null, onAuthorize = nu
                     status: 'BLOCKED',
                     statusZh: '超限拦截',
                     pass: false,
-                    detail: t('28 pickers can only harvest 400kg in morning hours; 1-day deadline causes 800kg shortfall', '28名工人单日晨间仅可抢收400kg，1天工期面临800kg缺口'),
+                    detail: t('28 harvest technicians can only harvest 400kg in morning hours; 1-day deadline causes 800kg shortfall', '28名采收人员单日晨间仅可抢收400kg，1天工期面临800kg缺口'),
                 };
             }
             return { quality, compliance, capacity };
@@ -174,7 +201,7 @@ export default function DecisionMatrix({ customScenario = null, onAuthorize = nu
                 status: 'BLOCKED',
                 statusZh: '超限拦截',
                 pass: false,
-                detail: t('25 pickers can only pick 300kg/day; 1-day deadline causes 450kg shortfall', '25名采工日产能仅300kg，1天工期短缺450kg'),
+                detail: t('25 harvest technicians can only pick 300kg/day; 1-day deadline causes 450kg shortfall', '25名专业采收人员日产能仅300kg，1天工期短缺450kg'),
             };
         }
         return { quality, compliance, capacity };
@@ -253,23 +280,76 @@ export default function DecisionMatrix({ customScenario = null, onAuthorize = nu
                 </div>
             </div>
 
+            {/* Real-time Policy Sandbox Impact Pill */}
+            {policyConfig && (
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    background: policyConfig.preset === 'ka_fast'
+                        ? 'rgba(245, 158, 11, 0.12)'
+                        : policyConfig.preset === 'l4_full'
+                            ? 'rgba(168, 85, 247, 0.12)'
+                            : 'rgba(56, 189, 248, 0.08)',
+                    border: `1px solid ${policyConfig.preset === 'ka_fast' ? 'rgba(245, 158, 11, 0.4)' : policyConfig.preset === 'l4_full' ? 'rgba(168, 85, 247, 0.4)' : 'rgba(56, 189, 248, 0.25)'}`,
+                    borderRadius: 6,
+                    padding: '6px 12px',
+                    marginBottom: 12,
+                    fontSize: '0.72rem'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{
+                            background: policyConfig.preset === 'ka_fast' ? '#f59e0b' : policyConfig.preset === 'l4_full' ? '#a855f7' : '#38bdf8',
+                            color: '#090d16',
+                            fontWeight: 800,
+                            padding: '1px 6px',
+                            borderRadius: 3,
+                            fontSize: '0.62rem'
+                        }}>
+                            {policyConfig.preset === 'ka_fast' ? 'KA FAST (沙盘生效)' : policyConfig.preset === 'l4_full' ? 'L4 FULL AUTONOMOUS' : 'L3 STRICT (合规基准)'}
+                        </span>
+                        <span style={{ color: '#cbd5e1' }}>
+                            {policyConfig.preset === 'ka_fast'
+                                ? t('Simulation policy active: PHI tolerance -6h enabled. Plan A unlocked for experimental comparison (34.2% audit risk).', '治理沙盘策略已生效：启用 -6h PHI 容忍度，方案 A 实验性参与博弈比选（伴随 34.2% 渠道拒收抽检风险）。')
+                                : policyConfig.preset === 'l4_full'
+                                    ? t('Simulation policy active: Full L4 autonomy mode. Zero manual sign-offs required; Plan B ready for instant robotic dispatch.', '治理沙盘策略已生效：L4 全无人化巡航模式，无需现场主管人工签批，推荐方案 B 毫秒级闭环下发。')
+                                    : t('Baseline strict policy: 100% rigid GB 2763 statutory gates enforced. Plan A strictly vetoed by A08 Compliance.', '当前执行严格法定合规策略：GB 2763 门禁刚性联锁，A08 法规合规主体一票否决方案 A。')}
+                        </span>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => navigate('/admin')}
+                        style={{ background: 'transparent', border: 'none', color: '#38bdf8', cursor: 'pointer', fontSize: '0.68rem', fontWeight: 700 }}
+                    >
+                        {t('Adjust in Governance →', '前往治理沙盘调整 →')}
+                    </button>
+                </div>
+            )}
+
             {/* ── 1. Top 5 Operational Gold KPIs ── */}
             <div className="dm-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10, marginBottom: 16 }}>
                 {config.kpis.map((kpi, idx) => (
-                    <div key={idx} style={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: 8, padding: '10px 14px', position: 'relative' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: 1, color: '#94a3b8' }}>
-                                {t(kpi.labelEn, kpi.labelZh)}
-                            </span>
-                            {kpi.delta && <span style={{ color: kpi.deltaColor || '#00e5a3', fontSize: '0.75rem' }}>{kpi.delta}</span>}
+                    <Tooltip
+                        key={idx}
+                        title={t(kpi.labelEn, kpi.labelZh)}
+                        content={t(kpi.noteEn, kpi.noteZh)}
+                        delayMs={1000}
+                    >
+                        <div style={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: 8, padding: '10px 14px', position: 'relative', width: '100%', cursor: 'help' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: 1, color: '#94a3b8' }}>
+                                    {t(kpi.labelEn, kpi.labelZh)} 
+                                </span>
+                                {kpi.delta && <span style={{ color: kpi.deltaColor || '#00e5a3', fontSize: '0.75rem' }}>{kpi.delta}</span>}
+                            </div>
+                            <div style={{ fontSize: idx === 4 ? '1.25rem' : '1.45rem', fontWeight: 800, color: kpi.dynamicColor ? kpi.dynamicColor(currentActivePlan) : kpi.valueColor, margin: '4px 0 2px' }}>
+                                {kpi.dynamicValue ? kpi.dynamicValue(currentActivePlan, t) : kpi.value}
+                            </div>
+                            <div style={{ fontSize: '0.65rem', color: '#64748b' }}>
+                                {t(kpi.noteEn, kpi.noteZh)}
+                            </div>
                         </div>
-                        <div style={{ fontSize: idx === 4 ? '1.25rem' : '1.45rem', fontWeight: 800, color: kpi.dynamicColor ? kpi.dynamicColor(currentActivePlan) : kpi.valueColor, margin: '4px 0 2px' }}>
-                            {kpi.dynamicValue ? kpi.dynamicValue(currentActivePlan, t) : kpi.value}
-                        </div>
-                        <div style={{ fontSize: '0.65rem', color: '#64748b' }}>
-                            {t(kpi.noteEn, kpi.noteZh)}
-                        </div>
-                    </div>
+                    </Tooltip>
                 ))}
             </div>
 
@@ -278,14 +358,14 @@ export default function DecisionMatrix({ customScenario = null, onAuthorize = nu
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <span style={{ fontSize: '0.72rem', fontWeight: 800, letterSpacing: 1, color: '#94a3b8' }}>
-                            {t('SPECIALIST MULTI-AGENT CONSENSUS', '六维多智能体专家博弈')}
+                            {t('MULTI-AGENT CONSENSUS & DEBATE', '14 业务智能体协同博弈')}
                         </span>
                         <span style={{ fontSize: '0.62rem', background: '#00e5a320', color: '#00e5a3', padding: '1px 6px', borderRadius: 4, fontWeight: 700 }}>
-                            6 AGENTS
+                            14 AGENTS
                         </span>
                     </div>
                     <span style={{ fontSize: '0.65rem', color: '#64748b' }}>
-                        {t('Click badge to inspect decision reasoning & evidence', '点击角标查看各智能体研判依据与论据')}
+                        {t('Hover or click badge to inspect reasoning & evidence', '悬浮 1 秒或点击角标查看各智能体研判依据与论据')}
                     </span>
                 </div>
 
@@ -293,27 +373,34 @@ export default function DecisionMatrix({ customScenario = null, onAuthorize = nu
                     {specialists.map(s => {
                         const isSelected = activeSpecialist === s.id;
                         return (
-                            <div
+                            <Tooltip
                                 key={s.id}
-                                onClick={() => setActiveSpecialist(isSelected ? null : s.id)}
-                                style={{
-                                    background: isSelected ? 'rgba(56, 189, 248, 0.15)' : '#0f172a',
-                                    border: `1px solid ${isSelected ? '#38bdf8' : '#1e293b'}`,
-                                    borderRadius: 6, padding: '8px 10px', cursor: 'pointer', transition: 'all 0.2s ease',
-                                }}
+                                title={`${t(s.role, s.roleZh)} · ${s.badge}`}
+                                content={isZh ? (s.evidenceZh || s.claimZh || s.questionZh) : (s.evidence || s.claim || s.question)}
+                                delayMs={1000}
                             >
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-                                    <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#94a3b8' }}>
-                                        {t(s.role, s.roleZh)}
-                                    </span>
-                                    <span style={{ fontSize: '0.58rem', fontWeight: 800, background: `${s.badgeColor}20`, color: s.badgeColor, padding: '1px 4px', borderRadius: 3 }}>
-                                        {s.badge}
-                                    </span>
+                                <div
+                                    onClick={() => setActiveSpecialist(isSelected ? null : s.id)}
+                                    style={{
+                                        background: isSelected ? 'rgba(56, 189, 248, 0.15)' : '#0f172a',
+                                        border: `1px solid ${isSelected ? '#38bdf8' : '#1e293b'}`,
+                                        borderRadius: 6, padding: '8px 10px', cursor: 'pointer', transition: 'all 0.2s ease',
+                                        width: '100%'
+                                    }}
+                                >
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+                                        <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#94a3b8' }}>
+                                            {t(s.role, s.roleZh)}
+                                        </span>
+                                        <span style={{ fontSize: '0.58rem', fontWeight: 800, background: `${s.badgeColor}20`, color: s.badgeColor, padding: '1px 4px', borderRadius: 3 }}>
+                                            {s.badge}
+                                        </span>
+                                    </div>
+                                    <div style={{ fontSize: '0.72rem', fontWeight: 600, color: '#e2e8f0' }}>
+                                        {t(s.question, s.questionZh)}
+                                    </div>
                                 </div>
-                                <div style={{ fontSize: '0.72rem', fontWeight: 600, color: '#e2e8f0' }}>
-                                    {t(s.question, s.questionZh)}
-                                </div>
-                            </div>
+                            </Tooltip>
                         );
                     })}
                 </div>
@@ -335,8 +422,8 @@ export default function DecisionMatrix({ customScenario = null, onAuthorize = nu
                                                 {t(spec.question, spec.questionZh)}
                                             </span>
                                         </div>
-                                        <button onClick={() => setActiveSpecialist(null)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.75rem' }}>
-                                            ✕
+                                        <button onClick={() => setActiveSpecialist(null)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 2, display: 'flex', alignItems: 'center' }} title={t('Close', '关闭')}>
+                                            <Icon name="x" size={13} color="#94a3b8" />
                                         </button>
                                     </div>
                                     <p style={{ fontSize: '0.74rem', color: '#cbd5e1', lineHeight: 1.5, margin: '0 0 6px 0' }}>
@@ -367,161 +454,344 @@ export default function DecisionMatrix({ customScenario = null, onAuthorize = nu
                                 transition: 'all 0.2s',
                             }}
                         >
-                            {p === 'B' ? (effectiveLead === 'B' ? t('✔ Plan B (Lead)', '✔ 方案 B (首选)') : t('Plan B', '方案 B')) :
-                             p === 'C' ? (effectiveLead === 'C' ? t('✔ Plan C (Lead)', '✔ 方案 C (首选)') : t('Plan C (Runner-up)', '方案 C (次优)')) :
+                            {p === 'B' ? (effectiveLead === 'B' ? t('Plan B (Lead)', '方案 B (首选)') : t('Plan B', '方案 B')) :
+                             p === 'C' ? (effectiveLead === 'C' ? t('Plan C (Lead)', '方案 C (首选)') : t('Plan C (Runner-up)', '方案 C (次优)')) :
                              t('Plan A', '方案 A')}
                         </button>
                     ))}
                 </div>
             </div>
 
-            {/* ── 3. Strategy Comparison Matrix ── */}
-            <div className="dm-table-wrapper dm-strategy-table" style={{ border: '1px solid #1e293b', borderRadius: 8, overflowX: 'auto', WebkitOverflowScrolling: 'touch', marginBottom: 16 }}>
-                {/* Header Row */}
-                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr 1fr 1fr', background: '#0c1220', borderBottom: '1px solid #1e293b', padding: '10px 14px', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.68rem', fontWeight: 800, letterSpacing: 1, color: '#64748b' }}>{t('CRITERIA', '决策维度')}</span>
-                    {/* Column A */}
-                    <div
-                        onClick={() => setSelectedPlan('A')}
-                        style={{
-                            cursor: 'pointer', padding: '4px 8px', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                            background: selectedPlan === 'A' ? 'rgba(56, 189, 248, 0.15)' : 'transparent',
-                            border: `1px solid ${selectedPlan === 'A' ? '#38bdf8' : 'transparent'}`,
-                        }}
-                    >
-                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#f8fafc' }}>
-                            {t(plans.A.titleEn, plans.A.titleZh)}
-                        </span>
+            {/* ── 3. Strategy Comparison Matrix: 3 Independent Vertical Strategic Columns ── */}
+            <div style={{ marginBottom: 20 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                    <div>
+                        <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#f8fafc', display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Icon name="layers" size={18} color="#38bdf8" />
+                            {t('Independent Strategic Plan Comparison', '三方案纵向独立立体决策矩阵')}
+                        </h3>
+                        <p style={{ margin: '4px 0 0', fontSize: '0.78rem', color: '#94a3b8' }}>
+                            {t('Click anywhere on a column to focus. The entire strategy card illuminates with active causal reasoning below.', '点击任意卡片即可整体选定，整列泛光高亮并联动下方因果推演。')}
+                        </p>
                     </div>
-                    {/* Column B */}
-                    <div
-                        onClick={() => setSelectedPlan('B')}
-                        style={{
-                            cursor: 'pointer', padding: '4px 8px', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                            background: selectedPlan === 'B' ? 'rgba(0, 229, 163, 0.15)' : 'transparent',
-                            border: `1px solid ${selectedPlan === 'B' ? '#00e5a3' : 'transparent'}`,
-                        }}
-                    >
-                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#00e5a3' }}>
-                            {t(plans.B.titleEn, plans.B.titleZh)}
-                        </span>
-                        {effectiveLead === 'B' && (
-                            <span style={{ fontSize: '0.58rem', fontWeight: 800, color: '#090d16', background: '#00e5a3', padding: '2px 6px', borderRadius: 4 }}>
-                                {t('OPTIMAL', '首选')}
-                            </span>
-                        )}
-                    </div>
-                    {/* Column C */}
-                    <div
-                        onClick={() => setSelectedPlan('C')}
-                        style={{
-                            cursor: 'pointer', padding: '4px 8px', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                            background: selectedPlan === 'C' ? 'rgba(245, 158, 11, 0.15)' : 'transparent',
-                            border: `1px solid ${selectedPlan === 'C' ? '#f59e0b' : 'transparent'}`,
-                        }}
-                    >
-                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: effectiveLead === 'C' ? '#00e5a3' : '#f59e0b' }}>
-                            {t(plans.C.titleEn, plans.C.titleZh)}
-                        </span>
-                        {effectiveLead === 'C' && (
-                            <span style={{ fontSize: '0.58rem', fontWeight: 800, color: '#090d16', background: '#00e5a3', padding: '2px 6px', borderRadius: 4 }}>
-                                {t('OPTIMAL', '首选')}
-                            </span>
-                        )}
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                        {t('Active Focus: Plan ', '当前焦点：方案 ')}<strong style={{ color: selectedPlan === 'B' ? '#00e5a3' : selectedPlan === 'C' ? '#f59e0b' : '#ef4444' }}>{selectedPlan}</strong>
                     </div>
                 </div>
 
-                {/* Row: ACTION */}
-                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr 1fr 1fr', borderBottom: '1px solid #1e293b', padding: '12px 14px', alignItems: 'start', background: '#090e17' }}>
-                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b' }}>{t('ACTION', '核心行动')}</span>
-                    <div style={{ fontSize: '0.74rem', color: '#cbd5e1', lineHeight: 1.4, paddingRight: 10 }}>
-                        <strong style={{ color: '#f8fafc', display: 'block', marginBottom: 2 }}>{t(plans.A.actionHeadEn, plans.A.actionHeadZh)}</strong>
-                        <span style={{ color: '#94a3b8', fontSize: '0.68rem' }}>{t(plans.A.actionSubEn, plans.A.actionSubZh)}</span>
+                <div
+                    className="dm-cards-grid"
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
+                        gap: 16,
+                    }}
+                >
+                    {['A', 'B', 'C'].map(pKey => {
+                        const plan = plans[pKey];
+                        const isSelected = selectedPlan === pKey;
+                        const isLead = effectiveLead === pKey;
+                        const isBlocked = pKey === 'A';
+                        const themeColor = pKey === 'B' ? '#00e5a3' : pKey === 'C' ? '#f59e0b' : '#ef4444';
+
+                        return (
+                            <div
+                                key={pKey}
+                                onClick={() => setSelectedPlan(pKey)}
+                                style={{
+                                    background: isSelected ? `${themeColor}12` : '#0f172a',
+                                    border: isSelected ? `2px solid ${themeColor}` : `1px solid ${themeColor}35`,
+                                    borderRadius: 10,
+                                    padding: 16,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.25s ease',
+                                    boxShadow: isSelected ? `0 0 24px ${themeColor}22` : 'none',
+                                    opacity: isSelected ? 1 : 0.75,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'space-between',
+                                    position: 'relative'
+                                }}
+                            >
+                                {/* Top Badge Row */}
+                                <div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <span style={{
+                                                fontSize: '0.9rem',
+                                                fontWeight: 900,
+                                                color: '#090d16',
+                                                background: themeColor,
+                                                width: 24,
+                                                height: 24,
+                                                borderRadius: '50%',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center'
+                                            }}>
+                                                {pKey}
+                                            </span>
+                                            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: isSelected ? themeColor : '#f8fafc' }}>
+                                                {t(plan.titleEn, plan.titleZh)}
+                                            </span>
+                                        </div>
+                                        {isLead && (
+                                            <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#090d16', background: '#00e5a3', padding: '2px 8px', borderRadius: 4 }}>
+                                                {t('OPTIMAL LEAD', '当前首选')}
+                                            </span>
+                                        )}
+                                        {isBlocked && (
+                                            <span style={{ fontSize: '0.62rem', fontWeight: 800, color: policyConfig?.phiTolerance === 'relaxed' ? '#fbbf24' : '#f87171', background: policyConfig?.phiTolerance === 'relaxed' ? 'rgba(245,158,11,0.2)' : 'rgba(239,68,68,0.2)', padding: '2px 8px', borderRadius: 4 }}>
+                                                {policyConfig?.phiTolerance === 'relaxed' ? t('RELAXED (34.2% RISK)', '沙盘容忍 (34.2%风险)') : t('BLOCKED', '合规阻断')}
+                                            </span>
+                                        )}
+                                        {pKey === 'C' && !isLead && (
+                                            <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#fbbf24', background: 'rgba(245,158,11,0.2)', padding: '2px 8px', borderRadius: 4 }}>
+                                                {t('RUNNER-UP', '强力备选')}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* Section: Action */}
+                                    <div style={{ background: '#090d16', padding: 10, borderRadius: 6, marginBottom: 10, border: '1px solid #1e293b' }}>
+                                        <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b', marginBottom: 4, letterSpacing: 0.5 }}>
+                                            {t('CORE ACTION', '核心行动')}
+                                        </div>
+                                        <strong style={{ fontSize: '0.8rem', color: isSelected ? themeColor : '#f8fafc', display: 'block', marginBottom: 2 }}>
+                                            {t(plan.actionHeadEn, plan.actionHeadZh)}
+                                        </strong>
+                                        <span style={{ fontSize: '0.72rem', color: '#94a3b8', lineHeight: 1.4, display: 'block' }}>
+                                            {t(plan.actionSubEn, plan.actionSubZh)}
+                                        </span>
+                                    </div>
+
+                                    {/* Section: Economics */}
+                                    <div style={{ background: '#090d16', padding: 10, borderRadius: 6, marginBottom: 10, border: '1px solid #1e293b' }}>
+                                        <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b', marginBottom: 4, letterSpacing: 0.5 }}>
+                                            {t('FINANCIAL ACCOUNTING', '经济账测算')}
+                                        </div>
+                                        <div style={{ fontSize: '0.72rem', color: '#94a3b8', lineHeight: 1.5 }}>
+                                            <div>{t(plan.salesEn, plan.salesZh)}</div>
+                                            <div>{t(plan.costEn, plan.costZh)}</div>
+                                            <div style={{ fontSize: '0.82rem', fontWeight: 800, color: isBlocked ? '#94a3b8' : themeColor, marginTop: 4 }}>
+                                                {t(plan.netEn, plan.netZh)}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Section: Compliance & Obligation */}
+                                    <div style={{ background: '#090d16', padding: 10, borderRadius: 6, marginBottom: 10, border: '1px solid #1e293b' }}>
+                                        <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b', marginBottom: 6, letterSpacing: 0.5 }}>
+                                            {t('GATES & COMPLIANCE RATING', '履约与合规评级')}
+                                        </div>
+                                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                                            <span style={{ fontSize: '0.65rem', background: 'rgba(56,189,248,0.15)', color: '#38bdf8', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>
+                                                Crop {plan.scores.crop}
+                                            </span>
+                                            <span style={{ fontSize: '0.65rem', background: plan.scores.comp.startsWith('5') ? 'rgba(0,229,163,0.15)' : 'rgba(239,68,68,0.2)', color: plan.scores.comp.startsWith('5') ? '#00e5a3' : '#f87171', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>
+                                                Compliance {plan.scores.comp}
+                                            </span>
+                                            <span style={{ fontSize: '0.65rem', background: 'rgba(245,158,11,0.2)', color: '#fbbf24', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>
+                                                Cust {plan.scores.cust}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Section: Execution Ease & Flip Condition */}
+                                    <div style={{ background: '#090d16', padding: 10, borderRadius: 6, marginBottom: 12, border: '1px solid #1e293b' }}>
+                                        <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b', marginBottom: 4 }}>
+                                            {t('FLIP & WIN TRIGGER', '胜出与翻转工况')}
+                                        </div>
+                                        <div style={{ fontSize: '0.72rem', color: '#cbd5e1', lineHeight: 1.45 }}>
+                                            {t(plan.winsWhenEn, plan.winsWhenZh)}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Select Button */}
+                                <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); setSelectedPlan(pKey); }}
+                                    style={{
+                                        width: '100%',
+                                        padding: '8px 12px',
+                                        borderRadius: 6,
+                                        fontSize: '0.78rem',
+                                        fontWeight: 800,
+                                        border: isSelected ? `1px solid ${themeColor}` : '1px solid #334155',
+                                        background: isSelected ? themeColor : 'rgba(30, 41, 59, 0.6)',
+                                        color: isSelected ? '#090d16' : '#94a3b8',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: 6
+                                    }}
+                                >
+                                    {isSelected ? (
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                            <Icon name="check-circle" size={13} color="#090d16" />
+                                            {t('Plan ' + pKey + ' Selected (Active)', '当前已选定方案 ' + pKey)}
+                                        </span>
+                                    ) : t('Select Plan ' + pKey, '切换选定方案 ' + pKey)}
+                                </button>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* ── Dynamic Causal Attribution & Specialist Matrix (Linked to Selected Plan) ── */}
+            <div style={{ background: '#0a0f1d', border: '1px solid #1e293b', borderLeft: `4px solid ${selectedPlan === 'B' ? '#00e5a3' : selectedPlan === 'C' ? '#f59e0b' : '#ef4444'}`, borderRadius: 8, padding: 16, marginBottom: 20 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Icon name="brain" size={18} color={selectedPlan === 'B' ? '#00e5a3' : selectedPlan === 'C' ? '#f59e0b' : '#ef4444'} />
+                        <h3 style={{ margin: 0, fontSize: '0.98rem', color: '#f8fafc' }}>
+                            {t('Dynamic Causal Analysis: Deep Dive into Plan ', '方案深度因果归因与推演报告 · 聚焦方案 ')}
+                            <span style={{ color: selectedPlan === 'B' ? '#00e5a3' : selectedPlan === 'C' ? '#f59e0b' : '#ef4444' }}>{selectedPlan}</span>
+                        </h3>
                     </div>
-                    <div style={{ fontSize: '0.74rem', color: '#cbd5e1', lineHeight: 1.4, paddingRight: 10 }}>
-                        <strong style={{ color: '#00e5a3', display: 'block', marginBottom: 2 }}>{t(plans.B.actionHeadEn, plans.B.actionHeadZh)}</strong>
-                        <span style={{ color: '#94a3b8', fontSize: '0.68rem' }}>{t(plans.B.actionSubEn, plans.B.actionSubZh)}</span>
-                    </div>
-                    <div style={{ fontSize: '0.74rem', color: '#cbd5e1', lineHeight: 1.4 }}>
-                        <strong style={{ color: '#fbbf24', display: 'block', marginBottom: 2 }}>{t(plans.C.actionHeadEn, plans.C.actionHeadZh)}</strong>
-                        <span style={{ color: '#94a3b8', fontSize: '0.68rem' }}>{t(plans.C.actionSubEn, plans.C.actionSubZh)}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                        <button
+                            type="button"
+                            onClick={handleTriggerGeminiDebate}
+                            disabled={geminiDebateLoading}
+                            style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 6,
+                                background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(168, 85, 247, 0.25))',
+                                border: '1px solid rgba(168, 85, 247, 0.5)',
+                                color: '#e0e7ff', padding: '4px 10px', borderRadius: 6,
+                                fontSize: '0.72rem', fontWeight: 700, cursor: geminiDebateLoading ? 'wait' : 'pointer',
+                                boxShadow: '0 2px 8px rgba(168, 85, 247, 0.2)'
+                            }}
+                        >
+                            <Icon name="brain" size={13} color="#c084fc" />
+                            {geminiDebateLoading
+                                ? t('Synthesizing Live Gemini AI Debate...', 'Gemini 真实博弈推演生成中...')
+                                : t('Live Gemini Causal Debate', '唤醒 Gemini 深度博弈推演')}
+                        </button>
+                        <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
+                            {t('Linked to Scenario: ', '当前联动场景：')}<strong style={{ color: '#38bdf8' }}>{t(config.titleEn || 'PEST_PHI', config.titleZh || '蓟马虫害与安全期')}</strong>
+                        </span>
                     </div>
                 </div>
 
-                {/* Row: ECONOMICS */}
-                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr 1fr 1fr', borderBottom: '1px solid #1e293b', padding: '12px 14px', alignItems: 'center', background: '#0a101d' }}>
-                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b' }}>{t('ECONOMICS*', '经济账核算')}</span>
-                    <div style={{ fontSize: '0.72rem', color: '#94a3b8', lineHeight: 1.5 }}>
-                        <div>{t(plans.A.salesEn, plans.A.salesZh)}</div>
-                        <div>{t(plans.A.costEn, plans.A.costZh)}</div>
-                        <div style={{ fontWeight: 800, color: '#cbd5e1' }}>{t(plans.A.netEn, plans.A.netZh)}</div>
-                    </div>
-                    <div style={{ fontSize: '0.72rem', color: '#94a3b8', lineHeight: 1.5 }}>
-                        <div>{t(plans.B.salesEn, plans.B.salesZh)}</div>
-                        <div>{t(plans.B.costEn, plans.B.costZh)}</div>
-                        <div style={{ fontWeight: 800, color: '#00e5a3', fontSize: '0.78rem' }}>
-                            {t(plans.B.netEn, plans.B.netZh)}
+                {/* Real-Time Live Gemini Debate Stream Box */}
+                {geminiDebateText && (
+                    <div style={{
+                        marginTop: 10, marginBottom: 14,
+                        padding: '12px 16px', borderRadius: 8,
+                        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(88, 28, 135, 0.25))',
+                        border: '1px solid rgba(168, 85, 247, 0.5)',
+                        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.4)'
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                            <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#c084fc', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <Icon name="brain" size={15} color="#c084fc" />
+                                {t('Google Gemini Strategic Multi-Agent Debate Simulation', 'Google Gemini 实时多智能体战备博弈推演')}
+                            </span>
+                            <span style={{ fontSize: '0.65rem', color: '#a855f7', background: 'rgba(168, 85, 247, 0.15)', padding: '2px 8px', borderRadius: 4, border: '1px solid rgba(168, 85, 247, 0.3)' }}>
+                                {geminiDebateText.source}
+                            </span>
+                        </div>
+                        <div style={{ fontSize: '0.78rem', color: '#e2e8f0', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                            {geminiDebateText.text}
                         </div>
                     </div>
-                    <div style={{ fontSize: '0.72rem', color: '#94a3b8', lineHeight: 1.5 }}>
-                        <div>{t(plans.C.salesEn, plans.C.salesZh)}</div>
-                        <div>{t(plans.C.costEn, plans.C.costZh)}</div>
-                        <div style={{ fontWeight: 800, color: '#fbbf24', fontSize: '0.76rem' }}>
-                            {t(plans.C.netEn, plans.C.netZh)}
+                )}
+
+                {/* Plan A Deep Analysis */}
+                {selectedPlan === 'A' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        <div style={{ background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: 6, padding: 12 }}>
+                            <strong style={{ fontSize: '0.8rem', color: '#f87171', display: 'block', marginBottom: 4 }}>
+                                {t('Compliance Meltdown Causal Chain (Veto Justification):', '合规熔断因果链条（一票否决依据）：')}
+                            </strong>
+                            <div style={{ fontSize: '0.74rem', color: '#cbd5e1', lineHeight: 1.5 }}>
+                                {isZh
+                                    ? '南区 LOT-03 在昨日 18:00 施用乙基多杀菌素，国家出口及绿色食品标准 GB 2763 规定其安全间隔期 (PHI) 严格为 72 小时。方案 A 计划今日抢收处于第 14 小时，经化学降解动力学推算，采收样本的药残将达 0.08 mg/kg（超标 800%）。若强行放行，将直接触发盒马 KA 实验室抽检一票否决、没收整批货物，并面临合同违约金 ¥146,250 及封园停业整改 6 个月的行政处罚。'
+                                    : 'South block LOT-03 was treated with Spinetoram requiring a strict 72h PHI under GB 2763. Harvesting at hour 14 guarantees residue levels of 0.08 mg/kg (800% over limit), resulting in immediate KA rejection, ¥146,250 penalties, and license suspension.'}
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
+                            <div style={{ background: '#090d16', padding: 10, borderRadius: 6, border: '1px solid #1e293b' }}>
+                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: 2 }}>{isZh ? 'A08 法规合规' : 'Compliance Lead'}</div>
+                                <div style={{ fontSize: '0.74rem', color: '#f87171', fontWeight: 700 }}>{isZh ? '投下不可撤销 VETO 否决票' : 'Issued Absolute VETO'}</div>
+                                <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: 4 }}>{isZh ? '“任何经济利益不得凌驾于绿色食品安全红线之上。”' : '"Safety compliance cannot be compromised."'}</div>
+                            </div>
+                            <div style={{ background: '#090d16', padding: 10, borderRadius: 6, border: '1px solid #1e293b' }}>
+                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: 2 }}>{isZh ? 'A07 财务核算' : 'Financial Actuary'}</div>
+                                <div style={{ fontSize: '0.74rem', color: '#fbbf24', fontWeight: 700 }}>{isZh ? '违约金敞口 ¥146,250' : 'Penalty Exposure ¥146,250'}</div>
+                                <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: 4 }}>{isZh ? '表面毛利无法弥补违约金与商誉损失。' : 'Gross margin fails to cover penalties.'}</div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
 
-                {/* Row: RISK & OBLIGATION */}
-                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr 1fr 1fr', borderBottom: '1px solid #1e293b', padding: '12px 14px', alignItems: 'center', background: '#090e17' }}>
-                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b' }}>{t('RISK & OBLIGATION', '履约与合规评级')}</span>
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '0.62rem', background: 'rgba(56,189,248,0.15)', color: '#38bdf8', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>Crop {plans.A.scores.crop}</span>
-                        <span style={{ fontSize: '0.62rem', background: plans.A.scores.comp.startsWith('5') ? 'rgba(0,229,163,0.15)' : 'rgba(239,68,68,0.2)', color: plans.A.scores.comp.startsWith('5') ? '#00e5a3' : '#f87171', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>Compliance {plans.A.scores.comp}</span>
-                        <span style={{ fontSize: '0.62rem', background: 'rgba(245,158,11,0.2)', color: '#fbbf24', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>Customer {plans.A.scores.cust}</span>
-                    </div>
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '0.62rem', background: 'rgba(56,189,248,0.15)', color: '#38bdf8', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>Crop {plans.B.scores.crop}</span>
-                        <span style={{ fontSize: '0.62rem', background: 'rgba(0,229,163,0.15)', color: '#00e5a3', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>Compliance {plans.B.scores.comp}</span>
-                        <span style={{ fontSize: '0.62rem', background: 'rgba(0,229,163,0.15)', color: '#00e5a3', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>Customer {plans.B.scores.cust}</span>
-                    </div>
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '0.62rem', background: 'rgba(245,158,11,0.2)', color: '#fbbf24', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>Crop {plans.C.scores.crop}</span>
-                        <span style={{ fontSize: '0.62rem', background: 'rgba(0,229,163,0.15)', color: '#00e5a3', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>Compliance {plans.C.scores.comp}</span>
-                        <span style={{ fontSize: '0.62rem', background: 'rgba(56,189,248,0.15)', color: '#38bdf8', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>Customer {plans.C.scores.cust}</span>
-                    </div>
-                </div>
+                {/* Plan B Deep Analysis */}
+                {selectedPlan === 'B' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        <div style={{ background: 'rgba(0, 229, 163, 0.08)', border: '1px solid rgba(0, 229, 163, 0.25)', borderRadius: 6, padding: 12 }}>
+                            <strong style={{ fontSize: '0.8rem', color: '#00e5a3', display: 'block', marginBottom: 4 }}>
+                                {t('Optimal Lead Causal Chain (Dawn Shift Picking & Pre-Cooling):', '最优首选因果链条（北区温室早班调优 + 预冷协同）：')}
+                            </strong>
+                            <div style={{ fontSize: '0.74rem', color: '#cbd5e1', lineHeight: 1.5 }}>
+                                {isZh
+                                    ? '系统策略避开处于 72h PHI 隔离状态的南区，自动调度北区 3 栋无药高架温室（华香特级果）。锁定清晨 05:00~08:30 弱光低温期（气温 16~19°C）错峰采摘，单果果粉（Wax Bloom）完整度高达 96.8%。采摘后 90 分钟内闭环送入 1 号气调库打冷至果心温 1.5°C。既 100% 遵守国家绿色食品标准，又足额交付 750kg 特级果，实现综合边际净贡献最高（¥48,750）。'
+                                    : 'Avoids South zone PHI restriction by dispatching North greenhouses. Dawn shift picking (05:00-08:30, 16-19°C) preserves 96.8% bloom. Pre-cooling within 90 min reaches 1.5°C core temp, delivering 750kg Grade A fruit with peak net margin ¥48,750.'}
+                            </div>
+                        </div>
 
-                {/* Row: EXECUTION */}
-                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr 1fr 1fr', borderBottom: '1px solid #1e293b', padding: '12px 14px', alignItems: 'center', background: '#0a101d' }}>
-                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b' }}>{t('EXECUTION', '执行复杂度')}</span>
-                    <div>
-                        <strong style={{ fontSize: '0.74rem', color: '#f8fafc', display: 'block' }}>{plans.A.easeEn}</strong>
-                        <span style={{ fontSize: '0.66rem', color: '#64748b' }}>{t(plans.A.easeSubEn, plans.A.easeSubZh)}</span>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
+                            <div style={{ background: '#090d16', padding: 10, borderRadius: 6, border: '1px solid #1e293b' }}>
+                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: 2 }}>{isZh ? 'A04 田间农艺' : 'A04 Field Agronomy'}</div>
+                                <div style={{ fontSize: '0.74rem', color: '#00e5a3', fontWeight: 700 }}>{isZh ? '果粉保持度 96.8% (特级A+)' : 'Bloom 96.8% (Grade A+)'}</div>
+                                <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: 4 }}>{isZh ? '“拂晓采摘果皮坚韧，完全避开午后高温软化风险。”' : '"Dawn harvest ensures supreme firmness and wax."'}</div>
+                            </div>
+                            <div style={{ background: '#090d16', padding: 10, borderRadius: 6, border: '1px solid #1e293b' }}>
+                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: 2 }}>{isZh ? 'A12 采收调度' : 'A12 Harvest Dispatch'}</div>
+                                <div style={{ fontSize: '0.74rem', color: '#38bdf8', fontWeight: 700 }}>{isZh ? '38人白手套班组已就绪' : 'Crew-38 Ready'}</div>
+                                <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: 4 }}>{isZh ? '“人均工效 32 kg/h，预计 08:15 前完成全部采收。”' : '"Target efficiency 32 kg/h, done before 08:15."'}</div>
+                            </div>
+                            <div style={{ background: '#090d16', padding: 10, borderRadius: 6, border: '1px solid #1e293b' }}>
+                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: 2 }}>{isZh ? '翻转预警条件' : 'Flip Sensitivity'}</div>
+                                <div style={{ fontSize: '0.74rem', color: '#fbbf24', fontWeight: 700 }}>{isZh ? '若阵风 > 12m/s 翻转为 C' : 'Gale >12m/s flips to Plan C'}</div>
+                                <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: 4 }}>{isZh ? '温室天窗遇大风强闭时，系统将瞬时切换至冷库释出。' : 'Vents close automatically on gale, flipping to C.'}</div>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <strong style={{ fontSize: '0.74rem', color: '#f59e0b', display: 'block' }}>{t(plans.B.easeEn, plans.B.easeZh || plans.B.easeEn)}</strong>
-                        <span style={{ fontSize: '0.66rem', color: '#64748b' }}>{t(plans.B.easeSubEn, plans.B.easeSubZh)}</span>
-                    </div>
-                    <div>
-                        <strong style={{ fontSize: '0.74rem', color: '#00e5a3', display: 'block' }}>{t(plans.C.easeEn, plans.C.easeZh || plans.C.easeEn)}</strong>
-                        <span style={{ fontSize: '0.66rem', color: '#64748b' }}>{t(plans.C.easeSubEn, plans.C.easeSubZh)}</span>
-                    </div>
-                </div>
+                )}
 
-                {/* Row: WINS WHEN */}
-                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr 1fr 1fr', padding: '12px 14px', alignItems: 'start', background: '#090e17' }}>
-                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b' }}>{t('WINS WHEN', '胜出翻转条件')}</span>
-                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', lineHeight: 1.4, paddingRight: 10 }}>
-                        {t(plans.A.winsWhenEn, plans.A.winsWhenZh)}
+                {/* Plan C Deep Analysis */}
+                {selectedPlan === 'C' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        <div style={{ background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.25)', borderRadius: 6, padding: 12 }}>
+                            <strong style={{ fontSize: '0.8rem', color: '#fbbf24', display: 'block', marginBottom: 4 }}>
+                                {t('Emergency Buffer Causal Chain (Zero Weather Disturbance):', '冷库恒温应急释出因果链条（零田间扰动）：')}
+                            </strong>
+                            <div style={{ fontSize: '0.74rem', color: '#cbd5e1', lineHeight: 1.5 }}>
+                                {isZh
+                                    ? '直接动用 2 号保税恒温气调库中昨日采收并已完成梯度预冷的 D-1 合格批次库存（750kg）。田间采收人员零扰动，对清晨大雾、突发阵风或暴雨工况具有 100% 免疫力。产生额外的仓储电费与冷库折旧约 ¥3,750，实现净利润 ¥45,000。在极端恶劣天气或采收工班短缺工况下，系统将自动把该方案翻转为第一推荐！'
+                                    : 'Dispatches pre-cooled D-1 buffer stock (750kg) from CA cold room #2 with zero field disturbance, giving 100% immunity to gale or rain. Generates ¥45,000 net profit after ¥3,750 refrigeration costs. Flips to #1 under severe weather.'}
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
+                            <div style={{ background: '#090d16', padding: 10, borderRadius: 6, border: '1px solid #1e293b' }}>
+                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: 2 }}>{isZh ? 'A06 销售履约' : 'Cold Chain Director'}</div>
+                                <div style={{ fontSize: '0.74rem', color: '#10b981', fontWeight: 700 }}>{isZh ? '果心恒温 1.5°C 库容充足' : 'Core Temp 1.5°C Ready'}</div>
+                                <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: 4 }}>{isZh ? '“D-1 批次糖度 13.6°Bx，已通过商超入库快检初筛。”' : '"D-1 lot tested 13.6°Bx, ready for prompt dispatch."'}</div>
+                            </div>
+                            <div style={{ background: '#090d16', padding: 10, borderRadius: 6, border: '1px solid #1e293b' }}>
+                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: 2 }}>{isZh ? '能耗成本核算' : 'Energy Surcharge'}</div>
+                                <div style={{ fontSize: '0.74rem', color: '#fbbf24', fontWeight: 700 }}>{isZh ? '仓储电费折旧 -¥3,750' : 'Holding Cost -¥3,750'}</div>
+                                <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: 4 }}>{isZh ? '夜间峰谷电价补贴已抵扣 42% 成本。' : '42% off-peak tariff applied.'}</div>
+                            </div>
+                        </div>
                     </div>
-                    <div style={{ fontSize: '0.7rem', color: '#00e5a3', lineHeight: 1.4, paddingRight: 10 }}>
-                        {t(plans.B.winsWhenEn, plans.B.winsWhenZh)}
-                    </div>
-                    <div style={{ fontSize: '0.7rem', color: '#fbbf24', lineHeight: 1.4 }}>
-                        {t(plans.C.winsWhenEn, plans.C.winsWhenZh)}
-                    </div>
-                </div>
+                )}
             </div>
 
             {/* ── 4. Interlocked Gates & Authorization ── */}
@@ -556,7 +826,9 @@ export default function DecisionMatrix({ customScenario = null, onAuthorize = nu
                     <div style={{ background: '#090d16', border: '1px solid #334155', borderRadius: 8, padding: 12, marginBottom: 12, animation: 'fadeIn 0.2s ease' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                             <strong style={{ fontSize: '0.75rem', color: '#f8fafc' }}>{t('Simulate Realistic Production Extremes', '模拟真实极限工况 (翻转测试)')}</strong>
-                            <button onClick={() => setShowBoundaryModal(false)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.8rem' }}>✕</button>
+                            <button onClick={() => setShowBoundaryModal(false)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 2, display: 'flex', alignItems: 'center' }} title={t('Close', '关闭')}>
+                                <Icon name="x" size={14} color="#94a3b8" />
+                            </button>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                             {/* Scenario-specific primary flip flag */}
@@ -599,52 +871,70 @@ export default function DecisionMatrix({ customScenario = null, onAuthorize = nu
                 {/* 3 Interlocked Gates Row */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10, marginBottom: 14 }}>
                     {/* Gate 1: Quality */}
-                    <div style={{ background: '#0f172a', border: `1px solid ${gates.quality.pass ? '#10b981' : '#ef4444'}`, borderRadius: 6, padding: '10px 12px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8' }}>{gates.quality.label}</span>
-                            <span style={{ fontSize: '0.62rem', fontWeight: 800, color: gates.quality.pass ? '#00e5a3' : '#ef4444', background: gates.quality.pass ? '#00e5a320' : '#ef444420', padding: '1px 6px', borderRadius: 3 }}>
-                                {isZh ? gates.quality.statusZh : gates.quality.status}
-                            </span>
+                    <Tooltip
+                        title={gates.quality.label}
+                        content={gates.quality.detail}
+                        delayMs={1000}
+                    >
+                        <div style={{ background: '#0f172a', border: `1px solid ${gates.quality.pass ? '#10b981' : '#ef4444'}`, borderRadius: 6, padding: '10px 12px', width: '100%', cursor: 'help' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8' }}>{gates.quality.label} </span>
+                                <span style={{ fontSize: '0.62rem', fontWeight: 800, color: gates.quality.pass ? '#00e5a3' : '#ef4444', background: gates.quality.pass ? '#00e5a320' : '#ef444420', padding: '1px 6px', borderRadius: 3 }}>
+                                    {isZh ? gates.quality.statusZh : gates.quality.status}
+                                </span>
+                            </div>
+                            <div style={{ fontSize: '0.9rem', fontWeight: 800, color: gates.quality.pass ? '#f8fafc' : '#ef4444', margin: '4px 0 2px' }}>
+                                {gates.quality.value}
+                            </div>
+                            <div style={{ fontSize: '0.65rem', color: '#64748b' }}>
+                                {gates.quality.detail}
+                            </div>
                         </div>
-                        <div style={{ fontSize: '0.9rem', fontWeight: 800, color: gates.quality.pass ? '#f8fafc' : '#ef4444', margin: '4px 0 2px' }}>
-                            {gates.quality.value}
-                        </div>
-                        <div style={{ fontSize: '0.65rem', color: '#64748b' }}>
-                            {gates.quality.detail}
-                        </div>
-                    </div>
+                    </Tooltip>
 
                     {/* Gate 2: Compliance */}
-                    <div style={{ background: '#0f172a', border: `1px solid ${gates.compliance.pass ? '#10b981' : '#ef4444'}`, borderRadius: 6, padding: '10px 12px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8' }}>{gates.compliance.label}</span>
-                            <span style={{ fontSize: '0.62rem', fontWeight: 800, color: gates.compliance.pass ? '#00e5a3' : '#ef4444', background: gates.compliance.pass ? '#00e5a320' : '#ef444420', padding: '1px 6px', borderRadius: 3 }}>
-                                {isZh ? gates.compliance.statusZh : gates.compliance.status}
-                            </span>
+                    <Tooltip
+                        title={gates.compliance.label}
+                        content={gates.compliance.detail}
+                        delayMs={1000}
+                    >
+                        <div style={{ background: '#0f172a', border: `1px solid ${gates.compliance.pass ? '#10b981' : '#ef4444'}`, borderRadius: 6, padding: '10px 12px', width: '100%', cursor: 'help' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8' }}>{gates.compliance.label} </span>
+                                <span style={{ fontSize: '0.62rem', fontWeight: 800, color: gates.compliance.pass ? '#00e5a3' : '#ef4444', background: gates.compliance.pass ? '#00e5a320' : '#ef444420', padding: '1px 6px', borderRadius: 3 }}>
+                                    {isZh ? gates.compliance.statusZh : gates.compliance.status}
+                                </span>
+                            </div>
+                            <div style={{ fontSize: '0.9rem', fontWeight: 800, color: gates.compliance.pass ? '#f8fafc' : '#ef4444', margin: '4px 0 2px' }}>
+                                {gates.compliance.value}
+                            </div>
+                            <div style={{ fontSize: '0.65rem', color: '#64748b' }}>
+                                {gates.compliance.detail}
+                            </div>
                         </div>
-                        <div style={{ fontSize: '0.9rem', fontWeight: 800, color: gates.compliance.pass ? '#f8fafc' : '#ef4444', margin: '4px 0 2px' }}>
-                            {gates.compliance.value}
-                        </div>
-                        <div style={{ fontSize: '0.65rem', color: '#64748b' }}>
-                            {gates.compliance.detail}
-                        </div>
-                    </div>
+                    </Tooltip>
 
                     {/* Gate 3: Capacity */}
-                    <div style={{ background: '#0f172a', border: `1px solid ${gates.capacity.pass ? '#10b981' : '#ef4444'}`, borderRadius: 6, padding: '10px 12px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8' }}>{gates.capacity.label}</span>
-                            <span style={{ fontSize: '0.62rem', fontWeight: 800, color: gates.capacity.pass ? '#00e5a3' : '#ef4444', background: gates.capacity.pass ? '#00e5a320' : '#ef444420', padding: '1px 6px', borderRadius: 3 }}>
-                                {isZh ? gates.capacity.statusZh : gates.capacity.status}
-                            </span>
+                    <Tooltip
+                        title={gates.capacity.label}
+                        content={gates.capacity.detail}
+                        delayMs={1000}
+                    >
+                        <div style={{ background: '#0f172a', border: `1px solid ${gates.capacity.pass ? '#10b981' : '#ef4444'}`, borderRadius: 6, padding: '10px 12px', width: '100%', cursor: 'help' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8' }}>{gates.capacity.label} </span>
+                                <span style={{ fontSize: '0.62rem', fontWeight: 800, color: gates.capacity.pass ? '#00e5a3' : '#ef4444', background: gates.capacity.pass ? '#00e5a320' : '#ef444420', padding: '1px 6px', borderRadius: 3 }}>
+                                    {isZh ? gates.capacity.statusZh : gates.capacity.status}
+                                </span>
+                            </div>
+                            <div style={{ fontSize: '0.9rem', fontWeight: 800, color: gates.capacity.pass ? '#f8fafc' : '#ef4444', margin: '4px 0 2px' }}>
+                                {gates.capacity.value}
+                            </div>
+                            <div style={{ fontSize: '0.65rem', color: '#64748b' }}>
+                                {gates.capacity.detail}
+                            </div>
                         </div>
-                        <div style={{ fontSize: '0.9rem', fontWeight: 800, color: gates.capacity.pass ? '#f8fafc' : '#ef4444', margin: '4px 0 2px' }}>
-                            {gates.capacity.value}
-                        </div>
-                        <div style={{ fontSize: '0.65rem', color: '#64748b' }}>
-                            {gates.capacity.detail}
-                        </div>
-                    </div>
+                    </Tooltip>
                 </div>
 
                 {/* Dispatch Button & Export Action */}
@@ -695,7 +985,7 @@ export default function DecisionMatrix({ customScenario = null, onAuthorize = nu
                             }}
                         >
                             <Icon name="bolt" size={14} color={allGatesPass ? '#090d16' : '#94a3b8'} />
-                            {allGatesPass ? t('⚡ AUTHORIZE DISPATCH (INTERLOCKED)', '⚡ 联锁签署派单并分发') : t('🔒 EXECUTION LOCKED (FAIL GATES)', '🔒 派单已闭锁 (门禁未通过)')}
+                            {allGatesPass ? t('AUTHORIZE DISPATCH (INTERLOCKED)', '联锁签署派单并分发') : t('EXECUTION LOCKED (FAIL GATES)', '派单已闭锁 (门禁未通过)')}
                         </button>
                     </div>
                 </div>
