@@ -244,6 +244,35 @@ async function serve() {
         return json(response, 200, { run: runtime.currentOrder() });
       }
       if (url.pathname === '/api/intelligence' && request.method === 'GET') return json(response, 200, { ...await intelligence(), sourceRecords: runtime.sources });
+      if (url.pathname === '/api/gemini/verify' && request.method === 'POST') {
+        let body = '';
+        for await (const chunk of request) {
+          body += chunk;
+          if (body.length > 8192) return json(response, 413, { error: 'Request too large.' });
+        }
+        let input = {};
+        try { input = JSON.parse(body); } catch (_) {}
+        const clientKey = request.headers['x-gemini-key'] || input.apiKey;
+        const effectiveKey = (clientKey || analysisKey || '').trim();
+        if (!effectiveKey) {
+          return json(response, 400, { ok: false, error: 'API key is empty.' });
+        }
+        try {
+          const pingRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${effectiveKey}`);
+          if (pingRes.ok) {
+            const data = await pingRes.json();
+            return json(response, 200, { ok: true, modelsCount: data?.models?.length || 0 });
+          }
+          const errText = await pingRes.text();
+          let errJson = {};
+          try { errJson = JSON.parse(errText); } catch (_) {}
+          const msg = errJson?.error?.message || errText;
+          const reason = errJson?.error?.details?.[0]?.reason || (msg.includes('API key not valid') ? 'API_KEY_INVALID' : 'AUTH_ERROR');
+          return json(response, pingRes.status, { ok: false, error: msg, reason, status: pingRes.status });
+        } catch (err) {
+          return json(response, 502, { ok: false, error: `Upstream connection failed: ${err.message}` });
+        }
+      }
       if (url.pathname === '/api/gemini/generate' && request.method === 'POST') {
         let body = '';
         for await (const chunk of request) {
@@ -258,27 +287,36 @@ async function serve() {
           return json(response, 503, { error: 'Gemini is not configured. Please input a valid Gemini API key in settings or run Sentinel with GEMINI_API_KEY.' });
         }
         const prompt = input.prompt || 'Analyze current scenario';
-        const model = input.model || 'gemini-1.5-flash';
-        try {
-          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${effectiveKey}`;
-          const gRes = await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ role: 'user', parts: [{ text: prompt }] }],
-              generationConfig: { maxOutputTokens: 1000, temperature: 0.25 }
-            })
-          });
-          if (!gRes.ok) {
+        const modelsToTry = [input.model || 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash'];
+        let lastError = null;
+        for (const model of modelsToTry) {
+          try {
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${effectiveKey}`;
+            const gRes = await fetch(endpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                generationConfig: { maxOutputTokens: 1000, temperature: 0.25 }
+              })
+            });
+            if (gRes.ok) {
+              const gData = await gRes.json();
+              const reply = gData?.candidates?.[0]?.content?.parts?.[0]?.text;
+              return json(response, 200, { text: reply, source: `Google ${model} (Server Relay)` });
+            }
             const errBody = await gRes.text();
-            return json(response, gRes.status, { error: `Gemini upstream error: ${errBody}` });
+            let parsed = {};
+            try { parsed = JSON.parse(errBody); } catch (_) {}
+            lastError = parsed?.error?.message || errBody;
+            if (gRes.status === 400 || gRes.status === 403 || gRes.status === 429) {
+              return json(response, gRes.status, { error: lastError });
+            }
+          } catch (err) {
+            lastError = err.message;
           }
-          const gData = await gRes.json();
-          const reply = gData?.candidates?.[0]?.content?.parts?.[0]?.text;
-          return json(response, 200, { text: reply, source: `Google ${model} (Server Relay)` });
-        } catch (err) {
-          return json(response, 502, { error: `Upstream connection failed: ${err.message}` });
         }
+        return json(response, 502, { error: `Gemini relay failed: ${lastError}` });
       }
       if (url.pathname === '/api/assistant' && request.method === 'POST') {
         const clientKey = request.headers['x-gemini-key'];

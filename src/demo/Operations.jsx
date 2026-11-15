@@ -884,40 +884,40 @@ export function Assistant() {
     let isSuccess = false;
     let errorDetail = '';
 
-    // Step 1: Try server-side relay
+    // Step 1: Use Server Relay /api/gemini/verify (Dedicated official Google models ping)
     try {
-      const relayRes = await fetch('/api/gemini/generate', {
+      const verifyRes = await fetch('/api/gemini/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-gemini-key': k },
-        body: JSON.stringify({ prompt: 'ping', model: 'gemini-1.5-flash', apiKey: k })
+        body: JSON.stringify({ apiKey: k })
       });
-      if (relayRes.ok) {
+      const verifyData = await verifyRes.json().catch(() => ({}));
+      if (verifyRes.ok && verifyData.ok) {
         isSuccess = true;
       } else {
-        const errJson = await relayRes.json().catch(() => ({}));
-        errorDetail = errJson?.error || `HTTP ${relayRes.status}`;
+        errorDetail = verifyData?.error || verifyData?.reason || `HTTP ${verifyRes.status}`;
       }
     } catch (e) {
-      errorDetail = e?.message || '网络连接故障';
+      errorDetail = e?.message || '服务端中继网络连接故障';
     }
 
-    // Step 2: If server relay failed, try Vite reverse proxy
-    if (!isSuccess) {
+    // Step 2: Fallback to /api/gemini/generate if verify route was unavailable
+    if (!isSuccess && errorDetail.includes('404')) {
       try {
-        const proxyRes = await fetch(`/google-gemini-api/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`, {
+        const relayRes = await fetch('/api/gemini/generate', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: [{ text: 'ping' }] }] })
+          headers: { 'Content-Type': 'application/json', 'x-gemini-key': k },
+          body: JSON.stringify({ prompt: 'ping', model: 'gemini-1.5-flash', apiKey: k })
         });
-        if (proxyRes.ok) {
+        const relayData = await relayRes.json().catch(() => ({}));
+        if (relayRes.ok && relayData.text) {
           isSuccess = true;
           errorDetail = '';
         } else {
-          const errText = await proxyRes.text().catch(() => '');
-          errorDetail = `Vite Proxy ${proxyRes.status}: ${errText}`;
+          errorDetail = relayData?.error || `HTTP ${relayRes.status}`;
         }
       } catch (e) {
-        errorDetail = (errorDetail ? errorDetail + '; ' : '') + `端侧直接连接: ${e?.message || '超时'}`;
+        errorDetail = e?.message || errorDetail;
       }
     }
 
@@ -935,12 +935,18 @@ export function Assistant() {
       setTimeout(() => setShowKeyModal(false), 900);
     } else {
       let diagAdvice = '';
-      if (errorDetail.includes('API_KEY_INVALID') || errorDetail.includes('API key not valid')) {
-        diagAdvice = isZh ? '【鉴权失败】API Key 无效或格式有误。请检查是否完整复制了 Google AI Studio 中的 AIzaSy... 字符。' : 'API Key is invalid. Please check the AIzaSy... string.';
+      if (errorDetail.includes('API_KEY_INVALID') || errorDetail.includes('API key not valid') || errorDetail.includes('INVALID_ARGUMENT')) {
+        diagAdvice = isZh
+          ? '【密钥鉴权失败 400】Google 官方判定此 API Key 无效。请登录 Google AI Studio (aistudio.google.com) 重新生成以 AIzaSy 开头的密钥，并确认复制完整。'
+          : 'API Key is invalid (400). Please verify the AIzaSy... key from Google AI Studio.';
       } else if (errorDetail.includes('403') || errorDetail.includes('PERMISSION_DENIED') || errorDetail.includes('location is not supported')) {
-        diagAdvice = isZh ? '【访问受限 403】Google 限制特定区域 IP 直连。请检查代理或网络环境。' : 'Region or permission denied.';
+        diagAdvice = isZh
+          ? '【区域限制 403】当前网络区域受 Google 限制。请确认科学上网节点或系统代理处于开启状态。'
+          : 'Region restriction (403). Please verify proxy/VPN connectivity.';
       } else if (errorDetail.includes('429') || errorDetail.includes('RESOURCE_EXHAUSTED')) {
-        diagAdvice = isZh ? '【配额耗尽 429】该 Key 今日免费并发配额已达上限。' : 'Quota exceeded.';
+        diagAdvice = isZh
+          ? '【免费配额耗尽 429】该 Key 今日调用次数已达上限，请稍候再试或在 Google AI Studio 更换项目新 Key。'
+          : 'Free quota reached (429). Please try again later or use another project key.';
       } else {
         diagAdvice = isZh ? `【连接受阻】无法连通 Google 节点：${errorDetail}` : errorDetail;
       }
@@ -994,38 +1000,11 @@ Rules:
       relayErr = e?.message || 'Server relay error';
     }
 
-    // 2. Try Vite proxy
-    let proxyErr = null;
-    try {
-      const proxyUrl = `/google-gemini-api/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`;
-      const proxyRes = await fetch(proxyUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: systemInstruction }] },
-          contents: [{ role: 'user', parts: [{ text: qText }] }],
-          generationConfig: { maxOutputTokens: 800, temperature: 0.2 }
-        })
-      });
-      if (proxyRes.ok) {
-        const data = await proxyRes.json();
-        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (text) {
-          return {
-            text: sanitizeEngineeringText(text),
-            source: 'Google Gemini 1.5 Flash (反向代理直连)',
-            success: true
-          };
-        }
-      } else {
-        const errText = await proxyRes.text().catch(() => '');
-        proxyErr = `Vite Proxy ${proxyRes.status}: ${errText}`;
-      }
-    } catch (e) {
-      proxyErr = e?.message || 'Proxy error';
+    if (relayErr) {
+      throw new Error(relayErr);
     }
 
-    throw new Error(relayErr || proxyErr || '无法连接至 Google Gemini 服务');
+    throw new Error('无法连接至 Google Gemini 服务');
   }
 
   function matchLocalQA(qText) {
