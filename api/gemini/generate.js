@@ -17,24 +17,61 @@ export default async function handler(req, res) {
 
   const prompt = req.body?.prompt || 'Analyze current scenario';
 
-  // 1. Directly target ultra-fast official production models (zero preliminary list roundtrip)
-  const reqModel = (req.body?.model || '').replace(/^models\//, '').trim();
+  // Global memory cache across warm serverless invocations
+  if (!global.keyModelsCache) global.keyModelsCache = new Map();
+  let candidateModels = global.keyModelsCache.get(effectiveKey) || [];
+  if (!candidateModels.length) {
+    try {
+      const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${effectiveKey}`, {
+        signal: AbortSignal.timeout(4000)
+      });
+      if (listRes.ok) {
+        const listData = await listRes.json();
+        candidateModels = (listData?.models || [])
+          .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+          .map(m => m.name.replace(/^models\//, ''))
+          .filter(name => !name.startsWith('gemini-2.5') && !name.includes('preview-05') && !name.includes('preview-09'));
+        global.keyModelsCache.set(effectiveKey, candidateModels);
+      }
+    } catch (_) {}
+  }
+
+  // Priority order matching project capability
+  const priorityOrder = [
+    'gemini-3.8-flash',
+    'gemini-3.5-flash-lite',
+    'gemini-2.0-flash',
+    'gemini-2.0-flash-lite',
+    'gemini-2.0-flash-exp',
+    'gemini-flash-latest',
+    'gemini-pro-latest'
+  ];
   const targetModels = [];
-  if (reqModel && !reqModel.startsWith('gemini-2.5')) {
+  const reqModel = (req.body?.model || '').replace(/^models\//, '').trim();
+  if (reqModel && candidateModels.includes(reqModel)) {
     targetModels.push(reqModel);
   }
-  for (const m of ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-lite']) {
+  for (const p of priorityOrder) {
+    if (candidateModels.includes(p) && !targetModels.includes(p)) targetModels.push(p);
+  }
+  for (const m of candidateModels) {
     if (!targetModels.includes(m)) targetModels.push(m);
+  }
+  if (!targetModels.length) {
+    targetModels.push('gemini-3.8-flash', 'gemini-2.0-flash', 'gemini-flash-latest');
   }
 
   let lastError = null;
-  for (const model of targetModels.slice(0, 2)) {
+  for (const model of targetModels.slice(0, 3)) {
     try {
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${effectiveKey}`;
       const gRes = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: AbortSignal.timeout(12000),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': effectiveKey
+        },
+        signal: AbortSignal.timeout(15000),
         body: JSON.stringify({
           contents: [{ role: 'user', parts: [{ text: prompt }] }],
           generationConfig: { maxOutputTokens: 1000, temperature: 0.25 }

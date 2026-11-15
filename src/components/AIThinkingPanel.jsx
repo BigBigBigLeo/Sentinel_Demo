@@ -213,7 +213,7 @@ export default function AIThinkingPanel({ chain = [], isThinking = false, onComp
                 </div>
                 <div className="thinking-header-right">
                     <span className="thinking-round-badge">{t('Round', '轮次')} {currentRound}/{maxRound}</span>
-                    <span className="thinking-model-badge">Sentinel-Agri v4.2</span>
+                    <span className="thinking-model-badge">Sentinel Enterprise Core v7.10</span>
                     <span className="thinking-step-count">{elapsed}/{total}</span>
                 </div>
             </div>

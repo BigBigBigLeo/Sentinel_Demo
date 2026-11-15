@@ -572,7 +572,7 @@ export function sanitizeEngineeringText(text) {
 const QA_KNOWLEDGE_BASE = [
   {
     tags: ['persona', 'hello', 'hi', 'hey', '你好', '早安', '晚上好', '你是谁', '介绍一下', '人设', '背景', '理念', 'who are you'],
-    answerZh: '您好。这里是观衡智序（Sentinel Core v7.7）运营与决策系统。\n\n' +
+    answerZh: '您好。这里是观衡智序（Sentinel Enterprise Core v7.10）运营与决策系统。\n\n' +
       '【系统架构与基地定位】\n' +
       '本系统部署于云南省玉溪市澄江市龙街镇抚仙湖北岸 900 亩（约 60 公顷）高山蓝莓超级无土基质设施农业工厂（海拔 1,750 米）。系统构建了农业工厂工业本体，深度联动全园 32 套微气象遥测与 14 个专业职能协同决策网络（涵盖运营管理、田间农艺、设施温室、植保病理、品质追溯、销售履约、财务核算、法规合规、安全防灾、环境自控、无人机作业、采收调度、遥测感知与算法模型）。\n\n' +
       '【核心运行准则】\n' +
@@ -581,7 +581,7 @@ const QA_KNOWLEDGE_BASE = [
       '3. 刚性红线：国家食品安全 GB 2763 最大残留限量与 72 小时农药安全间隔期（PHI）拥有一票否决权；\n' +
       '4. 价值闭环：通过科学算法为农场锁定可量化的边际净贡献，保全蓝莓特级果粉与口感指标。\n\n' +
       '您可以查询园区微气象、蓝莓生理积温模型、水肥基质调控、果粉保全机理、12 项重点订单履约排产，或调阅方案 A/B/C 的边际财务测算。',
-    answerEn: 'System online: Guanheng Zhixu (Sentinel Core v7.7) Operations and Decision System.\n\n' +
+    answerEn: 'System online: Guanheng Zhixu (Sentinel Enterprise Core v7.10) Operations and Decision System.\n\n' +
       'Deployed at the 900-mu (~60 ha) high-tech substrate blueberry greenhouse facility in Chengjiang, Yunnan (elevation 1,750m, Fuxian Lake microclimate). Operating 14 professional functions across agronomy, climate, pathology, quality, sales, finance, compliance, and robotics.\n\n' +
       'Operating Rules:\n' +
       '1. Data-grounded: 32 microclimate stations and optical traps stream continuous real-time telemetry;\n' +
@@ -980,7 +980,7 @@ Rules:
         signal: AbortSignal.timeout(25000),
         body: JSON.stringify({
           prompt: fullPrompt,
-          model: 'gemini-2.0-flash',
+          model: 'gemini-3.8-flash',
           apiKey: geminiKey
         })
       });
@@ -989,7 +989,7 @@ Rules:
         if (data?.text) {
           return {
             text: sanitizeEngineeringText(data.text),
-            source: data.source || 'Google Gemini 2.0 Flash (在线大模型)',
+            source: data.source || 'Google Gemini (在线大模型)',
             success: true
           };
         }
@@ -1003,7 +1003,7 @@ Rules:
 
     // 2. Browser fallback via Vite reverse proxy (/google-gemini-api/...)
     if (geminiKey) {
-      for (const m of ['gemini-2.0-flash', 'gemini-1.5-flash']) {
+      for (const m of ['gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-2.0-flash', 'gemini-flash-latest']) {
         try {
           const directRes = await fetch(`/google-gemini-api/v1beta/models/${m}:generateContent?key=${encodeURIComponent(geminiKey)}`, {
             method: 'POST',

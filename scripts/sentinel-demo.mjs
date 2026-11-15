@@ -261,7 +261,13 @@ async function serve() {
           const pingRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${effectiveKey}`);
           if (pingRes.ok) {
             const data = await pingRes.json();
-            return json(response, 200, { ok: true, modelsCount: data?.models?.length || 0 });
+            const valid = (data?.models || [])
+              .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+              .map(m => m.name.replace(/^models\//, ''))
+              .filter(name => !name.startsWith('gemini-2.5') && !name.includes('preview-05') && !name.includes('preview-09'));
+            if (!global.keyModelsCache) global.keyModelsCache = new Map();
+            global.keyModelsCache.set(effectiveKey, valid);
+            return json(response, 200, { ok: true, modelsCount: data?.models?.length || 0, supportedModels: valid });
           }
           const errText = await pingRes.text();
           let errJson = {};
@@ -288,24 +294,64 @@ async function serve() {
         }
         const prompt = input.prompt || 'Analyze current scenario';
 
-        // 1. Directly target ultra-fast official production models (zero preliminary list roundtrip)
-        const reqModel = (input.model || '').replace(/^models\//, '').trim();
-        const targetModels = [];
-        if (reqModel && !reqModel.startsWith('gemini-2.5')) {
-          targetModels.push(reqModel);
-        }
-        for (const m of ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-lite']) {
-          if (!targetModels.includes(m)) targetModels.push(m);
+        // 1. Resolve available models dynamically from cache or Google ListModels
+        if (!global.keyModelsCache) global.keyModelsCache = new Map();
+        let candidateModels = global.keyModelsCache.get(effectiveKey) || [];
+        if (!candidateModels.length) {
+          try {
+            const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${effectiveKey}`, {
+              signal: AbortSignal.timeout(4000)
+            });
+            if (listRes.ok) {
+              const listData = await listRes.json();
+              candidateModels = (listData?.models || [])
+                .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+                .map(m => m.name.replace(/^models\//, ''))
+                .filter(name => !name.startsWith('gemini-2.5') && !name.includes('preview-05') && !name.includes('preview-09'));
+              global.keyModelsCache.set(effectiveKey, candidateModels);
+            }
+          } catch (_) {}
         }
 
+        // 2. Build target models strictly matching models confirmed to exist in this user's project
+        const priorityOrder = [
+          'gemini-3.8-flash',
+          'gemini-3.5-flash-lite',
+          'gemini-2.0-flash',
+          'gemini-2.0-flash-lite',
+          'gemini-2.0-flash-exp',
+          'gemini-flash-latest',
+          'gemini-pro-latest'
+        ];
+        const targetModels = [];
+        const reqModel = (input.model || '').replace(/^models\//, '').trim();
+        if (reqModel && candidateModels.includes(reqModel)) {
+          targetModels.push(reqModel);
+        }
+        for (const p of priorityOrder) {
+          if (candidateModels.includes(p) && !targetModels.includes(p)) targetModels.push(p);
+        }
+        for (const m of candidateModels) {
+          if (!targetModels.includes(m)) targetModels.push(m);
+        }
+        if (!targetModels.length) {
+          targetModels.push('gemini-3.8-flash', 'gemini-2.0-flash', 'gemini-flash-latest');
+        }
+
+        console.log('[Gemini Relay] Key models available for generateContent:', candidateModels.length, 'Target models:', targetModels.slice(0, 3));
+
         let lastError = null;
-        for (const model of targetModels.slice(0, 2)) {
+        for (const model of targetModels.slice(0, 3)) {
           try {
+            console.log('[Gemini Relay] Dispatching request to model:', model);
             const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${effectiveKey}`;
             const gRes = await fetch(endpoint, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              signal: AbortSignal.timeout(12000),
+              headers: {
+                'Content-Type': 'application/json',
+                'x-goog-api-key': effectiveKey
+              },
+              signal: AbortSignal.timeout(15000),
               body: JSON.stringify({
                 contents: [{ role: 'user', parts: [{ text: prompt }] }],
                 generationConfig: { maxOutputTokens: 1000, temperature: 0.25 }
@@ -315,6 +361,7 @@ async function serve() {
               const gData = await gRes.json();
               const reply = gData?.candidates?.[0]?.content?.parts?.[0]?.text;
               if (reply) {
+                console.log('[Gemini Relay] Model', model, 'succeeded! Output chars:', reply.length);
                 return json(response, 200, { text: reply, source: `Google ${model} (在线大模型)` });
               }
             }
@@ -322,6 +369,7 @@ async function serve() {
             let parsed = {};
             try { parsed = JSON.parse(errBody); } catch (_) {}
             lastError = parsed?.error?.message || errBody;
+            console.log('[Gemini Relay] Model', model, 'returned error HTTP', gRes.status, ':', lastError);
             if (lastError.includes('API_KEY_INVALID') || lastError.includes('API key not valid')) {
               return json(response, 400, { error: lastError });
             }
@@ -333,6 +381,7 @@ async function serve() {
             }
           } catch (err) {
             lastError = err.message;
+            console.log('[Gemini Relay] Model', model, 'exception:', err.message);
           }
         }
         return json(response, 502, { error: `Gemini relay failed: ${lastError}` });

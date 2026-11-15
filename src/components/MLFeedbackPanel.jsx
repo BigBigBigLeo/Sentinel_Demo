@@ -51,7 +51,7 @@ export default function MLFeedbackPanel({ prediction, actual }) {
                         <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 2 }}>{t('Continuous learning from decision outcomes', '从决策结果持续学习')}</div>
                     </div>
                 </div>
-                <span className="ml-version-badge ml-version-current">Sentinel-Agri v4.2</span>
+                <span className="ml-version-badge ml-version-current">Sentinel Enterprise Core v7.10</span>
             </div>
 
             <div className="ml-feedback-body">

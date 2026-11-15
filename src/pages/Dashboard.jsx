@@ -422,7 +422,7 @@ export default function Dashboard() {
                     <div className="watchdog-divider" />
                     <span className="watchdog-stat">{t('Autonomy Baseline', '策略基准')}: <strong style={{ color: policyConfig?.preset === 'ka_fast' ? '#fbbf24' : '#38bdf8' }}>{policyConfig?.preset === 'ka_fast' ? 'KA 极速优先 (放行-6h)' : policyConfig?.preset === 'l4_full' ? 'L4 全无人化巡航' : 'L3 严格合规基准'}</strong></span>
                     <div style={{ flex: 1 }} />
-                    <span className="watchdog-stat" style={{ color: '#64748b' }}>Sentinel Enterprise Ontology v7.9</span>
+                    <span className="watchdog-stat" style={{ color: '#64748b' }}>Sentinel Enterprise Ontology v7.10</span>
                 </div>
 
                 {/* Emergency Alert Breakthrough Capsule (Direct Drill-Down into Prescription Room) */}

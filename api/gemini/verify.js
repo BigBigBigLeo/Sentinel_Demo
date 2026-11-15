@@ -19,7 +19,13 @@ export default async function handler(req, res) {
     const pingRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${effectiveKey}`);
     if (pingRes.ok) {
       const data = await pingRes.json();
-      return res.status(200).json({ ok: true, modelsCount: data?.models?.length || 0 });
+      const valid = (data?.models || [])
+        .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+        .map(m => m.name.replace(/^models\//, ''))
+        .filter(name => !name.startsWith('gemini-2.5') && !name.includes('preview-05') && !name.includes('preview-09'));
+      if (!global.keyModelsCache) global.keyModelsCache = new Map();
+      global.keyModelsCache.set(effectiveKey, valid);
+      return res.status(200).json({ ok: true, modelsCount: data?.models?.length || 0, supportedModels: valid });
     }
     const errText = await pingRes.text();
     let errJson = {};

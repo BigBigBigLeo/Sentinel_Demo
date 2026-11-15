@@ -499,7 +499,7 @@ export default function Prescription() {
                                     : t('Analysis Complete - All Rounds', '分析完成 · 全轮次多智能体推演定稿')}
                             </div>
                             <div style={{ fontSize: '0.68rem', color: '#94a3b8', marginTop: 2 }}>
-                                {t('Phase: Verifying | Round 3/3 | Sentinel Enterprise Core v7.6 · 13 Steps / 14 Functions Consensus', '阶段：合规校验放行 | 轮次 3/3 | 观衡企业级智能中枢 v7.6 · 13 步骤 / 14 大专业职能全景博弈')}
+                                {t('Phase: Verifying | Round 3/3 | Sentinel Enterprise Core v7.10 · 13 Steps / 14 Functions Consensus', '阶段：合规校验放行 | 轮次 3/3 | 观衡企业级智能中枢 v7.10 · 13 步骤 / 14 大专业职能全景博弈')}
                             </div>
                         </div>
                     </div>
@@ -509,7 +509,7 @@ export default function Prescription() {
                             {t('Round 3/3', '轮次 3/3')}
                         </span>
                         <span style={{ fontSize: '0.62rem', background: 'rgba(30,64,175,0.2)', color: '#93c5fd', border: '1px solid rgba(96,165,250,0.3)', padding: '2px 8px', borderRadius: 4, fontWeight: 700 }}>
-                            Sentinel-Agri v7.6
+                            Sentinel-Agri v7.10
                         </span>
                     </div>
                 </div>

@@ -191,11 +191,11 @@ export default function Layout() {
                     <div style={{ fontSize: '0.6rem', color: '#475569' }}>
                         {t('Day', '第')} {currentDay || 18} / 120
                     </div>
-                    <div style={{ fontSize: '0.65rem', color: '#64748b', marginTop: 6 }}>
-                        {t('Sentinel Engine v4.2', 'Sentinel 引擎 v4.2')}
+                    <div style={{ fontSize: '0.65rem', color: '#38bdf8', marginTop: 6, fontWeight: 600 }}>
+                        {t('Sentinel Enterprise Core v7.10', '观衡工业级智序中枢 v7.10')}
                     </div>
                     <div style={{ fontSize: '0.65rem', color: '#64748b' }}>
-                        {t('Build 2026.03', '构建 2026.03')}
+                        {t('Release 2026.11 · Live In-Sync', '更新时序: 2026.11 · 在线实时')}
                     </div>
                 </div>
             </aside>
