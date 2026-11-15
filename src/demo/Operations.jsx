@@ -969,7 +969,7 @@ Rules:
     const fullPrompt = `${systemInstruction}\n\nUser Operational Query: ${qText}`;
 
     let relayErr = null;
-    // 1. Try server-side relay
+    // 1. Try server-side relay with strict 8s timeout to prevent hanging
     try {
       const relayRes = await fetch('/api/gemini/generate', {
         method: 'POST',
@@ -977,9 +977,10 @@ Rules:
           'Content-Type': 'application/json',
           'x-gemini-key': geminiKey
         },
+        signal: AbortSignal.timeout(8000),
         body: JSON.stringify({
           prompt: fullPrompt,
-          model: 'gemini-1.5-flash',
+          model: 'gemini-2.0-flash',
           apiKey: geminiKey
         })
       });

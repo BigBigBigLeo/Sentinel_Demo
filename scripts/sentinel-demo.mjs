@@ -288,28 +288,31 @@ async function serve() {
         }
         const prompt = input.prompt || 'Analyze current scenario';
 
-        // 1. Resolve available models dynamically from Google for this specific key
+        // 1. Resolve available models dynamically from Google for this specific key with 3s timeout
         let targetModels = [];
         try {
-          const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${effectiveKey}`);
+          const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${effectiveKey}`, {
+            signal: AbortSignal.timeout(4000)
+          });
           if (listRes.ok) {
             const listData = await listRes.json();
             const available = (listData?.models || [])
               .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
               .map(m => m.name.replace(/^models\//, ''));
-            const priorityList = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash-latest', 'gemini-2.0-flash-exp', 'gemini-1.5-pro'];
+            const priorityList = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash-latest'];
             for (const p of priorityList) {
               if (available.includes(p)) targetModels.push(p);
             }
             for (const m of available) {
-              if (!targetModels.includes(m)) targetModels.push(m);
+              if (!targetModels.includes(m) && targetModels.length < 2) targetModels.push(m);
             }
           }
         } catch (_) {}
 
         if (!targetModels.length) {
-          targetModels = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash-latest'];
+          targetModels = ['gemini-2.0-flash', 'gemini-1.5-flash'];
         }
+        targetModels = targetModels.slice(0, 2);
 
         let lastError = null;
         for (const model of targetModels) {
@@ -318,6 +321,7 @@ async function serve() {
             const gRes = await fetch(endpoint, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
+              signal: AbortSignal.timeout(6000),
               body: JSON.stringify({
                 contents: [{ role: 'user', parts: [{ text: prompt }] }],
                 generationConfig: { maxOutputTokens: 1000, temperature: 0.25 }
