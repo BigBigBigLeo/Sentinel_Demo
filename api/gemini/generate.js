@@ -27,21 +27,29 @@ export default async function handler(req, res) {
       const listData = await listRes.json();
       const available = (listData?.models || [])
         .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
-        .map(m => m.name.replace(/^models\//, ''));
-      const priorityList = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash-latest'];
+        .map(m => m.name.replace(/^models\//, ''))
+        // Strictly exclude deprecated or restricted models (e.g. gemini-2.5, preview-05, etc.)
+        .filter(name => !name.startsWith('gemini-2.5') && !name.includes('preview-05') && !name.includes('preview-09'));
+      const priorityList = [
+        'gemini-3.8-flash',
+        'gemini-3.5-flash-lite',
+        'gemini-2.0-flash',
+        'gemini-1.5-flash',
+        'gemini-flash-latest'
+      ];
       for (const p of priorityList) {
         if (available.includes(p)) targetModels.push(p);
       }
       for (const m of available) {
-        if (!targetModels.includes(m) && targetModels.length < 2) targetModels.push(m);
+        if (!targetModels.includes(m) && targetModels.length < 3) targetModels.push(m);
       }
     }
   } catch (_) {}
 
   if (!targetModels.length) {
-    targetModels = ['gemini-2.0-flash', 'gemini-1.5-flash'];
+    targetModels = ['gemini-3.8-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
   }
-  targetModels = targetModels.slice(0, 2);
+  targetModels = targetModels.slice(0, 3);
 
   let lastError = null;
   for (const model of targetModels) {
@@ -50,7 +58,7 @@ export default async function handler(req, res) {
       const gRes = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        signal: AbortSignal.timeout(6000),
+        signal: AbortSignal.timeout(7000),
         body: JSON.stringify({
           contents: [{ role: 'user', parts: [{ text: prompt }] }],
           generationConfig: { maxOutputTokens: 1000, temperature: 0.25 }
@@ -59,18 +67,22 @@ export default async function handler(req, res) {
       if (gRes.ok) {
         const gData = await gRes.json();
         const reply = gData?.candidates?.[0]?.content?.parts?.[0]?.text;
-        return res.status(200).json({ text: reply, source: `Google ${model} (Vite / Vercel Server Relay)` });
+        if (reply) {
+          return res.status(200).json({ text: reply, source: `Google ${model} (在线大模型)` });
+        }
       }
       const errBody = await gRes.text();
       let parsed = {};
       try { parsed = JSON.parse(errBody); } catch (_) {}
       lastError = parsed?.error?.message || errBody;
-      if (gRes.status === 400 || gRes.status === 403 || gRes.status === 429) {
-        if (lastError.includes('API_KEY_INVALID') || lastError.includes('API key not valid')) {
-          return res.status(400).json({ error: lastError });
-        }
-        if (gRes.status === 403) return res.status(403).json({ error: lastError });
-        if (gRes.status === 429) return res.status(429).json({ error: lastError });
+      if (lastError.includes('API_KEY_INVALID') || lastError.includes('API key not valid')) {
+        return res.status(400).json({ error: lastError });
+      }
+      if (gRes.status === 403 && (lastError.includes('PERMISSION_DENIED') || lastError.includes('location is not supported'))) {
+        return res.status(403).json({ error: lastError });
+      }
+      if (gRes.status === 429 && lastError.includes('RESOURCE_EXHAUSTED')) {
+        return res.status(429).json({ error: lastError });
       }
     } catch (err) {
       lastError = err.message;

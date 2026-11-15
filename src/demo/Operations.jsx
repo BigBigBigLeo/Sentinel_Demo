@@ -907,7 +907,7 @@ export function Assistant() {
         const relayRes = await fetch('/api/gemini/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-gemini-key': k },
-          body: JSON.stringify({ prompt: 'ping', model: 'gemini-1.5-flash', apiKey: k })
+          body: JSON.stringify({ prompt: 'ping', model: 'gemini-3.8-flash', apiKey: k })
         });
         const relayData = await relayRes.json().catch(() => ({}));
         if (relayRes.ok && relayData.text) {
@@ -980,7 +980,7 @@ Rules:
         signal: AbortSignal.timeout(8000),
         body: JSON.stringify({
           prompt: fullPrompt,
-          model: 'gemini-2.0-flash',
+          model: 'gemini-3.8-flash',
           apiKey: geminiKey
         })
       });
@@ -989,7 +989,7 @@ Rules:
         if (data?.text) {
           return {
             text: sanitizeEngineeringText(data.text),
-            source: 'Google Gemini 1.5 Flash (服务端直连)',
+            source: data.source || 'Google Gemini (在线大模型)',
             success: true
           };
         }
