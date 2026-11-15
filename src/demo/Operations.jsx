@@ -969,7 +969,7 @@ Rules:
     const fullPrompt = `${systemInstruction}\n\nUser Operational Query: ${qText}`;
 
     let relayErr = null;
-    // 1. Try server-side relay with strict 8s timeout to prevent hanging
+    // 1. Try server-side relay with adequate 25s timeout for cross-border generation
     try {
       const relayRes = await fetch('/api/gemini/generate', {
         method: 'POST',
@@ -977,10 +977,10 @@ Rules:
           'Content-Type': 'application/json',
           'x-gemini-key': geminiKey
         },
-        signal: AbortSignal.timeout(8000),
+        signal: AbortSignal.timeout(25000),
         body: JSON.stringify({
           prompt: fullPrompt,
-          model: 'gemini-3.8-flash',
+          model: 'gemini-2.0-flash',
           apiKey: geminiKey
         })
       });
@@ -989,7 +989,7 @@ Rules:
         if (data?.text) {
           return {
             text: sanitizeEngineeringText(data.text),
-            source: data.source || 'Google Gemini (在线大模型)',
+            source: data.source || 'Google Gemini 2.0 Flash (在线大模型)',
             success: true
           };
         }
@@ -999,6 +999,34 @@ Rules:
       }
     } catch (e) {
       relayErr = e?.message || 'Server relay error';
+    }
+
+    // 2. Browser fallback via Vite reverse proxy (/google-gemini-api/...)
+    if (geminiKey) {
+      for (const m of ['gemini-2.0-flash', 'gemini-1.5-flash']) {
+        try {
+          const directRes = await fetch(`/google-gemini-api/v1beta/models/${m}:generateContent?key=${encodeURIComponent(geminiKey)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            signal: AbortSignal.timeout(20000),
+            body: JSON.stringify({
+              contents: [{ role: 'user', parts: [{ text: fullPrompt }] }],
+              generationConfig: { maxOutputTokens: 1000, temperature: 0.25 }
+            })
+          });
+          if (directRes.ok) {
+            const dData = await directRes.json();
+            const text = dData?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) {
+              return {
+                text: sanitizeEngineeringText(text),
+                source: `Google ${m} (浏览器直连反代)`,
+                success: true
+              };
+            }
+          }
+        } catch (_) {}
+      }
     }
 
     if (relayErr) {

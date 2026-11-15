@@ -288,48 +288,24 @@ async function serve() {
         }
         const prompt = input.prompt || 'Analyze current scenario';
 
-        // 1. Resolve available models dynamically from Google for this specific key with 4s timeout
-        let targetModels = [];
-        try {
-          const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${effectiveKey}`, {
-            signal: AbortSignal.timeout(4000)
-          });
-          if (listRes.ok) {
-            const listData = await listRes.json();
-            const available = (listData?.models || [])
-              .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
-              .map(m => m.name.replace(/^models\//, ''))
-              // Strictly exclude any deprecated or restricted models (e.g. gemini-2.5, preview-05, etc.)
-              .filter(name => !name.startsWith('gemini-2.5') && !name.includes('preview-05') && !name.includes('preview-09'));
-            const priorityList = [
-              'gemini-3.8-flash',
-              'gemini-3.5-flash-lite',
-              'gemini-2.0-flash',
-              'gemini-1.5-flash',
-              'gemini-flash-latest'
-            ];
-            for (const p of priorityList) {
-              if (available.includes(p)) targetModels.push(p);
-            }
-            for (const m of available) {
-              if (!targetModels.includes(m) && targetModels.length < 3) targetModels.push(m);
-            }
-          }
-        } catch (_) {}
-
-        if (!targetModels.length) {
-          targetModels = ['gemini-3.8-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+        // 1. Directly target ultra-fast official production models (zero preliminary list roundtrip)
+        const reqModel = (input.model || '').replace(/^models\//, '').trim();
+        const targetModels = [];
+        if (reqModel && !reqModel.startsWith('gemini-2.5')) {
+          targetModels.push(reqModel);
         }
-        targetModels = targetModels.slice(0, 3);
+        for (const m of ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-lite']) {
+          if (!targetModels.includes(m)) targetModels.push(m);
+        }
 
         let lastError = null;
-        for (const model of targetModels) {
+        for (const model of targetModels.slice(0, 2)) {
           try {
             const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${effectiveKey}`;
             const gRes = await fetch(endpoint, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              signal: AbortSignal.timeout(7000),
+              signal: AbortSignal.timeout(12000),
               body: JSON.stringify({
                 contents: [{ role: 'user', parts: [{ text: prompt }] }],
                 generationConfig: { maxOutputTokens: 1000, temperature: 0.25 }
