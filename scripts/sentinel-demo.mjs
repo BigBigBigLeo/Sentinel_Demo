@@ -290,7 +290,7 @@ async function serve() {
         const clientKey = request.headers['x-gemini-key'] || input.apiKey;
         const effectiveKey = (clientKey || analysisKey || '').trim();
         if (!effectiveKey) {
-          return json(response, 503, { error: 'Gemini is not configured. Please input a valid Gemini API key in settings or run Sentinel with GEMINI_API_KEY.' });
+          return json(response, 503, { error: '大模型尚未配置密钥。请在右上角「模型密钥」中输入。' });
         }
         const prompt = input.prompt || 'Analyze current scenario';
 
@@ -361,15 +361,15 @@ async function serve() {
               const gData = await gRes.json();
               const reply = gData?.candidates?.[0]?.content?.parts?.[0]?.text;
               if (reply) {
-                console.log('[Gemini Relay] Model', model, 'succeeded! Output chars:', reply.length);
-                return json(response, 200, { text: reply, source: `Google ${model} (在线大模型)` });
+                console.log('[Model Relay] Model', model, 'succeeded! Output chars:', reply.length);
+                return json(response, 200, { text: reply, source: `观衡智序 · 工业智能大模型 (${model})` });
               }
             }
             const errBody = await gRes.text();
             let parsed = {};
             try { parsed = JSON.parse(errBody); } catch (_) {}
             lastError = parsed?.error?.message || errBody;
-            console.log('[Gemini Relay] Model', model, 'returned error HTTP', gRes.status, ':', lastError);
+            console.log('[Model Relay] Model', model, 'returned error HTTP', gRes.status, ':', lastError);
             if (lastError.includes('API_KEY_INVALID') || lastError.includes('API key not valid')) {
               return json(response, 400, { error: lastError });
             }
@@ -381,10 +381,10 @@ async function serve() {
             }
           } catch (err) {
             lastError = err.message;
-            console.log('[Gemini Relay] Model', model, 'exception:', err.message);
+            console.log('[Model Relay] Model', model, 'exception:', err.message);
           }
         }
-        return json(response, 502, { error: `Gemini relay failed: ${lastError}` });
+        return json(response, 502, { error: `大模型推理中继异常: ${lastError}` });
       }
       if (url.pathname === '/api/assistant' && request.method === 'POST') {
         const clientKey = request.headers['x-gemini-key'];

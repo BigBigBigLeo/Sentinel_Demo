@@ -878,7 +878,7 @@ export function Assistant() {
     }
 
     setKeyTesting(true);
-    setKeyStatus(isZh ? '正在向 Google 官方端点发起双向鉴权测试 (ping)...' : 'Verifying Google API authorization...');
+    setKeyStatus(isZh ? '正在向大模型官方端点发起双向鉴权测试 (ping)...' : 'Verifying model API authorization...');
     setKeyDiagnostic('');
 
     let isSuccess = false;
@@ -930,43 +930,77 @@ export function Assistant() {
       } catch {}
       setGeminiKey(k);
       setKeyVerified(true);
-      setKeyStatus(isZh ? 'Google 官方 API 连通验证成功！(HTTP 200 OK，密钥有效)' : 'Google API Connected! (200 OK)');
+      setKeyStatus(isZh ? '大模型官方 API 连通验证成功！(HTTP 200 OK，密钥有效)' : 'Model API Connected! (200 OK)');
       setKeyDiagnostic('');
       setTimeout(() => setShowKeyModal(false), 900);
     } else {
       let diagAdvice = '';
       if (errorDetail.includes('API_KEY_INVALID') || errorDetail.includes('API key not valid') || errorDetail.includes('INVALID_ARGUMENT')) {
         diagAdvice = isZh
-          ? '【密钥鉴权失败 400】Google 官方判定此 API Key 无效。请登录 Google AI Studio (aistudio.google.com) 重新生成以 AIzaSy 开头的密钥，并确认复制完整。'
-          : 'API Key is invalid (400). Please verify the AIzaSy... key from Google AI Studio.';
+          ? '【密钥鉴权失败 400】官方判定此 API Key 无效。请重新核对密钥格式，并确认复制完整。'
+          : 'API Key is invalid (400). Please verify your API key.';
       } else if (errorDetail.includes('403') || errorDetail.includes('PERMISSION_DENIED') || errorDetail.includes('location is not supported')) {
         diagAdvice = isZh
-          ? '【区域限制 403】当前网络区域受 Google 限制。请确认科学上网节点或系统代理处于开启状态。'
+          ? '【区域限制 403】当前网络区域受官方端点访问限制。请确认科学上网节点或系统代理处于开启状态。'
           : 'Region restriction (403). Please verify proxy/VPN connectivity.';
       } else if (errorDetail.includes('429') || errorDetail.includes('RESOURCE_EXHAUSTED')) {
         diagAdvice = isZh
-          ? '【免费配额耗尽 429】该 Key 今日调用次数已达上限，请稍候再试或在 Google AI Studio 更换项目新 Key。'
-          : 'Free quota reached (429). Please try again later or use another project key.';
+          ? '【调用配额超限 429】该密钥今日调用次数已达上限，请稍候再试或更换项目新密钥。'
+          : 'Quota reached (429). Please try again later or use another project key.';
       } else {
-        diagAdvice = isZh ? `【连接受阻】无法连通 Google 节点：${errorDetail}` : errorDetail;
+        diagAdvice = isZh ? `【连接受阻】无法连通模型节点：${errorDetail}` : errorDetail;
       }
 
       setKeyVerified(false);
-      setKeyStatus(isZh ? '连通鉴权未通过，请核对 Key 或网络' : 'Verification failed');
+      setKeyStatus(isZh ? '连通鉴权未通过，请核对密钥或网络' : 'Verification failed');
       setKeyDiagnostic(diagAdvice);
     }
   }
 
   async function callLiveGemini(qText) {
-    const systemInstruction = `You are the decision and operations intelligence core for a 900-mu (~60 ha) high-tech blueberry greenhouse facility in Yunnan Chengjiang, China (elevation 1,750m, Fuxian Lake microclimate).
-Output pure industrial engineering briefs.
-Rules:
-1. NEVER use personal names or informal titles.
-2. NEVER use Markdown bold (**) or any emojis.
-3. Be data-dense, quantitative, and authoritative.
-4. Language: ${isZh ? 'Simplified Chinese' : 'English'}.`;
+    const hasChinese = /[\u4e00-\u9fa5]/.test(qText);
+    const respondZh = hasChinese || isZh;
 
-    const fullPrompt = `${systemInstruction}\n\nUser Operational Query: ${qText}`;
+    const systemInstruction = respondZh
+      ? `你是云南玉溪澄江 900 亩高山蓝莓超级无土基质设施农业工厂的『观衡智序（Sentinel Enterprise Core v7.10）』运营与决策智能中枢。
+
+【基地工业生产全景数据】：
+- 地理与规模：云南省玉溪市澄江市龙街镇抚仙湖北岸 900 亩（60 公顷）高山蓝莓超级无土基质设施农业工厂，海拔 1,750 米，配备 32 套微环境遥测站、连栋 Venlo 智能温室与双层保温避雨设施；
+- 今日运行体量：全园日产能 12,450 kg，已出库 9,240 kg，负荷 74.2%；
+- 财务指标：12 项商业长协与现货大单，日合同总额 ¥898,150，净利润 ¥512,950（综合毛利率 57.1%），系统决策增益挽损 +¥183,950；
+- 实时全域微环境遥测（抚仙湖生态微气候）：
+  * 室外气象：气温 18.5~21.4℃，相对湿度 56%~68% RH，PAR 光合有效辐射 880 µmol/(m²·s)，风速 2.4 m/s，午后 13:30~16:30 强对流大风预警（阵风阈值 12.0 m/s 联锁闭窗撤网）；
+  * 温室冠层：温度 22.4℃，饱和水汽压差 VPD 1.15 kPa（处于 0.8~1.2 kPa 黄金区间），叶面湿润 0.5h，无灰霉病凝露风险；
+  * 冷库与预冷：1号气调保鲜库 1.5℃ / 95% RH（库存 50,000 kg），压差预冷 90 分钟极速打冷（18℃降至 1.5℃），呼吸商 Q10=3.2；
+- 关键决策案例：
+  * 南区 LOT-03 处于乙基多杀菌素施药后 14h，距 GB 2763 农残 72h PHI 安全采收期有 -58h 赤字，方案 A 提前采收被系统刚性否决；
+  * 处方决策室主推方案 B（北区智能温室拂晓抢收 + CA-02 应急备选），确保盒马鲜生 750kg 特级果优质交付，锁定边际净贡献 +¥45,800；
+  * 果粉保全机理：清晨 05:00~08:30 露凉低温窗口采摘，表皮二酮类蜡质白霜完整度达 96.8%，严禁高温触碰融蜡。
+
+【针对性回答规范】：
+1. 必须使用标准简体中文回答，语调严谨、专业、权威。
+2. 紧扣用户实际提问直接展开回答，务必贴合澄江基地现场数据与农艺生产实际（例如问天气微气候，直接列明温湿度/VPD/光照数值，并给出对采收与温室防风的明确指导；问订单直接列明长协与现货交付明细；问方案直接给出 A/B/C 决策权衡与法规一票否决依据）。
+3. 采用清晰结构（如【微气候遥测实况】、【作物生理与环境评估】、【生产调度与作业指令】），信息密度高、逻辑紧密。
+4. 绝对不要使用 Markdown 双星号 (**) 粗体语法；绝对不要包含任何 Emoji 表情符号；绝对不要出现任何外部模型商业名称；绝对不要输出无意义代码块模板。`
+      : `You are the decision and operations intelligence core for Sentinel Enterprise Core v7.10, deployed at the 900-mu (~60 ha) high-tech substrate blueberry greenhouse facility in Yunnan Chengjiang, China (elevation 1,750m, Fuxian Lake microclimate).
+
+【Site Operations & Telemetry Baseline】:
+- Facility: 900-mu multi-span smart Venlo greenhouses & rain shelters, elevation 1,750m;
+- Daily Throughput: 12,450 kg daily capacity, 9,240 kg dispatched (74.2% load);
+- Financial Ledger: 12 strategic contracts, daily gross revenue ¥898,150, gross margin 57.1% (net profit ¥512,950), autonomous value-add +¥183,950;
+- Real-time Microclimate:
+  * External: Temp 18.5-21.4 C, RH 56-68%, PAR 880 umol/(m2*s), Wind 2.4 m/s (afternoon convective gust interlock at 12.0 m/s);
+  * Canopy: Temp 22.4 C, VPD 1.15 kPa (optimal 0.8-1.2 kPa range), Leaf wetness 0.5h, zero botrytis dew risk;
+  * Cold Chain: CA storage 1.5 C / 95% RH, forced-air 90-min precooling (18 C down to 1.5 C, Q10=3.2);
+- Active Case: South LOT-03 is at hour 14 of spinetoram pesticide application (-58h deficit vs GB 2763 72h PHI gate). Plan A is vetoed; Plan B (North greenhouse dawn shift + CA buffer) secures 750kg Hema Grade A delivery and +¥45,800 net margin. Epicuticular wax bloom preserved at 96.8% via 05:00-08:30 harvest.
+
+【Response Standards】:
+1. Answer strictly in clear, professional English.
+2. Directly answer the user's specific operational question with quantitative telemetry, causal reasoning, and actionable field directives.
+3. Structure clearly using sections (e.g. [Real-Time Telemetry], [Agronomic Assessment], [Operational Directives]).
+4. Zero Markdown bold (**), zero emojis, zero consumer branding, no redundant boilerplate. Output authoritative industrial briefs.`;
+
+    const fullPrompt = `${systemInstruction}\n\n${respondZh ? '用户运营与生产决策提问：' : 'User Operational Query: '}${qText}`;
 
     let relayErr = null;
     // 1. Try server-side relay with adequate 25s timeout for cross-border generation
@@ -989,7 +1023,7 @@ Rules:
         if (data?.text) {
           return {
             text: sanitizeEngineeringText(data.text),
-            source: data.source || 'Google Gemini (在线大模型)',
+            source: data.source || (respondZh ? '观衡智序 · 工业智能大模型' : 'Guanheng Zhixu Industrial Operating Model'),
             success: true
           };
         }
@@ -1020,7 +1054,7 @@ Rules:
             if (text) {
               return {
                 text: sanitizeEngineeringText(text),
-                source: `Google ${m} (浏览器直连反代)`,
+                source: respondZh ? '观衡智序 · 工业智能大模型 (反代通道)' : 'Guanheng Zhixu Operating Model (Direct)',
                 success: true
               };
             }
@@ -1033,7 +1067,7 @@ Rules:
       throw new Error(relayErr);
     }
 
-    throw new Error('无法连接至 Google Gemini 服务');
+    throw new Error(respondZh ? '无法连接至工业决策大模型服务' : 'Unable to connect to operating model service');
   }
 
   function matchLocalQA(qText) {
@@ -1091,23 +1125,23 @@ Rules:
             sender: 'assistant',
             text: aiResult.text,
             time: new Date().toLocaleTimeString(),
-            source: aiResult.source || 'Google Gemini 1.5 Flash (在线大模型)'
+            source: aiResult.source || (isZh ? '观衡智序 · 工业智能大模型' : 'Guanheng Zhixu Industrial Operating Model')
           }
         ]);
       } catch (err) {
         const rawErr = err?.message || '未知异常';
         let diagType = isZh ? '网络/端点连接异常' : 'Network Connection Error';
-        let diagAdvice = isZh ? '请核对网络环境是否可正常访问 Google 官方端点。' : 'Please verify Google endpoint network connectivity.';
+        let diagAdvice = isZh ? '请核对网络环境是否可正常访问大模型官方端点。' : 'Please verify model endpoint network connectivity.';
 
         if (rawErr.includes('API_KEY_INVALID') || rawErr.includes('API key not valid')) {
           diagType = isZh ? 'API Key 鉴权失败 (API_KEY_INVALID)' : 'API Key Invalid';
-          diagAdvice = isZh ? '您输入的 Key 格式不正确或已被吊销。请点击右上角「Gemini Key」重新配置。' : 'Key is invalid. Please reconfigure in top right.';
+          diagAdvice = isZh ? '您输入的密钥格式不正确或已被吊销。请点击右上角「模型密钥」重新配置。' : 'Key is invalid. Please reconfigure in top right.';
         } else if (rawErr.includes('403') || rawErr.includes('PERMISSION_DENIED') || rawErr.includes('location is not supported')) {
           diagType = isZh ? '访问受限 (403 Forbidden / 区域限制)' : 'Access Denied (403 Region Restriction)';
-          diagAdvice = isZh ? 'Google 对特定地区 IP 限制访问，请确保本地代理或网络环境支持访问 Google AI 节点。' : 'Google restricts access from this region. Please configure proxy.';
+          diagAdvice = isZh ? '官方端点对特定地区 IP 限制访问，请确保网络环境或本地代理支持连通该端点。' : 'Endpoint restricts access from this region. Please configure proxy.';
         } else if (rawErr.includes('429') || rawErr.includes('RESOURCE_EXHAUSTED')) {
           diagType = isZh ? '调用配额超限 (429 Resource Exhausted)' : 'Quota Exceeded (429)';
-          diagAdvice = isZh ? '当前 Key 的免费调用配额已达上限，请稍候重试或更换付费项目密钥。' : 'Free quota reached. Please try later or use another project key.';
+          diagAdvice = isZh ? '当前密钥的调用配额已达上限，请稍候重试或更换项目密钥。' : 'Quota reached. Please try later or use another project key.';
         }
 
         setMessages(prev => [
@@ -1116,10 +1150,10 @@ Rules:
             id: 'ai-' + Date.now(),
             sender: 'assistant',
             text: (isZh
-              ? `[Google Gemini 实时调用诊断告警]\n● 鉴权状态：${diagType}\n● 详细回执：${rawErr.slice(0, 160)}\n● 处置建议：${diagAdvice}\n\n════════════════════════════════════════════════════\n已自动平滑调用【观衡智序 · 工业决策知识库】提供高保真离线推演响应：\n\n`
-              : `[Google Gemini Call Diagnostic Alert]\n● Status: ${diagType}\n● Detail: ${rawErr.slice(0, 160)}\n● Action: ${diagAdvice}\n\nFalling back to Guanheng Zhixu decision knowledge core:\n\n`) + matchLocalQA(qText),
+              ? `[工业决策大模型调用诊断告警]\n● 鉴权状态：${diagType}\n● 详细回执：${rawErr.slice(0, 160)}\n● 处置建议：${diagAdvice}\n\n════════════════════════════════════════════════════\n已自动平滑调用【观衡智序 · 工业决策知识库】提供高保真离线推演响应：\n\n`
+              : `[Operating Model Call Diagnostic Alert]\n● Status: ${diagType}\n● Detail: ${rawErr.slice(0, 160)}\n● Action: ${diagAdvice}\n\nFalling back to Guanheng Zhixu decision knowledge core:\n\n`) + matchLocalQA(qText),
             time: new Date().toLocaleTimeString(),
-            source: '观衡智序 · 工业决策知识库 (网络降级)'
+            source: isZh ? '观衡智序 · 工业决策知识库 (网络降级)' : 'Guanheng Zhixu Knowledge Core (Fallback)'
           }
         ]);
       } finally {
@@ -1204,7 +1238,7 @@ Rules:
         <span>{isZh ? '决策助手' : 'AI Assistant'}</span>
         {geminiKey ? (
           <span style={{ fontSize: '0.62rem', background: '#10b981', color: '#fff', padding: '1px 5px', borderRadius: 4 }}>
-            Gemini
+            {isZh ? '大模型' : 'AI'}
           </span>
         ) : (
           <span style={{ fontSize: '0.62rem', background: 'rgba(255,255,255,0.2)', padding: '1px 5px', borderRadius: 4 }}>
@@ -1245,8 +1279,8 @@ Rules:
                 <span>
                   {geminiKey
                     ? (keyVerified
-                        ? (isZh ? '真实 Google Gemini 在线大模型 (已联通 200 OK)' : 'Google Gemini Live API (Connected)')
-                        : (isZh ? 'Gemini 密钥待验 / 异常 (遇阻自动切换知识库)' : 'Gemini Key Unverified / Warning'))
+                        ? (isZh ? '工业决策大模型引擎 (在线实时联通 200 OK)' : 'Autonomous Operating Model Engine (Online 200 OK)')
+                        : (isZh ? '模型密钥待验 / 异常 (遇阻自动切换知识库)' : 'Model Key Unverified / Warning'))
                     : (isZh ? '观衡智序 · 本地高保真决策知识库' : 'Local High-Density Knowledge Core')}
                 </span>
               </div>
@@ -1272,8 +1306,8 @@ Rules:
                 }}
               >
                 {geminiKey
-                  ? (keyVerified ? 'Gemini Key [在线 200]' : 'Gemini Key [待验/异常]')
-                  : '+ Gemini Key'}
+                  ? (keyVerified ? (isZh ? '模型密钥 [在线 200]' : 'Model Key [200 OK]') : (isZh ? '模型密钥 [待验/异常]' : 'Model Key [Warning]'))
+                  : (isZh ? '+ 模型密钥' : '+ Model Key')}
               </button>
               <button
                 type="button"
@@ -1389,12 +1423,12 @@ Rules:
           <div style={{ background: '#0f172a', border: '1px solid #38bdf8', borderRadius: 8, padding: 20, maxWidth: 480, width: '92%' }}>
             <h3 style={{ margin: '0 0 10px 0', fontSize: '0.95rem', color: '#f8fafc', display: 'flex', alignItems: 'center', gap: 8 }}>
               <Icon name="key" size={16} color="#38bdf8" />
-              {isZh ? '配置端侧 Google Gemini API Key' : 'Configure Personal Gemini API Key'}
+              {isZh ? '配置端侧工业智能大模型密钥 (API Key)' : 'Configure Autonomous Operating Model API Key'}
             </h3>
             <p style={{ fontSize: '0.74rem', color: '#cbd5e1', lineHeight: 1.5, margin: '0 0 10px 0' }}>
               {isZh
-                ? 'Key 仅保存在当前浏览器的 localStorage 中，绝不上报或存储在服务器。点击测试将立即验证密钥有效性；若鉴权不通过将给出明确排查原因。'
-                : 'Key is stored only in your local browser localStorage. Tested live against Google API.'}
+                ? '密钥仅存储在当前浏览器的 localStorage 中，绝不上报或存储在服务器。点击测试将即时检验端点连通性；若鉴权未通过将提供具体排查建议。'
+                : 'Key is stored only in your local browser localStorage. Verified live against the official model endpoint.'}
             </p>
             <input
               type="password"

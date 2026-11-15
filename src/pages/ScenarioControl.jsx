@@ -273,7 +273,7 @@ export default function ScenarioControl() {
                                 }}
                             >
                                 <Icon name="brain" size={14} color="#c084fc" />
-                                {geminiAnalysisLoading ? t('Analyzing with Gemini...', 'Gemini 智能解析中...') : t('Live AI Strategy Review', '唤醒 Gemini 战备推演评注')}
+                                {geminiAnalysisLoading ? t('Analyzing with Operating Model...', '工业大模型智能解析中...') : t('Live AI Strategy Review', '唤醒大模型战备推演评注')}
                             </button>
                             <button
                                 type="button"
@@ -315,7 +315,7 @@ export default function ScenarioControl() {
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                                 <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#c084fc', display: 'flex', alignItems: 'center', gap: 6 }}>
                                     <Icon name="brain" size={15} color="#c084fc" />
-                                    {t('Google Gemini Real-Time Scenario Strategy Review', 'Google Gemini 实时战备推演战略评注')}
+                                    {t('Autonomous Operating Core Real-Time Strategy Review', '工业决策大模型 · 实时战备推演战略评注')}
                                 </span>
                                 <span style={{ fontSize: '0.65rem', color: '#a855f7', background: 'rgba(168, 85, 247, 0.15)', padding: '2px 8px', borderRadius: 4, border: '1px solid rgba(168, 85, 247, 0.3)' }}>
                                     {geminiAnalysisText.source}

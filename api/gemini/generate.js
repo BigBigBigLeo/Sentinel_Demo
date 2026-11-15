@@ -12,7 +12,7 @@ export default async function handler(req, res) {
 
   const effectiveKey = (req.headers['x-gemini-key'] || req.body?.apiKey || process.env.GEMINI_API_KEY || '').trim();
   if (!effectiveKey) {
-    return res.status(503).json({ error: 'Gemini is not configured. Please input a valid Gemini API key in settings or set GEMINI_API_KEY.' });
+    return res.status(503).json({ error: '大模型尚未配置密钥。请在右上角「模型密钥」中输入。' });
   }
 
   const prompt = req.body?.prompt || 'Analyze current scenario';
@@ -81,7 +81,7 @@ export default async function handler(req, res) {
         const gData = await gRes.json();
         const reply = gData?.candidates?.[0]?.content?.parts?.[0]?.text;
         if (reply) {
-          return res.status(200).json({ text: reply, source: `Google ${model} (在线大模型)` });
+          return res.status(200).json({ text: reply, source: `观衡智序 · 工业智能大模型 (${model})` });
         }
       }
       const errBody = await gRes.text();
@@ -102,5 +102,5 @@ export default async function handler(req, res) {
     }
   }
 
-  return res.status(502).json({ error: `Gemini relay failed: ${lastError}` });
+  return res.status(502).json({ error: `大模型推理中继异常: ${lastError}` });
 }

@@ -1,7 +1,7 @@
 // Unified Robust Gemini AI Client & Relay Adapter
 // Automatically handles local backend proxying, Vite proxying, and fallback domain reasoning.
 
-export async function callGeminiAI({ prompt, model = 'gemini-1.5-flash', context = {} }) {
+export async function callGeminiAI({ prompt, model = 'gemini-3.8-flash', context = {} }) {
     const key = (globalThis?.localStorage?.getItem('sentinel_gemini_key') || '').trim();
 
     // 1. Try backend server-side relay endpoint (/api/gemini/generate)
@@ -19,19 +19,20 @@ export async function callGeminiAI({ prompt, model = 'gemini-1.5-flash', context
             if (data?.text) {
                 return {
                     text: data.text,
-                    source: data.source || `Google ${model} (Server Relay)`,
+                    source: data.source || '观衡智序 · 工业智能大模型',
                     success: true
                 };
             }
         }
     } catch (e) {
-        console.warn('Backend Gemini relay attempt failed:', e);
+        console.warn('Backend model relay attempt failed:', e);
     }
 
     // 2. Try Vite local reverse proxy (/google-gemini-api/...)
     if (key) {
+      for (const m of ['gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-2.0-flash']) {
         try {
-            const proxyUrl = `/google-gemini-api/v1beta/models/${model}:generateContent?key=${key}`;
+            const proxyUrl = `/google-gemini-api/v1beta/models/${m}:generateContent?key=${encodeURIComponent(key)}`;
             const proxyResp = await fetch(proxyUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -46,20 +47,21 @@ export async function callGeminiAI({ prompt, model = 'gemini-1.5-flash', context
                 if (reply) {
                     return {
                         text: reply,
-                        source: `Google ${model} (Vite Secure Proxy)`,
+                        source: '观衡智序 · 工业智能大模型 (反代通道)',
                         success: true
                     };
                 }
             }
         } catch (e) {
-            console.warn('Vite Gemini proxy attempt failed:', e);
+            console.warn('Vite proxy attempt failed:', e);
         }
+      }
     }
 
     // 3. Fallback High-Fidelity Domain Synthesis (If offline / no key / quota exceeded)
     return {
         text: generateDomainFallback(prompt, context),
-        source: key ? 'Sentinel Causal Inference Engine (Local Fallback)' : 'Sentinel 14 Multi-Agent Neural Model (Autonomous Baseline)',
+        source: key ? '观衡智序 · 工业智能大模型 (知识库降级)' : '观衡智序 · 14智能体协同决策基准',
         success: false,
         requiresKey: !key
     };

@@ -668,8 +668,8 @@ Provide a crisp, multi-agent debate summary in ${isZh ? 'Chinese' : 'English'}.`
                         >
                             <Icon name="brain" size={13} color="#c084fc" />
                             {geminiDebateLoading
-                                ? t('Synthesizing Live Gemini AI Debate...', 'Gemini 真实博弈推演生成中...')
-                                : t('Live Gemini Causal Debate', '唤醒 Gemini 深度博弈推演')}
+                                ? t('Synthesizing Live Multi-Agent AI Debate...', '大模型多智能体博弈推演生成中...')
+                                : t('Live Multi-Agent Causal Debate', '唤醒大模型多智能体深度博弈')}
                         </button>
                         <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
                             {t('Linked to Scenario: ', '当前联动场景：')}<strong style={{ color: '#38bdf8' }}>{t(config.titleEn || 'PEST_PHI', config.titleZh || '蓟马虫害与安全期')}</strong>
@@ -677,7 +677,7 @@ Provide a crisp, multi-agent debate summary in ${isZh ? 'Chinese' : 'English'}.`
                     </div>
                 </div>
 
-                {/* Real-Time Live Gemini Debate Stream Box */}
+                {/* Real-Time Live Debate Stream Box */}
                 {geminiDebateText && (
                     <div style={{
                         marginTop: 10, marginBottom: 14,
@@ -689,7 +689,7 @@ Provide a crisp, multi-agent debate summary in ${isZh ? 'Chinese' : 'English'}.`
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                             <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#c084fc', display: 'flex', alignItems: 'center', gap: 6 }}>
                                 <Icon name="brain" size={15} color="#c084fc" />
-                                {t('Google Gemini Strategic Multi-Agent Debate Simulation', 'Google Gemini 实时多智能体战备博弈推演')}
+                                {t('Autonomous Operating Core Multi-Agent Strategic Debate', '工业决策大模型 · 实时多智能体战备博弈推演')}
                             </span>
                             <span style={{ fontSize: '0.65rem', color: '#a855f7', background: 'rgba(168, 85, 247, 0.15)', padding: '2px 8px', borderRadius: 4, border: '1px solid rgba(168, 85, 247, 0.3)' }}>
                                 {geminiDebateText.source}
